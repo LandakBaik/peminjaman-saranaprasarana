@@ -8,7 +8,19 @@
                     Dashboard
                 </a>
                 <div class="sb-sidenav-menu-heading">Interface</div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+
+                <a class="nav-link" href="index.php?page=layout-static">
+                    <div class="sb-nav-link-icon"><i class="fa-regular fa-calendar-days"></i></div>
+                    Pinjam
+                </a>
+                <a class="nav-link" href="index.php?page=layout-sidenav-light">
+                    <div class="sb-nav-link-icon"><i class="fa-regular fa-clipboard"></i></div>
+                    Peminjaman Saya
+                </a>
+                
+                <!-- Select menu dropdown layout dan pages auth, sapa tau butuh jangan diapus -->
+                
+                <!-- <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
                     <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
                     Layouts
                     <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
@@ -49,16 +61,24 @@
                             </nav>
                         </div>
                     </nav>
-                </div>
+                </div> -->
                 <div class="sb-sidenav-menu-heading">Addons</div>
+
                 <a class="nav-link" href="index.php?page=charts">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-gear"></i></div>
+                    User Profile
+                </a>
+
+                <!-- Chart dan Table pages sementara yang mungkin butuh nanti, jangan diapus -->
+
+                <!-- <a class="nav-link" href="index.php?page=charts">
                     <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                     Charts
                 </a>
                 <a class="nav-link" href="index.php?page=tables">
                     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                     Tables
-                </a>
+                </a> -->
             </div>
         </div>
         <div class="sb-sidenav-footer">
