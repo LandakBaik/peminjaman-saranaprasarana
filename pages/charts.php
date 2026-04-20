@@ -1,4 +1,4 @@
-<div id="layoutSidenav_content">
+<!-- <div id="layoutSidenav_content">
     <main id="charts">
         <div class="container-fluid px-4">
             <h1 class="mt-4">Charts</h1>
@@ -48,4 +48,4 @@
     <footer>
         <?php include 'footer.php'; ?>
     </footer>
-</div>
+</div> -->
