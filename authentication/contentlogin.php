@@ -2,7 +2,7 @@
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    
+
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "role" => "user"
         ]
     ];
-    
+
     $loginberhasil = false;
     // Cek Validation
     foreach ($user as $user) {
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['loggedin'] = true;
             $_SESSION['email'] = $email;
             $_SESSION['role'] = $user['role'];
-        
+
             if ($user['role'] == 'admin') {
                 header("Location: ../index.php");
             } elseif ($user['role'] == 'user') {
@@ -36,11 +36,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             } else {
                 header("Location: Login.php?page=login&error=1");
             }
-            
+
             exit();
+        } else {
+            // akun tidak valid
+            header("Location: Login.php?page=login&error=1");
+            exit();
+        }
     }
-} else {
-    // akun tidak valid
-    header("Location: Login.php?page=login&error=1");
-    exit();
 }

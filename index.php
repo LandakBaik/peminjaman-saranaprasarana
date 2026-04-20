@@ -29,9 +29,9 @@
                 case 'tables':
                     include 'pages/tables.php';
                     break;
-                // case 'charts':
-                //     include 'pages/charts.php';
-                //     break;
+                case 'pinjam':
+                    include 'pages/pinjam.php';
+                    break;
                 default:
                     include 'pages/dashboard.php';
             }
@@ -45,6 +45,7 @@
         <!-- <script src="assets/demo/chart-bar-demo.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
         <script src="js/datatables-simple-demo.js"></script>
+        <script src="assets/demo/calender-demo.js"></script>
         <!-- <script src="assets/demo/chart-pie-demo.js"></script> -->
     </body>
 </html>
