@@ -7,25 +7,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['password'] ?? '';
 
     // Akun Test
-    $akun_valid = "admin@gmail.com";
-    $password_valid = "admin";
-
+    $user = [
+        [
+            "email" => "admin@gmail.com",
+            "password" => "1234",
+            "role" => "admin"
+        ],
+        [
+            "email" => "rolan@gmail.com",
+            "password" => "1234",
+            "role" => "user"
+        ]
+    ];
+    
+    $loginberhasil = false;
     // Cek Validation
-    if ($email === $akun_valid && $password === $password_valid) {
-        $_SESSION['loggedin'] = true;
-        $_SESSION['email'] = $email;
-        $_SESSION['role'] = 'Admin';
+    foreach ($user as $user) {
+        if ($email === $user['email'] && $password === $user['password']) {
+
+            $_SESSION['loggedin'] = true;
+            $_SESSION['email'] = $email;
+            $_SESSION['role'] = $user['role'];
         
-        // Go to Dashboard
-        header("Location: ../index.php");
-        exit();
-    } else {
-        // Akun tidak valid
-        header("Location: Login.php?page=login&error=1");
-        exit();
+            if ($user['role'] == 'admin') {
+                header("Location: ../index.php");
+            } elseif ($user['role'] == 'user') {
+                header("Location: ../pages/layout-sidenav-light.php");
+            } else {
+                header("Location: Login.php?page=login&error=1");
+            }
+            
+            exit();
     }
 } else {
-    // Jika ada yang mencoba mengakses file ini langsung tanpa POST
-    header("Location: Login.php");
+    // akun tidak valid
+    header("Location: Login.php?page=login&error=1");
     exit();
 }
