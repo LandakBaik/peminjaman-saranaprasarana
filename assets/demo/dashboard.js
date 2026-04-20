@@ -79,8 +79,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // =========================
-  // INIT DEFAULT
-  // =========================
   updateDashboard("daily");
 });
