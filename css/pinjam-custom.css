@@ -1,0 +1,217 @@
+/* Custom Styles untuk Halaman Pinjam - Calendar & Modal */
+
+/* Calendar Styles */
+.calendar-container {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.calendar-header button {
+  background: #f3f4f6;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.2s;
+}
+
+.calendar-header button:hover {
+  background: #e5e7eb;
+}
+
+.calendar-title {
+  display: flex;
+  gap: 10px;
+}
+
+.calendar-title select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.calendar-days-header,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-days-header div {
+  text-align: center;
+  padding: 15px 0;
+  font-weight: bold;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.calendar-grid .day {
+  min-height: 110px;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: 0.2s;
+}
+
+.calendar-grid .day:hover {
+  background: #f9fafb;
+}
+
+.calendar-grid .day.inactive {
+  color: #bbb;
+  background: #fafafa;
+}
+
+.calendar-grid .day .date-number {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.calendar-grid .day.today {
+  background: #eff6ff;
+}
+
+.calendar-grid .day.selected {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  width: 95%;
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 30px;
+  border-radius: 18px;
+  position: relative;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.modal-content .close {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.modal-content .close:hover {
+  color: #000;
+}
+
+.room-title {
+  text-align: center;
+  color: #0057b8;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.section-title span {
+  flex: 1;
+  height: 1px;
+  background: #ccc;
+}
+
+.section-title h3 {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Upload Box */
+.upload-box {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 25px;
+  text-align: center;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-box:hover {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+/* Image Placeholder */
+.image-placeholder {
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(135deg, #ddd 0%, #f0f0f0 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Room Description Styling */
+.room-description {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+ .table-wrapper {
+border: 1px solid #ddd;
+max-height: 220px;
+overflow-y: auto;
+margin-bottom: 18px;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 992px) {
+  .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .room-title {
+    font-size: 20px;
+  }
+
+  .image-placeholder {
+    height: 200px;
+  }
+}

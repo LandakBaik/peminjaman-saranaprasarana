@@ -9,7 +9,7 @@
                 </a>
                 <div class="sb-sidenav-menu-heading">Interface</div>
 
-                <a class="nav-link" href="index.php?page=layout-static">
+                <a class="nav-link" href="index.php?page=pinjam">
                     <div class="sb-nav-link-icon"><i class="fa-regular fa-calendar-days"></i></div>
                     Pinjam
                 </a>
