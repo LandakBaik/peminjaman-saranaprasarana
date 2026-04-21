@@ -1,3 +1,7 @@
+<?php
+$role = $_SESSION['user']['role'];
+?>
+
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
@@ -9,6 +13,8 @@
                 </a>
                 <div class="sb-sidenav-menu-heading">Interface</div>
 
+                <!-- user -->
+                 <?php if ($role === 'user') : ?>
                 <a class="nav-link" href="index.php?page=select-room">
                     <div class="sb-nav-link-icon"><i class="fas fa-door-open"></i></div>
                     Pinjam
@@ -17,6 +23,17 @@
                     <div class="sb-nav-link-icon"><i class="fa-regular fa-clipboard"></i></div>
                     Peminjaman Saya
                 </a>
+                <?php endif; ?>
+
+                <!-- admin -->
+
+                <!-- staff -->
+                <?php if (in_array($role, ['admin', 'staff'])) : ?>
+                <a class="nav-link" href="index.php?page=approve-peminjaman">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-check"></i></div>
+                    Approve Peminjaman
+                </a>
+                <?php endif; ?>
 
                 <!-- Select menu dropdown layout dan pages auth, sapa tau butuh jangan diapus -->
 
@@ -64,10 +81,12 @@
                 </div> -->
                 <div class="sb-sidenav-menu-heading">Addons</div>
 
+                <?php if (in_array($role, ['user', 'admin', 'staff'])) : ?>
                 <a class="nav-link" href="index.php?page=detail-profil">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-gear"></i></div>
                     User Profile
                 </a>
+                <?php endif; ?>
 
                 <!-- Chart dan Table pages sementara yang mungkin butuh nanti, jangan diapus -->
 

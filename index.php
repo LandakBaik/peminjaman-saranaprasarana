@@ -1,3 +1,11 @@
+<?php
+require 'middleware/auth.php';
+require 'middleware/role.php';
+
+$role = $_SESSION['user']['role'];
+$page = $_GET['page'] ?? 'dashboard';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -30,6 +38,7 @@
                     include 'pages/tables.php';
                     break;
                 case 'select-room':
+                    only(['user']);
                     include 'pages/select-room.php';
                     break;
                 case 'detail-profil':
@@ -45,10 +54,16 @@
                     include 'pages/pinjam.php';
                     break;
                 case 'peminjaman-saya':
+                    only(['user', 'admin', 'staff']);
                     include 'pages/peminjaman-saya.php';
+                    break;
+                case 'approve-peminjaman':
+                    only(['admin', 'staff']);
+                    include 'pages/approve-peminjaman.php';
                     break;
                 default:
                     include 'pages/dashboard.php';
+
             }
             ?>
         </div>

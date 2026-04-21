@@ -37,7 +37,6 @@
                     </div>
                 </div>
 
-                <!-- Right Panel -->
                 <?php include 'right-panel.php'; ?>
 
             </div>
