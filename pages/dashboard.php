@@ -96,7 +96,7 @@
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-chart-area me-1"></i>
-                            Tren Aktivitas Penjualan
+                            Tren Peminjaman
                         </div>
                         <div class="card-body">
                             <canvas id="myAreaChart" width="100%" height="30"></canvas>
@@ -111,30 +111,55 @@
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-table me-1"></i>
-                            Data Karyawan Terkini
+                            Data Peminjaman Terkini
                         </div>
                         <div class="card-body">
-                            <table id="datatablesSimple" class="table table-bordered">
+                            <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Position</th>
-                                        <th>Office</th>
-                                        <th>Age</th>
-                                        <th>Start date</th>
-                                        <th>Salary</th>
+                                        <th>Kode</th>
+                                        <th>Barang Pinjaman</th>
+                                        <th>Jenis</th>
+                                        <th>Status</th>
+                                        <th>Tanggal Peminjaman</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Tiger Nixon</td>
-                                        <td>System Architect</td>
-                                        <td>Edinburgh</td>
-                                        <td>61</td>
-                                        <td>2011/04/25</td>
-                                        <td>$320,800</td>
+                                        <td>B87634</td>
+                                        <td>Kamera</td>
+                                        <td>Elektronik</td>
+                                        <td>Disetujui</td>
+                                        <td>10 Oktober 2025</td>
                                     </tr>
-                                    <!-- dst -->
+                                    <tr>
+                                        <td>B87635</td>
+                                        <td>Proyektor</td>
+                                        <td>Elektronik</td>
+                                        <td>Disetujui</td>
+                                        <td>11 Oktober 2025</td>
+                                    </tr>
+                                    <tr>
+                                        <td>B87636</td>
+                                        <td>Laptop</td>
+                                        <td>Elektronik</td>
+                                        <td>Disetujui</td>
+                                        <td>12 Oktober 2025</td>
+                                    </tr>
+                                    <tr>
+                                        <td>B87637</td>
+                                        <td>Printer</td>
+                                        <td>Elektronik</td>
+                                        <td>Disetujui</td>
+                                        <td>13 Oktober 2025</td>
+                                    </tr>
+                                    <tr>
+                                        <td>B87638</td>
+                                        <td>Scanner</td>
+                                        <td>Elektronik</td>
+                                        <td>Disetujui</td>
+                                        <td>14 Oktober 2025</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

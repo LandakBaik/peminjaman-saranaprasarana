@@ -29,8 +29,14 @@
                 case 'tables':
                     include 'pages/tables.php';
                     break;
+                case 'select-room':
+                    include 'pages/select-room.php';
+                    break;
                 case 'pinjam':
                     include 'pages/pinjam.php';
+                    break;
+                case 'peminjaman-saya':
+                    include 'pages/peminjaman-saya.php';
                     break;
                 default:
                     include 'pages/dashboard.php';

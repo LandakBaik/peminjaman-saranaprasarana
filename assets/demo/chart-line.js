@@ -15,7 +15,7 @@ window.App.lineChart = {
         labels: [],
         datasets: [
           {
-            label: "Penjualan",
+            label: "Peminjaman",
             backgroundColor: "rgba(2,117,216,0.2)",
             borderColor: "rgba(2,117,216,1)",
             data: [],

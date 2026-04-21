@@ -1,34 +1,40 @@
 document.addEventListener("DOMContentLoaded", function () {
   const fullData = [
-    { value: 10000 },
-    { value: 30162 },
-    { value: 26263 },
-    { value: 18394 },
-    { value: 18287 },
-    { value: 28682 },
-    { value: 31274 },
-    { value: 33259 },
-    { value: 25849 },
-    { value: 24159 },
-    { value: 32651 },
-    { value: 31984 },
-    { value: 38451 },
+    { value: 1 },
+    { value: 3 },
+    { value: 2 },
+    { value: 1 },
+    { value: 8 },
+    { value: 6 },
+    { value: 3 },
+    { value: 3 },
+    { value: 2 },
+    { value: 2 },
+    { value: 5 },
+    { value: 4 },
+    { value: 3 },
   ];
 
-  // =========================
-  // INIT SEMUA
-  // =========================
   App.lineChart.init();
 
-  // =========================
-  // FILTER LOGIC
-  // =========================
   function processData(type) {
     let labels = [];
     let values = fullData.map((d) => d.value);
 
     if (type === "daily") {
-      labels = values.map((_, i) => "Hari " + (i + 1));
+      values = values.slice(-7);
+      labels = values.map(
+        (_, i) =>
+          ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"][
+            i % 7
+          ],
+      );
+
+      let hari = [0, 0, 0, 0, 0, 0, 0];
+      values.forEach((val, i) => {
+        const index = Math.floor(i / 1) % 7;
+        hari[index] += val;
+      });
     } else if (type === "weekly") {
       labels = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
 
@@ -40,12 +46,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
       values = minggu;
     } else if (type === "monthly") {
-      labels = ["Bulan 1", "Bulan 2", "Bulan 3"];
+      labels = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
 
-      let bulan = [0, 0, 0];
+      let bulan = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       values.forEach((val, i) => {
         const index = Math.floor(i / 5);
-        if (index < 3) bulan[index] += val;
+        if (index < 12) bulan[index] += val;
       });
 
       values = bulan;
