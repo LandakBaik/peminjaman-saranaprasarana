@@ -9,17 +9,17 @@
                 </a>
                 <div class="sb-sidenav-menu-heading">Interface</div>
 
-                <a class="nav-link" href="index.php?page=pinjam">
-                    <div class="sb-nav-link-icon"><i class="fa-regular fa-calendar-days"></i></div>
+                <a class="nav-link" href="index.php?page=select-room">
+                    <div class="sb-nav-link-icon"><i class="fas fa-door-open"></i></div>
                     Pinjam
                 </a>
-                <a class="nav-link" href="index.php?page=layout-sidenav-light">
+                <a class="nav-link" href="index.php?page=peminjaman-saya">
                     <div class="sb-nav-link-icon"><i class="fa-regular fa-clipboard"></i></div>
                     Peminjaman Saya
                 </a>
-                
+
                 <!-- Select menu dropdown layout dan pages auth, sapa tau butuh jangan diapus -->
-                
+
                 <!-- <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
                     <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
                     Layouts

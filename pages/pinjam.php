@@ -1,10 +1,23 @@
+<?php
+$room = $_GET['room'] ?? 'Tidak diketahui';
+
+$rooms = [
+    'RK3_1' => 'Ruang Kelas 3.1',
+    'RK3_2' => 'Ruang Kelas 3.2',
+    'RK3_3' => 'Ruang Kelas 3.3',
+];
+
+$roomName = $rooms[$room] ?? 'Ruangan tidak ditemukan';
+?>
+
 <div id="layoutSidenav_content">
     <link href="css/pinjam-custom.css" rel="stylesheet" />
     <main id="layout-static">
         <div class="container-fluid px-4">
-            <h1 class="mt-4">Pinjam</h1>
+            <h1 class="mt-4">Pinjam - <?php echo htmlspecialchars($roomName); ?></h1>
             <ol class="breadcrumb mb-4">
                 <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="index.php?page=select-room">Select Room</a></li>
                 <li class="breadcrumb-item active">Pinjam</li>
             </ol>
             <div class="card mb-4">
@@ -37,8 +50,12 @@
                 <div id="loanModal" class="modal">
                     <div class="modal-content large-modal">
                         <span class="close">&times;</span>
-
-                        <h1 class="room-title">Ruangan 3.11</h1>
+                        <div class="text-center mb-3">
+                            <h4 class="fw-semibold text-primary mb-1">
+                                <?php echo htmlspecialchars($roomName); ?>
+                            </h4>
+                        </div>
+                        <!-- <a href="index.php?page=pinjam&room=RK3_1" class="text-decoration-none text-dark"> -->
                         <div class="section-title">
                             <span></span>
                             <h3>Data Peminjaman</h3>
