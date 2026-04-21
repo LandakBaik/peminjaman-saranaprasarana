@@ -28,12 +28,12 @@ $page = $_GET['page'] ?? 'dashboard';
             $page = $_GET['page'] ?? 'dashboard';
 
             switch ($page) {
-                case 'layout-sidenav-light':
-                    include 'pages/layout-sidenav-light.php';
-                    break;
-                case 'layout-static':
-                    include 'pages/layout-static.php';
-                    break;
+                // case 'layout-sidenav-light':
+                //     include 'pages/layout-sidenav-light.php';
+                //     break;
+                // case 'layout-static':
+                //     include 'pages/layout-static.php';
+                //     break;
                 case 'tables':
                     include 'pages/tables.php';
                     break;
