@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['password'] ?? '';
 
     // Akun Test
-    $user = [
+    $users = [
         [
             "email" => "admin@gmail.com",
             "password" => "1234",
@@ -22,13 +22,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     $loginberhasil = false;
     // Cek Validation
-    foreach ($user as $user) {
+    foreach ($users as $user) {
         if ($email === $user['email'] && $password === $user['password']) {
 
             $_SESSION['loggedin'] = true;
             $_SESSION['email'] = $email;
             $_SESSION['role'] = $user['role'];
         
+            $loginberhasil = true;
             if ($user['role'] == 'admin') {
                 header("Location: ../index.php");
             } elseif ($user['role'] == 'user') {
@@ -38,6 +39,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
             
             exit();
+        }
+    }
+
+    if (!$loginberhasil) {
+        header("Location: Login.php?page=login&error=1");
+        exit();
     }
 } else {
     // akun tidak valid

@@ -29,6 +29,12 @@
                 case 'tables':
                     include 'pages/tables.php';
                     break;
+                case 'detail-profil':
+                    include 'pages/detail-profil.php';
+                    break;
+                case 'detail-profil-edit':
+                    include 'pages/detail-profil-edit.php';
+                    break;
                 // case 'charts':
                 //     include 'pages/charts.php';
                 //     break;

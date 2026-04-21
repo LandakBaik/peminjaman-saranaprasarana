@@ -64,7 +64,7 @@
                 </div> -->
                 <div class="sb-sidenav-menu-heading">Addons</div>
 
-                <a class="nav-link" href="index.php?page=charts">
+                <a class="nav-link" href="index.php?page=detail-profil">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-gear"></i></div>
                     User Profile
                 </a>
