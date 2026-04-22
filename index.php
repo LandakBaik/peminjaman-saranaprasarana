@@ -57,6 +57,10 @@ $page = $_GET['page'] ?? 'dashboard';
                     only(['user', 'admin', 'staff']);
                     include 'pages/peminjaman-saya.php';
                     break;
+                case 'riwayat-peminjaman':
+                    only(['user', 'admin', 'staff']);
+                    include 'pages/riwayat-peminjaman.php';
+                    break;
                 case 'approve-peminjaman':
                     only(['admin', 'staff']);
                     include 'pages/approve-peminjaman.php';

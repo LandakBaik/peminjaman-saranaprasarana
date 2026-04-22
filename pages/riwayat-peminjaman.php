@@ -3,17 +3,11 @@
         <div class="container-fluid px-4">
 
             <!-- Title -->
-            <h1 class="mt-4 fw-bold">Peminjaman Saya</h1>
-
-            <!-- Action -->
+            <h1 class="mt-4 fw-bold">Riwayat Peminjaman</h1>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Peminjaman anda saat ini</span>
-                <a href="index.php?page=riwayat-peminjaman" class="btn btn-primary btn-sm">
-                    <i class="fas fa-history me-1"></i> Lihat Riwayat
-                </a>
+                <span class="text-muted"> Daftar peminjaman yang telah selesai, ditolak, atau dibatalkan</span>
+                <a href="index.php?page=peminjaman-saya" class="btn btn-primary btn-sm">Kembali</a>
             </div>
-
-            <!-- Card -->
             <div class="card mb-4">
                 <div class="card-body">
                     <!-- Search + Filter -->
@@ -41,9 +35,9 @@
                                         <label class="form-label fw-semibold">Status</label>
                                         <select class="form-select" id="filterStatus">
                                             <option value="" selected>Semua</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Disetujui">Disetujui</option>
-                                            <option value="Ditolak">Ditolak</option>
+                                            <option value="Pending">Selesai</option>
+                                            <option value="Disetujui">Ditolak</option>
+                                            <option value="Ditolak">Dibatalkan</option>
                                         </select>
                                     </div>
                                     <!-- Jenis -->
@@ -102,7 +96,7 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-success-subtle text-success">Disetujui</span>
+                                        <span class="badge bg-success-subtle text-success">Selesai</span>
                                     </td>
                                     <td class="text-center">10.00</td>
                                     <td class="text-center">12.00</td>
@@ -110,7 +104,7 @@
                                         9 Oktober<br><small class="text-muted">2025</small>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-info btn-sm">Kembalikan</button>
+                                        <button class="btn btn-sm btn-outline-primary">Print</button> 
                                     </td>
                                 </tr>
 
@@ -128,7 +122,7 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-primary-subtle text-primary">Pending</span>
+                                        <span class="badge bg-primary-subtle text-primary">Ditolak</span>
                                     </td>
                                     <td class="text-center">15.00</td>
                                     <td class="text-center">17.00</td>
@@ -136,10 +130,11 @@
                                         6 Oktober<br><small class="text-muted">2025</small>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-danger btn-sm">Batalkan</button>
+                                        <button class="btn btn-sm btn-outline-primary">Print</button> 
                                     </td>
                                 </tr>
 
+                                <!-- Row 3 -->
                                 <tr data-status="Pending" data-type="Ruangan">
                                     <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
                                     <td class="text-center">2</td>
@@ -153,7 +148,7 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-primary-subtle text-primary">Pending</span>
+                                        <span class="badge bg-primary-subtle text-primary">Dibatalkan</span>
                                     </td>
                                     <td class="text-center">15.00</td>
                                     <td class="text-center">17.00</td>
@@ -161,14 +156,13 @@
                                         6 Oktober<br><small class="text-muted">2025</small>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-danger btn-sm">Batalkan</button>
+                                        <button class="btn btn-sm btn-outline-primary">Print</button> 
                                     </td>
                                 </tr>
 
                             </tbody>
                         </table>
                     </div>
-
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <small class="text-muted" id="rowCount">1–2 of 2</small>
@@ -180,17 +174,10 @@
                             <button class="btn btn-light btn-sm ms-1">&gt;</button>
                         </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </main>
-
-    <footer>
-        <?php include 'footer.php'; ?>
-    </footer>
-</div>
-
+</div> 
 <!-- Script Filter -->
 <script src="js/filter.js"></script>
