@@ -8,7 +8,7 @@
                 <!-- Card 1 -->
                 <div class="col-md-4">
                     <a href="index.php?page=pinjam&room=RK3_1" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100 border-0">
+                        <div class="card shadow-sm h-100 border-1">
                             <div class="card-body">
 
                                 <div class="d-flex justify-content-between align-items-start">
@@ -35,7 +35,7 @@
                 <!-- Card 2 -->
                 <div class="col-md-4">
                     <a href="index.php?page=pinjam&room=RK3_2" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100 border-0">
+                        <div class="card shadow-sm h-100 border-1">
                             <div class="card-body">
 
                                 <div class="d-flex justify-content-between align-items-start">
@@ -60,7 +60,7 @@
                 <!-- Card 3 -->
                 <div class="col-md-4">
                     <a href="index.php?page=pinjam&room=RK3_3" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100 border-0">
+                        <div class="card shadow-sm h-100 border-1">
                             <div class="card-body">
 
                                 <div class="d-flex justify-content-between align-items-start">

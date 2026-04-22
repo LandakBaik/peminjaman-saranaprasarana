@@ -28,7 +28,7 @@
             <div class="row g-3 my-5">
                 <!-- Total -->
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-1 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary"
                                 style="width:50px; height:50px;">
@@ -44,7 +44,7 @@
 
                 <!-- Disetujui -->
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-1 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success"
                                 style="width:50px; height:50px;">
@@ -60,7 +60,7 @@
 
                 <!-- Ditolak -->
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-1 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger"
                                 style="width:50px; height:50px;">
@@ -76,7 +76,7 @@
 
                 <!-- Terlambat -->
                 <div class="col-xl-3 col-md-6">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-1 shadow-sm">
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning"
                                 style="width:50px; height:50px;">
