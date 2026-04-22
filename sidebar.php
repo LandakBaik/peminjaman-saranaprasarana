@@ -27,8 +27,29 @@ $role = $_SESSION['user']['role'];
 
                 <!-- admin -->
 
+                <?php if (in_array($role, ['admin'])) : ?>
+                <a class="nav-link" href="index.php?page=ruangan">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-door-open"></i></div>
+                    Ruangan
+                </a>
+                <?php endif; ?>
+
+                <?php if (in_array($role, ['admin'])) : ?>
+                <a class="nav-link" href="index.php?page=barang">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
+                    Barang
+                </a>
+                <?php endif; ?>
+
+                <?php if (in_array($role, ['admin'])) : ?>
+                <a class="nav-link" href="index.php?page=akun-staff">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
+                    Akun Staff
+                </a>
+                <?php endif; ?>
+
                 <!-- staff -->
-                <?php if (in_array($role, ['admin', 'staff'])) : ?>
+                <?php if (in_array($role, ['staff'])) : ?>
                 <a class="nav-link" href="index.php?page=approve-peminjaman">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-check"></i></div>
                     Approve Peminjaman
