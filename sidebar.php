@@ -58,14 +58,14 @@ $role = $_SESSION['user']['role'];
 
                 <?php if (in_array($role, ['staff'])) : ?>
                 <a class="nav-link" href="index.php?page=approve-peminjaman">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-check"></i></div>
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-rotate-left"></i></div>
                     Pengembalian
                 </a>
                 <?php endif; ?>
 
                 <?php if (in_array($role, ['staff'])) : ?>
                 <a class="nav-link" href="index.php?page=approve-peminjaman">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-check"></i></div>
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bookmark"></i></div>
                     Riwayat Peminjaman
                 </a>
                 <?php endif; ?>
