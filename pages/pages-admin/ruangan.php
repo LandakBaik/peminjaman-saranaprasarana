@@ -43,8 +43,8 @@ $stmt = $ruangan->readAll();
                                     <th>No</th>
                                     <th>Nama Ruangan</th>
                                     <th>Kapasitas</th>
-                                    <th>Status</th>
-                                    <th>Fasilitas</th>
+                                    <th>Tipe</th>
+                                    <th>Foto</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -52,23 +52,28 @@ $stmt = $ruangan->readAll();
                                 <?php
                                 $no = 1;
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $badgeClass = 'bg-success-subtle text-success';
-                                    if ($row['status'] == 'dipinjam') $badgeClass = 'bg-warning-subtle text-warning';
-                                    if ($row['status'] == 'maintenance') $badgeClass = 'bg-danger-subtle text-danger';
                                 ?>
-                                <tr>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><?= $no++ ?></td>
-                                    <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
-                                    <td class="text-center"><?= htmlspecialchars($row['kapasitas']) ?></td>
-                                    <td class="text-center">
-                                        <span class="badge <?= $badgeClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
-                                    </td>
-                                    <td><?= htmlspecialchars($row['fasilitas']) ?></td>
-                                    <td class="text-center">
-                                        <a href="controllers/RuanganController.php?action=delete&id=<?= $row['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin menghapus ruangan ini?')">Hapus</a>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td class="text-center"><input type="checkbox"></td>
+                                        <td class="text-center"><?= $no++ ?></td>
+                                        <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
+                                        <td class="text-center"><?= htmlspecialchars($row['kapasitas']) ?></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info text-dark">
+                                                <?= ucfirst($row['tipe_ruangan']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <img src="uploads/<?= $row['foto_ruangan'] ?>" width="60" class="rounded">
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="controllers/RuanganController.php?action=delete&id_ruangan=<?= $row['id_ruangan'] ?>"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin menghapus ruangan ini?')">
+                                                Hapus
+                                            </a>
+                                        </td>
+                                    </tr>
                                 <?php } ?>
                             </tbody>
                         </table>
@@ -90,7 +95,7 @@ $stmt = $ruangan->readAll();
             </div>
 
         </div>
-        
+
         <!-- Modal Tambah Ruangan -->
         <div class="modal fade" id="tambahRuanganModal" tabindex="-1" aria-labelledby="tambahRuanganModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -108,45 +113,63 @@ $stmt = $ruangan->readAll();
                             </div>
                         </div>
 
-                        <form action="controllers/RuanganController.php?action=create" method="POST">
+                        <form action="controllers/RuanganController.php?action=create" method="POST" enctype="multipart/form-data">
                             <div class="row g-4">
-                                <!-- Left Column -->
+
+                                <!-- Left -->
                                 <div class="col-md-7">
                                     <div class="row mb-3">
                                         <div class="col-md-6">
-                                            <label class="form-label text-muted fw-semibold">Nama Ruangan</label>
-                                            <input type="text" class="form-control" name="nama_ruangan" placeholder="Contoh: Ruang 3.11" required>
+                                            <label class="form-label">Nama Ruangan</label>
+                                            <input type="text" class="form-control" name="nama_ruangan" required>
                                         </div>
+
                                         <div class="col-md-6">
-                                            <label class="form-label text-muted fw-semibold">Kapasitas</label>
-                                            <input type="number" class="form-control" name="kapasitas" placeholder="50" required>
+                                            <label class="form-label">Kapasitas</label>
+                                            <input type="number" class="form-control" name="kapasitas" required>
                                         </div>
                                     </div>
 
+                                    <!-- ENUM TIPE -->
                                     <div class="mb-3">
-                                        <label class="form-label text-muted fw-semibold">Fasilitas</label>
-                                        <textarea class="form-control" name="fasilitas" rows="4" placeholder="AC, Proyektor, dll..."></textarea>
+                                        <label class="form-label">Tipe Ruangan</label>
+                                        <select name="tipe_ruangan" class="form-control" required>
+                                            <option value="">-- Pilih --</option>
+                                            <option value="laboratorium">Laboratorium</option>
+                                            <option value="non-laboratorium">Non-Laboratorium</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Right Column (Image upload placeholder) -->
+                                <!-- Right (Upload) -->
                                 <div class="col-md-5">
-                                    <div class="bg-light w-100 h-100 d-flex flex-column align-items-center justify-content-center border rounded" style="min-height: 250px; cursor: pointer;">
+                                    <label class="form-label">Foto Ruangan</label>
+
+                                    <div class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3"
+                                        style="min-height: 250px; cursor: pointer;"
+                                        onclick="document.getElementById('fotoInput').click();">
+
                                         <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                        <span class="text-muted">Upload Gambar Ruangan</span>
-                                        <input type="file" class="d-none" id="uploadGambarRuangan">
+                                        <span class="text-muted">Klik untuk upload</span>
+
+                                        <input type="file" name="foto_ruangan" id="fotoInput" class="d-none" required>
                                     </div>
+
+                                    <!-- Preview -->
+                                    <img id="previewImg" class="mt-2 w-100 d-none rounded" />
                                 </div>
+
                             </div>
 
                             <!-- Footer -->
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
                                 <span class="text-muted small">
-                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman <i class="fas fa-search ms-1"></i></a>
+                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
+
                                 <div>
-                                    <button type="button" class="btn btn-outline-secondary px-4 me-2" data-bs-dismiss="modal">Kembali</button>
-                                    <button type="submit" class="btn btn-primary px-4">Kirim</button>
+                                    <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Kembali</button>
+                                    <button type="submit" class="btn btn-primary">Kirim</button>
                                 </div>
                             </div>
                         </form>
@@ -154,7 +177,7 @@ $stmt = $ruangan->readAll();
                 </div>
             </div>
         </div>
-        
+
     </main>
 
     <footer>

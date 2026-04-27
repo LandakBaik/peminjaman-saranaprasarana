@@ -7,14 +7,19 @@ $database = new Database();
 $db = $database->getConnection();
 $barang = new Barang($db);
 
-$action = isset($_GET['action']) ? $_GET['action'] : '';
+$action = $_GET['action'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // ================= CREATE =================
     if ($action == 'create') {
+
+        $barang->id_barang = $_POST['id_barang']; // kalau pakai custom ID
+        $barang->id_ruangan = $_POST['id_ruangan'];
         $barang->nama_barang = $_POST['nama_barang'];
-        $barang->total = $_POST['total'];
-        $barang->rusak = 0;
-        $barang->dipinjam = 0;
+        $barang->deskripsi_barang = $_POST['deskripsi_barang'];
+        $barang->total_stok = $_POST['total_stok'];
+        $barang->stok_rusak = 0; // default
 
         if ($barang->create()) {
             header("Location: ../index.php?page=barang&success=added");
@@ -22,12 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: ../index.php?page=barang&error=add_failed");
         }
         exit();
-    } elseif ($action == 'update') {
-        $barang->id = $_POST['id'];
+    }
+
+    // ================= UPDATE =================
+    elseif ($action == 'update') {
+
+        $barang->id_barang = $_POST['id_barang'];
+        $barang->id_ruangan = $_POST['id_ruangan'];
         $barang->nama_barang = $_POST['nama_barang'];
-        $barang->total = $_POST['total'];
-        $barang->rusak = $_POST['rusak'] ?? 0;
-        $barang->dipinjam = $_POST['dipinjam'] ?? 0;
+        $barang->deskripsi_barang = $_POST['deskripsi_barang'];
+        $barang->total_stok = $_POST['total_stok'];
+        $barang->stok_rusak = $_POST['stok_rusak'] ?? 0;
 
         if ($barang->update()) {
             header("Location: ../index.php?page=barang&success=updated");
@@ -36,8 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit();
     }
-} elseif ($action == 'delete') {
-    $barang->id = $_GET['id'];
+}
+
+// ================= DELETE =================
+elseif ($action == 'delete') {
+
+    $barang->id_barang = $_GET['id_barang'];
+
     if ($barang->delete()) {
         header("Location: ../index.php?page=barang&success=deleted");
     } else {

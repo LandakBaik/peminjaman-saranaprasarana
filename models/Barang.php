@@ -1,63 +1,157 @@
 <?php
-class Barang {
+class Barang
+{
     private $conn;
     private $table_name = "barang";
 
-    public $id;
+    public $id_barang;
+    public $id_ruangan;
     public $nama_barang;
-    public $total;
-    public $rusak;
+    public $deskripsi_barang;
+    public $total_stok;
+    public $stok_rusak;
+
+    // ini tidak disimpan di DB
     public $dipinjam;
     public $tersedia;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function readAll() {
-        $query = "SELECT * FROM " . $this->table_name;
+    public function readAll()
+    {
+        $query = "SELECT 
+                b.*,
+                r.nama_ruangan,
+                COALESCE(SUM(
+                    CASE 
+                        WHEN p.status = 'dipinjam' THEN 1
+                        ELSE 0
+                    END
+                ), 0) AS dipinjam,
+                (b.total_stok - b.stok_rusak - COALESCE(SUM(
+                    CASE 
+                        WHEN p.status = 'dipinjam' THEN 1
+                        ELSE 0
+                    END
+                ), 0)) AS tersedia
+              FROM " . $this->table_name . " b
+              LEFT JOIN ruangan r 
+                ON b.id_ruangan = r.id_ruangan
+              LEFT JOIN detail_peminjaman dp 
+                ON dp.id_barang = b.id_barang
+              LEFT JOIN peminjaman p 
+                ON p.id_peminjaman = dp.id_peminjaman
+              GROUP BY b.id_barang";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
-    public function create() {
-        // Automatically calculate tersedia
-        $this->tersedia = $this->total - $this->rusak - $this->dipinjam;
+    public function create()
+    {
+        $this->id_barang = $this->generateId();
 
-        $query = "INSERT INTO " . $this->table_name . " SET nama_barang=:nama_barang, total=:total, rusak=:rusak, dipinjam=:dipinjam, tersedia=:tersedia";
+        $query = "INSERT INTO " . $this->table_name . "
+              SET id_barang=:id_barang,
+                  id_ruangan=:id_ruangan,
+                  nama_barang=:nama_barang,
+                  deskripsi_barang=:deskripsi_barang,
+                  total_stok=:total_stok,
+                  stok_rusak=:stok_rusak";
+
         $stmt = $this->conn->prepare($query);
 
+        $stmt->bindParam(":id_barang", $this->id_barang);
+        $stmt->bindParam(":id_ruangan", $this->id_ruangan);
         $stmt->bindParam(":nama_barang", $this->nama_barang);
-        $stmt->bindParam(":total", $this->total);
-        $stmt->bindParam(":rusak", $this->rusak);
-        $stmt->bindParam(":dipinjam", $this->dipinjam);
-        $stmt->bindParam(":tersedia", $this->tersedia);
+        $stmt->bindParam(":deskripsi_barang", $this->deskripsi_barang);
+        $stmt->bindParam(":total_stok", $this->total_stok);
+        $stmt->bindParam(":stok_rusak", $this->stok_rusak);
 
         return $stmt->execute();
     }
 
-    public function update() {
-        $this->tersedia = $this->total - $this->rusak - $this->dipinjam;
+    public function update()
+    {
+        $query = "UPDATE " . $this->table_name . "
+                  SET nama_barang=:nama_barang,
+                      deskripsi_barang=:deskripsi_barang,
+                      total_stok=:total_stok,
+                      stok_rusak=:stok_rusak
+                  WHERE id_barang=:id_barang";
 
-        $query = "UPDATE " . $this->table_name . " SET nama_barang=:nama_barang, total=:total, rusak=:rusak, dipinjam=:dipinjam, tersedia=:tersedia WHERE id = :id";
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(":nama_barang", $this->nama_barang);
-        $stmt->bindParam(":total", $this->total);
-        $stmt->bindParam(":rusak", $this->rusak);
-        $stmt->bindParam(":dipinjam", $this->dipinjam);
-        $stmt->bindParam(":tersedia", $this->tersedia);
-        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":deskripsi_barang", $this->deskripsi_barang);
+        $stmt->bindParam(":total_stok", $this->total_stok);
+        $stmt->bindParam(":stok_rusak", $this->stok_rusak);
+        $stmt->bindParam(":id_barang", $this->id_barang);
 
         return $stmt->execute();
     }
 
-    public function delete() {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+    public function delete()
+    {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id_barang = :id_barang";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":id_barang", $this->id_barang);
         return $stmt->execute();
+    }
+
+    public function generateId()
+    {
+        $query = "SELECT id_barang 
+              FROM " . $this->table_name . " 
+              ORDER BY id_barang DESC 
+              LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $lastId = $row['id_barang']; // contoh: BRG005
+            $number = (int) substr($lastId, 3); // ambil angka setelah "BRG"
+            $number++;
+            $newId = 'BRG' . str_pad($number, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'BRG001';
+        }
+
+        return $newId;
+    }
+
+    public function getByRuangan($id_ruangan)
+    {
+        $query = "SELECT 
+                b.*,
+                COALESCE(SUM(
+                    CASE WHEN p.status = 'dipinjam' THEN dp.kuantitas ELSE 0 END
+                ),0) AS dipinjam,
+
+                (b.total_stok - b.stok_rusak - COALESCE(SUM(
+                    CASE WHEN p.status = 'dipinjam' THEN dp.kuantitas ELSE 0 END
+                ),0)) AS stok_tersedia
+
+              FROM barang b
+              LEFT JOIN detail_peminjaman dp 
+                ON dp.id_barang = b.id_barang
+              LEFT JOIN peminjaman p 
+                ON p.id_peminjaman = dp.id_peminjaman
+
+              WHERE b.id_ruangan = :id_ruangan
+              GROUP BY b.id_barang";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id_ruangan", $id_ruangan);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-?>

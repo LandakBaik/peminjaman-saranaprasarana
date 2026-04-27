@@ -1,83 +1,188 @@
 <?php
-class Peminjaman {
+class Peminjaman
+{
     private $conn;
     private $table_name = "peminjaman";
 
-    public $id;
-    public $user_id;
+    public $id_peminjaman;
+    public $id_pengguna;
     public $jenis_peminjaman;
-    public $item_id;
-    public $jumlah;
-    public $tanggal_pinjam;
-    public $tanggal_kembali;
-    public $keperluan;
+    public $waktu_mulai;
+    public $waktu_selesai;
+    // public $tanggal_kembali;
     public $status;
     public $approved_by;
 
-    public function __construct($db) {
+    public $items = [];
+    public $id_ruangan;
+    public $keperluan;
+    public $catatan;
+    public $jaminan;
+
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function readAll() {
-        $query = "SELECT p.*, u.name as user_name, 
-                  CASE 
-                    WHEN p.jenis_peminjaman = 'barang' THEN b.nama_barang
-                    WHEN p.jenis_peminjaman = 'ruangan' THEN r.nama_ruangan
-                  END as item_name
-                  FROM " . $this->table_name . " p
-                  LEFT JOIN users u ON p.user_id = u.id
-                  LEFT JOIN barang b ON p.item_id = b.id AND p.jenis_peminjaman = 'barang'
-                  LEFT JOIN ruangan r ON p.item_id = r.id AND p.jenis_peminjaman = 'ruangan'
-                  ORDER BY p.created_at DESC";
+    // 🔹 READ ALL
+    public function readAll()
+    {
+        $query = "SELECT p.*,
+                         u.nama as peminjam,
+                         s.nama as staff_approval
+                  FROM peminjaman p
+                  LEFT JOIN pengguna u ON p.id_pengguna = u.id_pengguna
+                  LEFT JOIN pengguna s ON p.approved_by = s.id_pengguna
+                  ORDER BY p.tanggal_dibuat DESC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
-    public function readByUser($user_id) {
-        $query = "SELECT p.*, 
-                  CASE 
-                    WHEN p.jenis_peminjaman = 'barang' THEN b.nama_barang
-                    WHEN p.jenis_peminjaman = 'ruangan' THEN r.nama_ruangan
-                  END as item_name
-                  FROM " . $this->table_name . " p
-                  LEFT JOIN barang b ON p.item_id = b.id AND p.jenis_peminjaman = 'barang'
-                  LEFT JOIN ruangan r ON p.item_id = r.id AND p.jenis_peminjaman = 'ruangan'
-                  WHERE p.user_id = :user_id
-                  ORDER BY p.created_at DESC";
+    // 🔹 READ BY USER
+    public function readByUser($id_pengguna)
+    {
+        $query = "SELECT p.*,
+                         u.nama as peminjam,
+                         s.nama as staff_approval,
+                         b.nama_barang,
+                         r.nama_ruangan
+
+                  FROM peminjaman p
+
+                  LEFT JOIN pengguna u 
+                        ON p.id_pengguna = u.id_pengguna
+
+                  LEFT JOIN pengguna s 
+                        ON p.approved_by = s.id_pengguna
+
+                  LEFT JOIN detail_peminjaman dp 
+                        ON dp.id_peminjaman = p.id_peminjaman
+
+                  LEFT JOIN barang b 
+                        ON dp.id_barang = b.id_barang
+
+                  LEFT JOIN ruangan r 
+                        ON b.id_ruangan = r.id_ruangan
+
+                  WHERE p.id_pengguna = :id_pengguna
+                  ORDER BY p.tanggal_dibuat DESC";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         return $stmt;
     }
 
-    public function create() {
-        $query = "INSERT INTO " . $this->table_name . " 
-                  SET user_id=:user_id, jenis_peminjaman=:jenis_peminjaman, item_id=:item_id, 
-                      jumlah=:jumlah, tanggal_pinjam=:tanggal_pinjam, tanggal_kembali=:tanggal_kembali, 
-                      keperluan=:keperluan, status='pending'";
-        $stmt = $this->conn->prepare($query);
-
-        $stmt->bindParam(":user_id", $this->user_id);
-        $stmt->bindParam(":jenis_peminjaman", $this->jenis_peminjaman);
-        $stmt->bindParam(":item_id", $this->item_id);
-        $stmt->bindParam(":jumlah", $this->jumlah);
-        $stmt->bindParam(":tanggal_pinjam", $this->tanggal_pinjam);
-        $stmt->bindParam(":tanggal_kembali", $this->tanggal_kembali);
-        $stmt->bindParam(":keperluan", $this->keperluan);
-
-        return $stmt->execute();
+   public function create()
+{
+    if ($this->jenis_peminjaman == 'barang') {
+        if (
+            date('Y-m-d', strtotime($this->waktu_mulai)) !=
+            date('Y-m-d', strtotime($this->waktu_selesai))
+        ) {
+            die("Peminjaman barang hanya boleh 1 hari!");
+        }
     }
 
-    public function updateStatus() {
-        $query = "UPDATE " . $this->table_name . " SET status=:status, approved_by=:approved_by WHERE id = :id";
+    // generate ID manual
+    $this->id_peminjaman = $this->generateId();
+
+    $query = "INSERT INTO peminjaman 
+        SET id_peminjaman=:id_peminjaman,
+            id_pengguna=:id_pengguna,
+            jenis_peminjaman=:jenis_peminjaman,
+            waktu_mulai=:waktu_mulai,
+            waktu_selesai=:waktu_selesai,
+            keperluan=:keperluan,
+            catatan=:catatan,
+            jaminan=:jaminan,
+            status='Pending'";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+    $stmt->bindParam(":id_pengguna", $this->id_pengguna);
+    $stmt->bindParam(":jenis_peminjaman", $this->jenis_peminjaman);
+    $stmt->bindParam(":waktu_mulai", $this->waktu_mulai);
+    $stmt->bindParam(":waktu_selesai", $this->waktu_selesai);
+    $stmt->bindParam(":keperluan", $this->keperluan);
+    $stmt->bindParam(":catatan", $this->catatan);
+    $stmt->bindParam(":jaminan", $this->jaminan);
+
+    $stmt->execute();
+
+    // ❗ JANGAN pakai lastInsertId lagi
+
+    // DETAIL
+    if ($this->jenis_peminjaman == 'barang') {
+
+        foreach ($this->items as $id => $kuantitas) {
+            $this->insertDetail($id, $kuantitas);
+        }
+
+    } elseif ($this->jenis_peminjaman == 'ruangan') {
+
+        $query = "SELECT id_barang FROM barang WHERE id_ruangan = :id_ruangan";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id_ruangan", $this->id_ruangan);
+        $stmt->execute();
+
+        $barangList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($barangList as $b) {
+            $this->insertDetail($b['id_barang'], 1);
+        }
+    }
+
+    return true;
+}
+    private function insertDetail($id_barang, $kuantitas)
+{
+    $query = "INSERT INTO detail_peminjaman 
+              SET id_peminjaman=:id_peminjaman,
+                  id_barang=:id_barang,
+                  kuantitas=:kuantitas";
+
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+    $stmt->bindParam(":id_barang", $id_barang);
+    $stmt->bindParam(":kuantitas", $kuantitas);
+
+    $stmt->execute();
+}
+    // 🔹 UPDATE STATUS
+    public function updateStatus()
+    {
+        $query = "UPDATE peminjaman 
+                  SET status=:status, approved_by=:approved_by 
+                  WHERE id_peminjaman = :id_peminjaman";
+
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":approved_by", $this->approved_by);
-        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
         return $stmt->execute();
     }
+
+    public function generateId()
+    {
+        $query = "SELECT id_peminjaman FROM peminjaman ORDER BY id_peminjaman DESC LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $last = $row['id_peminjaman'];
+            $num = (int) substr($last, 2);
+            $num++;
+            return "PM" . str_pad($num, 3, "0", STR_PAD_LEFT);
+        }
+
+        return "PM001";
+    }
 }
-?>

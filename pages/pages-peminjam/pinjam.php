@@ -1,26 +1,41 @@
 <?php
-$room = $_GET['room'] ?? 'Tidak diketahui';
+require_once 'config/Database.php';
+require_once 'models/Barang.php';
+require_once 'models/Ruangan.php';
 
-$rooms = [
-    'RK3_1' => 'Ruang Kelas 3.1',
-    'RK3_2' => 'Ruang Kelas 3.2',
-    'RK3_3' => 'Ruang Kelas 3.3',
-];
+$database = new Database();
+$db = $database->getConnection();
 
-$roomName = $rooms[$room] ?? 'Ruangan tidak ditemukan';
+$id_ruangan = $_GET['id_ruangan'] ?? null;
+
+if (!$id_ruangan) {
+    die("Ruangan tidak valid (missing id_ruangan)");
+}
+
+$ruanganModel = new Ruangan($db);
+$ruangan = $ruanganModel->getById($id_ruangan);
+
+if (!$ruangan) {
+    die("Ruangan tidak ditemukan");
+}
+
+$roomName = $ruangan['nama_ruangan'];
+
+$barangModel = new Barang($db);
+$barangList = $barangModel->getByRuangan($id_ruangan);
 ?>
 
 <div id="layoutSidenav_content">
     <link href="css/pinjam-custom.css" rel="stylesheet" />
+
     <main id="layout-static">
         <div class="container-fluid px-4">
-            <h1 class="mt-4">Pinjam - <?php echo htmlspecialchars($roomName); ?></h1>
-            <ol class="breadcrumb mb-4">
-                <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="index.php?page=select-room">Select Room</a></li>
-                <li class="breadcrumb-item active">Pinjam</li>
-            </ol>
+
+            <h1 class="mt-4">Pinjam - <?= htmlspecialchars($roomName) ?></h1>
+
             <div class="card mb-4">
+
+                <!-- ================= CALENDAR ================= -->
                 <div class="calendar-container">
                     <div class="calendar-header">
                         <button id="prevMonth">&#10094;</button>
@@ -46,175 +61,164 @@ $roomName = $rooms[$room] ?? 'Ruangan tidak ditemukan';
                     <div id="calendarDates" class="calendar-grid"></div>
                 </div>
 
-                <!-- Popup Form Peminjaman -->
+                <!-- ================= MODAL ================= -->
                 <div id="loanModal" class="modal">
                     <div class="modal-content large-modal">
                         <span class="close">&times;</span>
+
                         <div class="text-center mb-3">
-                            <h4 class="fw-semibold text-primary mb-1">
-                                <?php echo htmlspecialchars($roomName); ?>
+                            <h4 class="fw-semibold text-primary">
+                                <?= htmlspecialchars($roomName) ?>
                             </h4>
                         </div>
-                        <!-- <a href="index.php?page=pinjam&room=RK3_1" class="text-decoration-none text-dark"> -->
-                        <div class="section-title">
-                            <span></span>
-                            <h3>Data Peminjaman</h3>
-                            <span></span>
-                        </div>
 
-                        <form action="controllers/PeminjamanController.php?action=create" method="POST" class="row g-3">
-                            <input type="hidden" name="item_id" value="1"> <!-- Dummy ID for item/ruangan -->
+                        <form action="controllers/PeminjamanController.php?action=create"
+                            method="POST"
+                            enctype="multipart/form-data"
+                            class="row g-3">
+
+                            <input type="hidden" name="ruangan" value="<?= $id_ruangan ?>">
+
                             <div class="col-12 col-lg-8">
+
+                                <!-- JENIS -->
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">JENIS PEMINJAMAN</label>
-                                    <select class="form-select" name="jenis_peminjaman" id="jenismPinjam" required>
-                                        <option value="" selected>Pilih</option>
+                                    <select class="form-select" name="jenis_peminjaman" required>
+                                        <option value="">Pilih</option>
                                         <option value="barang">Barang</option>
                                         <option value="ruangan">Ruangan</option>
                                     </select>
                                 </div>
 
+                                <!-- NAMA -->
                                 <div class="row g-3 mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label">Nama Peminjam</label>
-                                        <input type="text" class="form-control" placeholder="Nama peminjam">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Nama</label>
+                                        <input type="text" class="form-control"
+                                            value="<?= $_SESSION['user']['nama'] ?? '' ?>" readonly>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-md-6">
                                         <label class="form-label">Keperluan</label>
-                                        <input type="text" class="form-control" name="keperluan" placeholder="Keperluan peminjaman" required>
+                                        <input type="text" class="form-control"
+                                            name="keperluan" required>
                                     </div>
                                 </div>
 
+                                <!-- WAKTU -->
                                 <div class="row g-3 mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label">Tanggal Pinjam</label>
-                                        <input type="date" class="form-control" name="tanggal_pinjam" required>
+                                    <div class="col-md-6">
+                                        <label>Mulai</label>
+                                        <input type="datetime-local" class="form-control"
+                                            name="waktu_mulai" required>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label">Tanggal Selesai</label>
-                                        <input type="date" class="form-control" name="tanggal_kembali" required>
+                                    <div class="col-md-6">
+                                        <label>Selesai</label>
+                                        <input type="datetime-local" class="form-control"
+                                            name="waktu_selesai" required>
+                                    </div>
+                                </div>
+
+                                <!-- BARANG -->
+                                <div class="mb-3">
+                                    <label class="fw-bold">Daftar Barang</label>
+
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAll"></th>
+                                                <th>ID</th>
+                                                <th>Nama</th>
+                                                <th>Jumlah</th>
+                                                <th>Stok</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <?php if (!empty($barangList)): ?>
+                                                <?php foreach ($barangList as $b): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                name="barang[<?= $b['id_barang'] ?>][checked]">
+                                                        </td>
+
+                                                        <td><?= $b['id_barang'] ?></td>
+
+                                                        <td><?= htmlspecialchars($b['nama_barang']) ?></td>
+
+                                                        <td>
+                                                            <input type="number" min="1" value="1"
+                                                                name="barang[<?= $b['id_barang'] ?>][kuantitas]"
+                                                                class="form-control form-control-sm">
+                                                        </td>
+
+                                                        <td><?= $b['stok_tersedia'] ?? 0 ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted">
+                                                        Tidak ada barang di ruangan ini
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- CATATAN -->
+                                <div class="mb-3">
+                                    <label>Catatan</label>
+                                    <textarea class="form-control" name="catatan"></textarea>
+                                </div>
+
+                            </div>
+
+                            <!-- KANAN -->
+                            <div class="col-lg-4">
+
+                                <div class="mb-3 text-center">
+                                    <label class="form-label fw-bold">Foto Ruangan</label>
+                                    <div>
+                                        <img src="uploads/ruangan/<?= $ruangan['foto_ruangan'] ?>"
+                                            class="img-fluid rounded shadow-sm"
+                                            style="max-height: 180px; object-fit: cover;"
+                                            alt="Foto Ruangan">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Daftar Barang</label>
-                                    <div class="table-wrapper">
-                                        <table class="table table-sm">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th style="width: 40px;"><input class="form-check-input" type="checkbox" id="selectAll"></th>
-                                                    <th>Kode</th>
-                                                    <th>Nama</th>
-                                                    <th style="width: 80px;">Jumlah</th>
-                                                    <th style="width: 80px;">Tersedia</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201001</td>
-                                                    <td>Kursi Besi</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>25</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201002</td>
-                                                    <td>AC Split</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>4</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201003</td>
-                                                    <td>White Board</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>1</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201001</td>
-                                                    <td>Kursi Besi</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>25</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201002</td>
-                                                    <td>AC Split</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>4</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201003</td>
-                                                    <td>White Board</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>1</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201001</td>
-                                                    <td>Kursi Besi</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>25</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201002</td>
-                                                    <td>AC Split</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>4</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><input class="form-check-input" type="checkbox"></td>
-                                                    <td>3050201003</td>
-                                                    <td>White Board</td>
-                                                    <td><input type="number" min="1" value="1" class="form-control form-control-sm"></td>
-                                                    <td>1</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <label>Jaminan</label>
+                                    <input type="file" name="jaminan" class="form-control">
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Catatan</label>
-                                    <textarea class="form-control" rows="4" placeholder="Catatan..."></textarea>
-                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Kirim
+                                </button>
                             </div>
 
-                            <div class="col-12 col-lg-4">
-                                <div class="image-placeholder mb-3"></div>
-
-                                <p class="room-description text-muted small mb-3">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempat ini dapat digunakan untuk kebutuhan peminjaman ruangan.
-                                </p>
-
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Jaminan</label>
-                                    <div class="upload-box">
-                                        <input type="file" class="d-none" id="fileInput">
-                                        <label for="fileInput" class="d-block mb-0" style="cursor: pointer;">
-                                            <small>Klik untuk upload file</small>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="reset" class="btn btn-outline-secondary">Bersihkan</button>
-                                    <button type="submit" class="btn btn-primary">Kirim Permohonan</button>
-                                </div>
-                            </div>
                         </form>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
-    <footer>
-        <?php include 'footer.php'; ?>
-    </footer>
 </div>
+<!-- ================= SCRIPT ================= -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('selectAll');
+
+        if (selectAll) {
+            selectAll.addEventListener('click', function() {
+                document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+                    cb.checked = this.checked;
+                });
+            });
+        }
+    });
+</script>

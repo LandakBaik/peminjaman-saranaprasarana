@@ -1,6 +1,6 @@
 <?php
 require_once 'config/Database.php';
-require_once 'models/Peminjaman.php';
+require_once __DIR__ . '/../../models/Peminjaman.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -105,36 +105,41 @@ $stmt = $peminjaman->readByUser($userId);
                                     if ($row['status'] == 'rejected') $statusClass = 'bg-danger-subtle text-danger';
                                     if ($row['status'] == 'returned') $statusClass = 'bg-secondary-subtle text-secondary';
                                 ?>
-                                <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>" data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
-                                    <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
-                                    <td class="text-center"><?= $no++ ?></td>
-                                    <td>
-                                        <strong><?= htmlspecialchars($row['item_name']) ?></strong><br>
-                                        <small class="text-muted"><?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            <?= htmlspecialchars($row['keperluan']) ?>
-                                        </small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
-                                    </td>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">
-                                        <?= htmlspecialchars($row['tanggal_pinjam']) ?><br><small class="text-muted">s/d <?= htmlspecialchars($row['tanggal_kembali']) ?></small>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if($row['status'] == 'pending'): ?>
-                                            <button class="btn btn-danger btn-sm">Batalkan</button>
-                                        <?php elseif($row['status'] == 'approved'): ?>
-                                            <button class="btn btn-info btn-sm">Kembalikan</button>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
+                                    <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>" data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
+                                        <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
+                                        <td class="text-center"><?= $no++ ?></td>
+                                        <td>
+                                            <strong><?= htmlspecialchars($row['nama_barang'] ?? '-') ?></strong><br>
+                                            <small class="text-muted"><?= ucfirst($row['jenis_peminjaman']) ?></small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <?= htmlspecialchars($row['keperluan']) ?>
+                                            </small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <?= htmlspecialchars($row['waktu_mulai']) ?>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <?= htmlspecialchars($row['waktu_selesai']) ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php if ($row['status'] == 'pending'): ?>
+                                                <button class="btn btn-danger btn-sm">Batalkan</button>
+                                            <?php elseif ($row['status'] == 'approved'): ?>
+                                                <button class="btn btn-info btn-sm">Kembalikan</button>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
                                 <?php } ?>
                             </tbody>
                         </table>
