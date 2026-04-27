@@ -56,6 +56,20 @@ $role = $_SESSION['user']['role'];
                 </a>
                 <?php endif; ?>
 
+                <?php if (in_array($role, ['staff'])) : ?>
+                <a class="nav-link" href="index.php?page=approve-peminjaman">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                    Pengembalian
+                </a>
+                <?php endif; ?>
+
+                <?php if (in_array($role, ['staff'])) : ?>
+                <a class="nav-link" href="index.php?page=approve-peminjaman">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bookmark"></i></div>
+                    Riwayat Peminjaman
+                </a>
+                <?php endif; ?>
+
                 <!-- Select menu dropdown layout dan pages auth, sapa tau butuh jangan diapus -->
 
                 <!-- <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">

@@ -28,54 +28,47 @@ $page = $_GET['page'] ?? 'dashboard';
             $page = $_GET['page'] ?? 'dashboard';
 
             switch ($page) {
-                // case 'layout-sidenav-light':
-                //     include 'pages/layout-sidenav-light.php';
-                //     break;
-                // case 'layout-static':
-                //     include 'pages/layout-static.php';
-                //     break;
-                case 'tables':
-                    include 'pages/tables.php';
-                    break;
-                case 'select-room':
-                    only(['user']);
-                    include 'pages/select-room.php';
-                    break;
+                // Universal
                 case 'detail-profil':
                     include 'pages/detail-profil.php';
                     break;
                 case 'detail-profil-edit':
                     include 'pages/detail-profil-edit.php';
                     break;
-                // case 'charts':
-                //     include 'pages/charts.php';
-                //     break;
+                // Peminjam
+                case 'select-room':
+                    only(['user']);
+                    include 'pages/pages-peminjam/select-room.php';
+                    break;
                 case 'pinjam':
-                    include 'pages/pinjam.php';
+                    only(['user']);
+                    include 'pages/pages-peminjam/pinjam.php';
                     break;
                 case 'peminjaman-saya':
                     only(['user', 'admin', 'staff']);
-                    include 'pages/peminjaman-saya.php';
+                    include 'pages/pages-peminjam/peminjaman-saya.php';
                     break;
                 case 'riwayat-peminjaman':
                     only(['user', 'admin', 'staff']);
-                    include 'pages/riwayat-peminjaman.php';
+                    include 'pages/pages-peminjam/riwayat-peminjaman.php';
                     break;
+                // Staff
                 case 'approve-peminjaman':
                     only(['staff']);
-                    include 'pages/approve-peminjaman.php';
+                    include 'pages/pages-staff/approve.php';
                     break;
+                // Admin
                 case 'ruangan':
                     only(['admin']);
-                    include 'pages/ruangan.php';
+                    include 'pages/pages-admin/ruangan.php';
                     break;
                 case 'akun-staff':
                     only(['admin']);
-                    include 'pages/akun-staff.php';
+                    include 'pages/pages-admin/akun-staff.php';
                     break;
                 case 'barang':
                     only(['admin']);
-                    include 'pages/barang.php';
+                    include 'pages/pages-admin/barang.php';
                     break;
                 default:
                     include 'pages/dashboard.php';
