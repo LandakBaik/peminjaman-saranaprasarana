@@ -28,7 +28,6 @@
                             case 'register':
                                 include 'form-register.php';
                                 break;
-                            case 'login':
                             default:
                                 include 'form-login.php';
                                 break;

@@ -1,5 +1,6 @@
 <?php
-$role = $_SESSION['user']['role'];
+// Cek apakah session user ada dan role terdefinisi
+$role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
 ?>
 
 <div id="layoutSidenav_nav">

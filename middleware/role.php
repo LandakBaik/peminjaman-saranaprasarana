@@ -2,13 +2,15 @@
 function only($roles = [])
 {
     if (!isset($_SESSION['user'])) {
-        header("Location: auth/Login.php?page=login");
+        header("Location: authentication/Login.php?page=login");
         exit;
     }
 
-    $userRole = $_SESSION['user']['role'];
+    // Konversi role ke lowercase agar konsisten dengan sidebar
+    $userRole = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
 
     if (!in_array($userRole, $roles)) {
-        die("Akses ditolak");
+        http_response_code(403);
+        die("Akses ditolak - Anda tidak memiliki izin untuk mengakses halaman ini.");
     }
 }

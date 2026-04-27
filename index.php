@@ -1,8 +1,12 @@
 <?php
+// Aktifkan error reporting untuk debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require 'middleware/auth.php';
 require 'middleware/role.php';
 
-$role = $_SESSION['user']['role'];
+$role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
 $page = $_GET['page'] ?? 'dashboard';
 ?>
 

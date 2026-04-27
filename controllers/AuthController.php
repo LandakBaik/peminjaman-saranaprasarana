@@ -15,8 +15,8 @@ if ($action == 'login') {
 
     if ($user->login($email, $password)) {
         $_SESSION['user'] = [
-            'id' => $user->id,
-            'name' => $user->name,
+            'id' => $user->id_pengguna,
+            'nama' => $user->nama,
             'email' => $email,
             'role' => $user->role
         ];
@@ -27,16 +27,16 @@ if ($action == 'login') {
         exit();
     }
 } elseif ($action == 'register') {
-    $user->name = $_POST['name'] ?? '';
+    $user->nama = $_POST['nama'] ?? '';
     $user->email = $_POST['email'] ?? '';
     $user->password = $_POST['password'] ?? '';
     $user->role = 'user'; // default role
 
     if ($user->register()) {
-        header("Location: Login.php?page=login&success=1");
+        header("Location: ../authentication/Login.php?page=login&success=1");
         exit();
     } else {
-        header("Location: Login.php?page=register&error=1");
+        header("Location: ../authentication/Login.php?page=register&error=1");
         exit();
     }
 } elseif ($action == 'logout') {
@@ -44,4 +44,3 @@ if ($action == 'login') {
     header("Location: Login.php");
     exit();
 }
-?>
