@@ -1,3 +1,13 @@
+<?php
+require_once 'config/Database.php';
+require_once 'models/Peminjaman.php';
+
+$database = new Database();
+$db = $database->getConnection();
+$peminjaman = new Peminjaman($db);
+$userId = $_SESSION['user']['id'] ?? 0;
+$stmt = $peminjaman->readByUser($userId);
+?>
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -87,84 +97,45 @@
                                 </tr>
                             </thead>
                             <tbody id="peminjamanBody">
-
-                                <!-- Row 1 -->
-                                <tr data-status="Disetujui" data-type="Barang">
+                                <?php
+                                $no = 1;
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    $statusClass = 'bg-primary-subtle text-primary';
+                                    if ($row['status'] == 'approved') $statusClass = 'bg-success-subtle text-success';
+                                    if ($row['status'] == 'rejected') $statusClass = 'bg-danger-subtle text-danger';
+                                    if ($row['status'] == 'returned') $statusClass = 'bg-secondary-subtle text-secondary';
+                                ?>
+                                <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>" data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
                                     <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
-                                    <td class="text-center">1</td>
+                                    <td class="text-center"><?= $no++ ?></td>
                                     <td>
-                                        <strong>Printer</strong><br>
-                                        <small class="text-muted">Barang</small>
+                                        <strong><?= htmlspecialchars($row['item_name']) ?></strong><br>
+                                        <small class="text-muted"><?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?></small>
                                     </td>
                                     <td>
                                         <small class="text-muted">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit...
+                                            <?= htmlspecialchars($row['keperluan']) ?>
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-success-subtle text-success">Disetujui</span>
+                                        <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
                                     </td>
-                                    <td class="text-center">10.00</td>
-                                    <td class="text-center">12.00</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
                                     <td class="text-center">
-                                        9 Oktober<br><small class="text-muted">2025</small>
+                                        <?= htmlspecialchars($row['tanggal_pinjam']) ?><br><small class="text-muted">s/d <?= htmlspecialchars($row['tanggal_kembali']) ?></small>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-info btn-sm">Kembalikan</button>
+                                        <?php if($row['status'] == 'pending'): ?>
+                                            <button class="btn btn-danger btn-sm">Batalkan</button>
+                                        <?php elseif($row['status'] == 'approved'): ?>
+                                            <button class="btn btn-info btn-sm">Kembalikan</button>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-
-                                <!-- Row 2 -->
-                                <tr data-status="Pending" data-type="Ruangan">
-                                    <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
-                                    <td class="text-center">2</td>
-                                    <td>
-                                        <strong>Ruang 3.11</strong><br>
-                                        <small class="text-muted">Ruangan</small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit...
-                                        </small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary-subtle text-primary">Pending</span>
-                                    </td>
-                                    <td class="text-center">15.00</td>
-                                    <td class="text-center">17.00</td>
-                                    <td class="text-center">
-                                        6 Oktober<br><small class="text-muted">2025</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-danger btn-sm">Batalkan</button>
-                                    </td>
-                                </tr>
-
-                                <tr data-status="Pending" data-type="Ruangan">
-                                    <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
-                                    <td class="text-center">2</td>
-                                    <td>
-                                        <strong>Ruang 3.12</strong><br>
-                                        <small class="text-muted">Ruangan</small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit...
-                                        </small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary-subtle text-primary">Pending</span>
-                                    </td>
-                                    <td class="text-center">15.00</td>
-                                    <td class="text-center">17.00</td>
-                                    <td class="text-center">
-                                        6 Oktober<br><small class="text-muted">2025</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-danger btn-sm">Batalkan</button>
-                                    </td>
-                                </tr>
-
+                                <?php } ?>
                             </tbody>
                         </table>
                     </div>

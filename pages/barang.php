@@ -1,16 +1,25 @@
+<?php
+require_once 'config/Database.php';
+require_once 'models/Barang.php';
+
+$database = new Database();
+$db = $database->getConnection();
+$barang = new Barang($db);
+$stmt = $barang->readAll();
+?>
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
 
             <!-- Title -->
-            <h1 class="mt-4">Ruangan</h1>
+            <h1 class="mt-4">Barang</h1>
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Daftar ruangan yang tersedia</span>
-                <a href="#" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i> Tambah Ruangan
-                </a>
+                <span class="text-muted">Daftar barang yang tersedia</span>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahBarangModal">
+                    <i class="fas fa-plus me-1"></i> Tambah Barang
+                </button>
             </div>
 
             <!-- Card -->
@@ -28,49 +37,37 @@
                     <!-- Table -->
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr class="text-center">
+                            <thead class="table-light text-muted small fw-bold">
+                                <tr class="text-center text-uppercase">
                                     <th><input type="checkbox"></th>
-                                    <th>No</th>
-                                    <th>Nama Ruangan</th>
-                                    <th>Kapasitas</th>
-                                    <th>Status</th>
-                                    <th>Fasilitas</th>
-                                    <th>Aksi</th>
+                                    <th>NO <i class="fas fa-sort ms-1"></i></th>
+                                    <th class="text-start">NAMA BARANG <i class="fas fa-sort ms-1"></i></th>
+                                    <th>TOTAL</th>
+                                    <th>RUSAK</th>
+                                    <th>DIPINJAM</th>
+                                    <th>TERSEDIA</th>
+                                    <th>AKSI</th>
                                 </tr>
                             </thead>
-                            <tbody>
-
-                                <!-- Row 1 -->
-                                <tr>
+                            <tbody class="border-top-0">
+                                <?php
+                                $no = 1;
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                ?>
+                                <tr class="align-middle">
                                     <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center">1</td>
-                                    <td><strong>Ruang 3.11</strong></td>
-                                    <td class="text-center">30</td>
+                                    <td class="text-center"><?= $no++ ?></td>
+                                    <td><strong><?= htmlspecialchars($row['nama_barang']) ?></strong></td>
+                                    <td class="text-center"><?= htmlspecialchars($row['total']) ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($row['rusak']) ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($row['dipinjam']) ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($row['tersedia']) ?></td>
                                     <td class="text-center">
-                                        <span class="badge bg-success-subtle text-success">Tersedia</span>
-                                    </td>
-                                    <td>Proyektor, AC</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-info btn-sm">Detail</button>
+                                        <button class="btn btn-sm bg-info-subtle text-info fw-semibold px-3 border-0" data-bs-toggle="modal" data-bs-target="#editBarangModal" onclick="fillEditForm(<?= htmlspecialchars(json_encode($row)) ?>)">Edit</button>
+                                        <a href="controllers/BarangController.php?action=delete&id=<?= $row['id'] ?>" class="btn btn-sm bg-danger-subtle text-danger fw-semibold px-3 border-0 ms-1" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
                                     </td>
                                 </tr>
-
-                                <!-- Row 2 -->
-                                <tr>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center">2</td>
-                                    <td><strong>Ruang 4.22</strong></td>
-                                    <td class="text-center">50</td>
-                                    <td class="text-center">
-                                        <span class="badge bg-danger-subtle text-danger">Tidak Tersedia</span>
-                                    </td>
-                                    <td>Whiteboard, AC</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-info btn-sm">Detail</button>
-                                    </td>
-                                </tr>
-
+                                <?php } ?>
                             </tbody>
                         </table>
                     </div>
@@ -91,7 +88,86 @@
             </div>
 
         </div>
+        
+        <!-- Modal Tambah Barang -->
+        <div class="modal fade" id="tambahBarangModal" tabindex="-1" aria-labelledby="tambahBarangModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-2">
+                    <div class="modal-header border-0 pb-0">
+                        <h4 class="modal-title text-dark fw-bold" id="tambahBarangModalLabel">Tambah Barang</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="controllers/BarangController.php?action=create" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Nama Barang</label>
+                                <input type="text" class="form-control" name="nama_barang" placeholder="Laptop" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-muted fw-semibold">Kuantitas (Total)</label>
+                                <input type="number" class="form-control" name="total" placeholder="Harus angka" required>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="d-flex justify-content-end align-items-center pt-2">
+                                <button type="button" class="btn btn-outline-primary px-4 me-2" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary px-4">Kirim</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Edit Barang -->
+        <div class="modal fade" id="editBarangModal" tabindex="-1" aria-labelledby="editBarangModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-2">
+                    <div class="modal-header border-0 pb-0">
+                        <h4 class="modal-title text-dark fw-bold" id="editBarangModalLabel">Edit Barang</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="controllers/BarangController.php?action=update" method="POST">
+                            <input type="hidden" name="id" id="edit_id">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Nama Barang</label>
+                                <input type="text" class="form-control" name="nama_barang" id="edit_nama_barang" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Total</label>
+                                <input type="number" class="form-control" name="total" id="edit_total" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Rusak</label>
+                                <input type="number" class="form-control" name="rusak" id="edit_rusak">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-muted fw-semibold">Dipinjam</label>
+                                <input type="number" class="form-control" name="dipinjam" id="edit_dipinjam">
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="d-flex justify-content-end align-items-center pt-2">
+                                <button type="button" class="btn btn-outline-primary px-4 me-2" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary px-4">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </main>
+
+    <script>
+        function fillEditForm(data) {
+            document.getElementById('edit_id').value = data.id;
+            document.getElementById('edit_nama_barang').value = data.nama_barang;
+            document.getElementById('edit_total').value = data.total;
+            document.getElementById('edit_rusak').value = data.rusak;
+            document.getElementById('edit_dipinjam').value = data.dipinjam;
+        }
+    </script>
+
 
     <footer>
         <?php include 'footer.php'; ?>

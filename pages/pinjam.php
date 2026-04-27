@@ -62,14 +62,15 @@ $roomName = $rooms[$room] ?? 'Ruangan tidak ditemukan';
                             <span></span>
                         </div>
 
-                        <form class="row g-3">
+                        <form action="controllers/PeminjamanController.php?action=create" method="POST" class="row g-3">
+                            <input type="hidden" name="item_id" value="1"> <!-- Dummy ID for item/ruangan -->
                             <div class="col-12 col-lg-8">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">JENIS PEMINJAMAN</label>
-                                    <select class="form-select" id="jenismPinjam">
-                                        <option selected>Pilih</option>
-                                        <option>Barang</option>
-                                        <option>Ruangan</option>
+                                    <select class="form-select" name="jenis_peminjaman" id="jenismPinjam" required>
+                                        <option value="" selected>Pilih</option>
+                                        <option value="barang">Barang</option>
+                                        <option value="ruangan">Ruangan</option>
                                     </select>
                                 </div>
 
@@ -81,19 +82,19 @@ $roomName = $rooms[$room] ?? 'Ruangan tidak ditemukan';
 
                                     <div class="col-12 col-md-6">
                                         <label class="form-label">Keperluan</label>
-                                        <input type="text" class="form-control" placeholder="Keperluan peminjaman">
+                                        <input type="text" class="form-control" name="keperluan" placeholder="Keperluan peminjaman" required>
                                     </div>
                                 </div>
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-12 col-md-6">
                                         <label class="form-label">Tanggal Pinjam</label>
-                                        <input type="date" class="form-control">
+                                        <input type="date" class="form-control" name="tanggal_pinjam" required>
                                     </div>
 
                                     <div class="col-12 col-md-6">
                                         <label class="form-label">Tanggal Selesai</label>
-                                        <input type="date" class="form-control">
+                                        <input type="date" class="form-control" name="tanggal_kembali" required>
                                     </div>
                                 </div>
 
