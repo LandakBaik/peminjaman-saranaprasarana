@@ -3,10 +3,26 @@
     <p>Registrasi Akun Baru</p>
 </div>
 
+<?php if(isset($_GET['error'])): ?>
+<div class="alert alert-danger py-2 text-center small" role="alert">
+    <?php 
+        if($_GET['error'] == 'email_exists') {
+            echo 'Email sudah digunakan, silakan gunakan email lain!';
+        } elseif($_GET['error'] == 'domain_invalid') {
+            echo 'Gunakan email dengan domain student.polije.ac.id!';
+        } elseif($_GET['error'] == 'invalid_email') {
+            echo 'Format email tidak valid!';
+        } else {
+            echo 'Terjadi kesalahan saat registrasi!';
+        }
+    ?>
+</div>
+<?php endif; ?>
+
 <form action="../controllers/AuthController.php?action=register" method="POST">
     <div class="mb-3">
         <label class="form-label">Nama Lengkap</label>
-        <input type="text" class="form-control" name="name" required>
+        <input type="text" class="form-control" name="nama" required>
     </div>
 
     <div class="mb-3">
@@ -16,7 +32,13 @@
 
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <input type="password" class="form-control" name="password" required>
+        <input type="password" class="form-control" name="password" id="password" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Konfirmasi Password</label>
+        <input type="password" class="form-control" name="confirm_password" id="confirm_password" required>
+        <div class="invalid-feedback">Password tidak cocok!</div>
     </div>
 
     <button type="submit" class="btn btn-primary w-100 rounded-pill" style="background-color: #0F2854; border-color: #0F2854;">
@@ -29,3 +51,22 @@
     </p>
 
 </form>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    
+    if (password !== confirm) {
+        e.preventDefault();
+        document.getElementById('confirm_password').classList.add('is-invalid');
+    }
+});
+
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    if (this.value === password) {
+        this.classList.remove('is-invalid');
+    }
+});
+</script>

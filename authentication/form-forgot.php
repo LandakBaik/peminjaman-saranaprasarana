@@ -10,7 +10,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary w-100 rounded-pill" style="background-color: #0F2854; border-color: #0F2854;">
-        Kirim Link Reset
+        Kirim Kode OTP
     </button>
 
     <p class="text-center small mt-3">

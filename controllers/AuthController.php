@@ -23,24 +23,42 @@ if ($action == 'login') {
         header("Location: ../index.php");
         exit();
     } else {
-        header("Location: Login.php?page=login&error=1");
+        header("Location: ../authentication/Login.php?page=login&error=1");
         exit();
     }
 } elseif ($action == 'register') {
     $user->nama = $_POST['nama'] ?? '';
     $user->email = $_POST['email'] ?? '';
     $user->password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
     $user->role = 'user'; // default role
+
+    if ($user->password !== $confirm_password) {
+        header("Location: ../authentication/Login.php?page=register&error=1");
+        exit();
+    }
+    if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: ../authentication/Login.php?page=register&error=invalid_email");
+        exit();
+    }
+    
+    $domain = strtolower(substr(strrchr($user->email, "@"), 1));
+
+    //domain email 
+    if ($domain !== "student.polije.ac.id") {
+        header("Location: ../authentication/Login.php?page=register&error=domain_invalid");
+        exit();
+    }
 
     if ($user->register()) {
         header("Location: ../authentication/Login.php?page=login&success=1");
         exit();
     } else {
-        header("Location: ../authentication/Login.php?page=register&error=1");
+        header("Location: ../authentication/Login.php?page=register&error=email_exists");
         exit();
     }
 } elseif ($action == 'logout') {
     session_destroy();
-    header("Location: Login.php");
+    header("Location: ../authentication/Login.php");
     exit();
 }
