@@ -19,10 +19,7 @@ $stmt = $ruanganModel->readAll();
                 <?php while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) : ?>
 
                     <?php
-                        // bikin kode room otomatis (kalau id kamu RG001 dll)
                         $roomCode = $r['id_ruangan'];
-
-                        // mapping kapasitas kalau ada
                         $kapasitas = $r['kapasitas'] ?? '-';
                         $nama = $r['nama_ruangan'];
                     ?>
