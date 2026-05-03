@@ -73,6 +73,7 @@ $stmt = $ruangan->readAll();
                                                 Hapus
                                             </a>
                                         </td>
+                                        
                                     </tr>
                                 <?php } ?>
                             </tbody>

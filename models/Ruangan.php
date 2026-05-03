@@ -28,7 +28,7 @@ class Ruangan
     // CREATE
     public function create()
     {
-        // $this->id_ruangan = $this->generateId();
+       
 
         $query = "INSERT INTO " . $this->table_name . "
               SET nama_ruangan = :nama_ruangan,
@@ -84,12 +84,12 @@ class Ruangan
     }
 
     public function getById($id_ruangan)
-{
-    $query = "SELECT * FROM ruangan WHERE id_ruangan = :id_ruangan LIMIT 1";
-    $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(":id_ruangan", $id_ruangan);
-    $stmt->execute();
+    {
+        $query = "SELECT * FROM ruangan WHERE id_ruangan = :id_ruangan LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id_ruangan", $id_ruangan);
+        $stmt->execute();
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

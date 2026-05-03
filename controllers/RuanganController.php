@@ -9,37 +9,54 @@ $ruangan = new Ruangan($db);
 
 $action = $_GET['action'] ?? '';
 
-// fungsi upload
+// ================= FUNCTION UPLOAD =================
 function uploadFoto($file)
 {
     $targetDir = "../uploads/";
 
-    // buat folder jika belum ada
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0777, true);
     }
 
-    $fileName = time() . '_' . basename($file["name"]);
-    $targetFile = $targetDir . $fileName;
+    $allowedExt = ['jpg', 'jpeg', 'png'];
+    $allowedMime = ['image/jpeg', 'image/png'];
+    $maxSize = 2 * 1024 * 1024; // 2MB
 
-    // validasi tipe file
-    $allowedTypes = ['jpg', 'jpeg', 'png'];
-    $fileExt = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+    $fileExt = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
 
-    if (!in_array($fileExt, $allowedTypes)) {
+    // cek ekstensi
+    if (!in_array($fileExt, $allowedExt)) {
         return false;
     }
 
+    // cek ukuran
+    if ($file["size"] > $maxSize) {
+        return false;
+    }
+
+    // cek MIME asli (lebih aman)
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $file["tmp_name"]);
+    finfo_close($finfo);
+
+    if (!in_array($mime, $allowedMime)) {
+        return false;
+    }
+
+    // generate nama file aman
+    $fileName = time() . '_' . bin2hex(random_bytes(5)) . '.' . $fileExt;
+    $targetFile = $targetDir . $fileName;
+
     if (move_uploaded_file($file["tmp_name"], $targetFile)) {
-        return $fileName;
+        return "uploads/" . $fileName;
     }
 
     return false;
 }
 
+// ================= REQUEST =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // validasi ENUM tipe_ruangan
     $allowedTipe = ['laboratorium', 'non-laboratorium'];
     $tipe = $_POST['tipe_ruangan'] ?? '';
 
@@ -53,9 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
         $ruangan->tipe_ruangan = $tipe;
-        $ruangan->id_pengguna = $_SESSION['user_id'] ?? null;
+        $ruangan->id_pengguna = $_SESSION['user']["id"] ?? null;
 
-        // upload foto
         $upload = uploadFoto($_FILES['foto_ruangan']);
         if (!$upload) {
             header("Location: ../index.php?page=ruangan&error=upload_failed");
@@ -78,18 +94,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
         $ruangan->tipe_ruangan = $tipe;
-        $ruangan->id_pengguna = $_SESSION['user_id'] ?? null;
+        $ruangan->id_pengguna = $_SESSION['user']['id'] ?? null;
 
-        // cek apakah upload foto baru
         if (!empty($_FILES['foto_ruangan']['name'])) {
+
+            // hapus foto lama
+            if (!empty($_POST['foto_lama']) && file_exists("../" . $_POST['foto_lama'])) {
+                unlink("../" . $_POST['foto_lama']);
+            }
+
             $upload = uploadFoto($_FILES['foto_ruangan']);
             if (!$upload) {
                 header("Location: ../index.php?page=ruangan&error=upload_failed");
                 exit();
             }
+
             $ruangan->foto_ruangan = $upload;
         } else {
-            // tetap pakai foto lama
             $ruangan->foto_ruangan = $_POST['foto_lama'];
         }
 
@@ -104,7 +125,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ================= DELETE =================
 elseif ($action == 'delete') {
+
     $ruangan->id_ruangan = $_GET['id_ruangan'];
+
+    // ambil data dulu untuk hapus file
+    $data = $ruangan->getById($ruangan->id_ruangan);
+
+    if ($data && file_exists("../" . $data['foto_ruangan'])) {
+        unlink("../" . $data['foto_ruangan']);
+    }
 
     if ($ruangan->delete()) {
         header("Location: ../index.php?page=ruangan&success=deleted");
@@ -113,5 +142,3 @@ elseif ($action == 'delete') {
     }
     exit();
 }
-
-
