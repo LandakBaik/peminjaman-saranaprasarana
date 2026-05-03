@@ -96,4 +96,57 @@ class User
 
         return $stmt;
     }
+
+    public function createResetToken($email, $token)
+    {
+        $delete = "DELETE FROM password_resets WHERE email = :email";
+        $stmtDel = $this->conn->prepare($delete);
+        $stmtDel->bindParam(":email", $email);
+        $stmtDel->execute();
+
+        $query = "INSERT INTO password_resets 
+              (email, token, expires_at) 
+              VALUES (:email, :token, DATE_ADD(NOW(), INTERVAL 1 HOUR))";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        $stmt->bindParam(":token", $token);
+
+        return $stmt->execute();
+    }
+
+    public function findToken($token)
+    {
+        $query = "SELECT * FROM password_resets 
+              WHERE token = :token 
+              AND expires_at > NOW() 
+              LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":token", $token);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function updatePasswordByEmail($email, $password)
+    {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+        $query = "UPDATE " . $this->table_name . "
+              SET password = :password
+              WHERE email = :email";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":password", $hashed);
+        $stmt->bindParam(":email", $email);
+
+        return $stmt->execute();
+    }
+    public function deleteToken($email)
+    {
+        $query = "DELETE FROM password_resets WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        return $stmt->execute();
+    }
 }

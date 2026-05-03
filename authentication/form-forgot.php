@@ -1,9 +1,30 @@
+<?php if (isset($_GET['success']) && isset($_GET['token'])): ?>
+    <div class="alert alert-success text-center small">
+        Kode OTP berhasil dikirim!<br>
+        <a href="Login.php?page=reset&token=<?= htmlspecialchars($_GET['token']) ?>">
+            Klik di sini untuk reset password
+        </a>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger text-center small">
+        <?php
+        if ($_GET['error'] == 'email_not_found') {
+            echo "Email tidak ditemukan!";
+        } else {
+            echo "Terjadi kesalahan!";
+        }
+        ?>
+    </div>
+<?php endif; ?>
+
 <div class="text-center mb-4">
     <img src="../assets/img/pinjam_jti-removebg-preview-1.png" class="img-fluid mb-3" style="max-width:220px;">
     <p>Lupa Kata Sandi?</p>
 </div>
 
-<form action="forgot.php" method="POST">
+<form action="../controllers/ForgotController.php" method="POST">
     <div class="mb-3">
         <label class="form-label">Email</label>
         <input type="email" class="form-control" name="email" placeholder="Masukkan email Anda">

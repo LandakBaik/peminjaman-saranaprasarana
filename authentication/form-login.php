@@ -1,12 +1,18 @@
+<?php if (isset($_GET['success']) && $_GET['success'] == 'reset'): ?>
+    <div class="alert alert-success py-2 text-center small">
+        Password berhasil direset! Silakan login.
+    </div>
+<?php endif; ?>
+
 <div class="text-center mb-4">
     <img src="../assets/img/pinjam_jti-removebg-preview-1.png" class="img-fluid mb-3" style="max-width:220px;">
     <p>Selamat Datang Di Halaman Login</p>
 </div>
 
-<?php if(isset($_GET['error']) && $_GET['error'] == 1): ?>
-<div class="alert alert-danger py-2 text-center small" role="alert">
-    Email atau password salah!
-</div>
+<?php if (isset($_GET['error']) && $_GET['error'] == 1): ?>
+    <div class="alert alert-danger py-2 text-center small" role="alert">
+        Email atau password salah!
+    </div>
 <?php endif; ?>
 
 <form action="../controllers/AuthController.php?action=login" method="POST">
@@ -47,7 +53,7 @@
     const checkbox = document.getElementById("showPassword");
     const password = document.getElementById("password");
 
-    checkbox.addEventListener("change", function () {
+    checkbox.addEventListener("change", function() {
         if (this.checked) {
             password.type = "text";
         } else {
