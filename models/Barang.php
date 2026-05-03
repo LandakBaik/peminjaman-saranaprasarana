@@ -53,11 +53,10 @@ class Barang
 
     public function create()
     {
-        $this->id_barang = $this->generateId();
+        // $this->id_barang = $this->generateId();
 
         $query = "INSERT INTO " . $this->table_name . "
-              SET id_barang=:id_barang,
-                  id_ruangan=:id_ruangan,
+              SET id_ruangan=:id_ruangan,
                   nama_barang=:nama_barang,
                   deskripsi_barang=:deskripsi_barang,
                   total_stok=:total_stok,
@@ -65,7 +64,6 @@ class Barang
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":id_barang", $this->id_barang);
         $stmt->bindParam(":id_ruangan", $this->id_ruangan);
         $stmt->bindParam(":nama_barang", $this->nama_barang);
         $stmt->bindParam(":deskripsi_barang", $this->deskripsi_barang);
@@ -101,30 +99,6 @@ class Barang
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id_barang", $this->id_barang);
         return $stmt->execute();
-    }
-
-    public function generateId()
-    {
-        $query = "SELECT id_barang 
-              FROM " . $this->table_name . " 
-              ORDER BY id_barang DESC 
-              LIMIT 1";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row) {
-            $lastId = $row['id_barang']; // contoh: BRG005
-            $number = (int) substr($lastId, 3); // ambil angka setelah "BRG"
-            $number++;
-            $newId = 'BRG' . str_pad($number, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'BRG001';
-        }
-
-        return $newId;
     }
 
     public function getByRuangan($id_ruangan)
