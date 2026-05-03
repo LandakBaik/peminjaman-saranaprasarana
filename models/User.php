@@ -1,5 +1,6 @@
 <?php
-class User {
+class User
+{
     private $conn;
     private $table_name = "pengguna";
 
@@ -9,12 +10,14 @@ class User {
     public $password;
     public $role;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
     // login
-    public function login($email, $password) {
+    public function login($email, $password)
+    {
 
         $query = "SELECT * FROM " . $this->table_name . " 
                   WHERE email = :email 
@@ -43,12 +46,12 @@ class User {
     }
 
     // register
-    public function register() {
+    public function register()
+    {
 
-        // cek duplikasi email
+        // cek email
         $check = "SELECT email FROM " . $this->table_name . " 
-                  WHERE email = :email 
-                  LIMIT 1";
+              WHERE email = :email LIMIT 1";
 
         $stmtCheck = $this->conn->prepare($check);
         $stmtCheck->bindParam(":email", $this->email);
@@ -58,52 +61,33 @@ class User {
             return false;
         }
 
-        // ambil id terakhir
-        $queryId = "SELECT id_pengguna 
-                    FROM " . $this->table_name . " 
-                    ORDER BY id_pengguna DESC 
-                    LIMIT 1";
-
-        $stmtId = $this->conn->prepare($queryId);
-        $stmtId->execute();
-
-        $lastId = $stmtId->fetch(PDO::FETCH_ASSOC);
-
-        if ($lastId) {
-            $num = (int) substr($lastId['id_pengguna'], 3);
-            $num++;
-            $newId = "USR" . str_pad($num, 3, "0", STR_PAD_LEFT);
-        } else {
-            $newId = "USR001";
-        }
-
         // hash password
         $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
 
-        // insert data
+        // insert tanpa id_pengguna
         $query = "INSERT INTO " . $this->table_name . "
-                  SET id_pengguna = :id_pengguna,
-                      nama        = :nama,
-                      email       = :email,
-                      password    = :password,
-                      role        = :role";
+              SET nama     = :nama,
+                  email    = :email,
+                  password = :password,
+                  role     = :role";
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":id_pengguna", $newId);
         $stmt->bindParam(":nama", $this->nama);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":password", $hashedPassword);
         $stmt->bindParam(":role", $this->role);
 
         if ($stmt->execute()) {
+            $this->id_pengguna = $this->conn->lastInsertId();
             return true;
         }
 
         return false;
     }
 
-    public function readAll() {
+    public function readAll()
+    {
 
         $query = "SELECT * FROM " . $this->table_name;
 
@@ -113,4 +97,3 @@ class User {
         return $stmt;
     }
 }
-?>

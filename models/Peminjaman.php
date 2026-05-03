@@ -87,11 +87,10 @@ class Peminjaman
     }
 
     // generate ID manual
-    $this->id_peminjaman = $this->generateId();
+    // $this->id_peminjaman = $this->generateId();
 
     $query = "INSERT INTO peminjaman 
-        SET id_peminjaman=:id_peminjaman,
-            id_pengguna=:id_pengguna,
+        SET id_pengguna=:id_pengguna,
             jenis_peminjaman=:jenis_peminjaman,
             waktu_mulai=:waktu_mulai,
             waktu_selesai=:waktu_selesai,
@@ -102,7 +101,6 @@ class Peminjaman
 
     $stmt = $this->conn->prepare($query);
 
-    $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
     $stmt->bindParam(":id_pengguna", $this->id_pengguna);
     $stmt->bindParam(":jenis_peminjaman", $this->jenis_peminjaman);
     $stmt->bindParam(":waktu_mulai", $this->waktu_mulai);
@@ -113,7 +111,8 @@ class Peminjaman
 
     $stmt->execute();
 
-    // ❗ JANGAN pakai lastInsertId lagi
+    // Get last insert ID untuk detail
+    $this->id_peminjaman = $this->conn->lastInsertId();
 
     // DETAIL
     if ($this->jenis_peminjaman == 'barang') {
@@ -167,22 +166,5 @@ class Peminjaman
         $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
         return $stmt->execute();
-    }
-
-    public function generateId()
-    {
-        $query = "SELECT id_peminjaman FROM peminjaman ORDER BY id_peminjaman DESC LIMIT 1";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row) {
-            $last = $row['id_peminjaman'];
-            $num = (int) substr($last, 2);
-            $num++;
-            return "PM" . str_pad($num, 3, "0", STR_PAD_LEFT);
-        }
-
-        return "PM001";
     }
 }

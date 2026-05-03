@@ -138,7 +138,7 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
         </div>
         <div class="sb-sidenav-footer">
             <div class="small">Logged in as:</div>
-            Roland Rafael Dela Cruz
+            <?php echo $_SESSION['user']['nama'] ?? 'Guest'; ?>
         </div>
     </nav>
 </div>
