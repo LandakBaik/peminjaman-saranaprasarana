@@ -1,10 +1,9 @@
 <?php
-require_once 'config/Database.php';
-require_once 'models/User.php';
+// require_once '../../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
-$userModel = new User($db);
+$userModel = new \App\Models\User($db);
 $stmt = $userModel->readAll();
 ?>
 <div id="layoutSidenav_content">
@@ -56,21 +55,21 @@ $stmt = $userModel->readAll();
                                     if ($row['role'] == 'admin') $roleClass = 'bg-primary-subtle text-primary';
                                     if ($row['role'] == 'staff') $roleClass = 'bg-secondary-subtle text-secondary';
                                 ?>
-                                <tr>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><?= $no++ ?></td>
-                                    <td><strong><?= htmlspecialchars($row['nama']) ?></strong></td>
-                                    <td><?= htmlspecialchars($row['email']) ?></td>
-                                    <td class="text-center">
-                                        <span class="badge <?= $roleClass ?>"><?= ucfirst(htmlspecialchars($row['role'])) ?></span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-success-subtle text-success">Aktif</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-info btn-sm">Detail</button>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td class="text-center"><input type="checkbox"></td>
+                                        <td class="text-center"><?= $no++ ?></td>
+                                        <td><strong><?= htmlspecialchars($row['nama'] ?? '') ?></strong></td>
+                                        <td><?= htmlspecialchars($row['email'] ?? '') ?></td>
+                                        <td class="text-center">
+                                            <span class="badge <?= $roleClass ?>"><?= ucfirst(htmlspecialchars($row['role'])) ?></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-info btn-sm">Detail</button>
+                                        </td>
+                                    </tr>
                                 <?php } ?>
                             </tbody>
                         </table>
@@ -92,7 +91,7 @@ $stmt = $userModel->readAll();
             </div>
 
         </div>
-        
+
         <!-- Modal Tambah Akun Staff -->
         <div class="modal fade" id="tambahStaffModal" tabindex="-1" aria-labelledby="tambahStaffModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -144,7 +143,7 @@ $stmt = $userModel->readAll();
                 </div>
             </div>
         </div>
-        
+
     </main>
 
     <footer>

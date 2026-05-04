@@ -1,9 +1,7 @@
 <?php
-require_once 'config/Database.php';
-require_once 'models/Barang.php';
-require_once 'models/Ruangan.php';
+// require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
 
 $id_ruangan = $_GET['id_ruangan'] ?? null;
@@ -12,7 +10,7 @@ if (!$id_ruangan) {
     die("Ruangan tidak valid (missing id_ruangan)");
 }
 
-$ruanganModel = new Ruangan($db);
+$ruanganModel = new \App\Models\Ruangan($db);
 $ruangan = $ruanganModel->getById($id_ruangan);
 
 if (!$ruangan) {
@@ -21,7 +19,7 @@ if (!$ruangan) {
 
 $roomName = $ruangan['nama_ruangan'];
 
-$barangModel = new Barang($db);
+$barangModel = new \App\Models\Barang($db);
 $barangList = $barangModel->getByRuangan($id_ruangan);
 ?>
 

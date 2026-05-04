@@ -1,11 +1,10 @@
 <?php
 session_start();
-require_once '../config/Database.php';
-require_once '../models/Ruangan.php';
+require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
-$ruangan = new Ruangan($db);
+$ruangan = new \App\Models\Ruangan($db);
 
 $action = $_GET['action'] ?? '';
 
@@ -69,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action == 'create') {
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
-        $ruangan->tipe_ruangan = $tipe;
+        $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
         $ruangan->id_pengguna = $_SESSION['user']["id"] ?? null;
 
         $upload = uploadFoto($_FILES['foto_ruangan']);
@@ -90,10 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ================= UPDATE =================
     elseif ($action == 'update') {
+
         $ruangan->id_ruangan = $_POST['id_ruangan'];
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
-        $ruangan->tipe_ruangan = $tipe;
+        $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
         $ruangan->id_pengguna = $_SESSION['user']['id'] ?? null;
 
         if (!empty($_FILES['foto_ruangan']['name'])) {

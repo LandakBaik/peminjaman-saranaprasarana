@@ -1,10 +1,9 @@
 <?php
-require_once 'config/Database.php';
-require_once __DIR__ . '/../../models/Peminjaman.php';
+// require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
-$peminjaman = new Peminjaman($db);
+$peminjaman = new \App\Models\Peminjaman($db);
 $userId = $_SESSION['user']['id'] ?? 0;
 $stmt = $peminjaman->readByUser($userId);
 ?>

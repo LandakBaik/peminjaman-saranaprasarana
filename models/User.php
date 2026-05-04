@@ -1,4 +1,6 @@
 <?php
+namespace App\Models;
+
 class User
 {
     private $conn;
@@ -27,7 +29,7 @@ class User
         $stmt->bindParam(":email", $email);
         $stmt->execute();
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($row) {
 
@@ -126,7 +128,7 @@ class User
         $stmt->bindParam(":token", $token);
         $stmt->execute();
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
     public function updatePasswordByEmail($email, $password)
     {

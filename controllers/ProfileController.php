@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once '../config/Database.php';
+require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
 
 $userId = $_SESSION['user']['id'] ?? 0;

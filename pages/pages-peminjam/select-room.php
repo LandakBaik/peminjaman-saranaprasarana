@@ -1,11 +1,10 @@
 <?php
-require_once 'config/Database.php';
-require_once 'models/Ruangan.php';
+// require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
 
-$ruanganModel = new Ruangan($db);
+$ruanganModel = new \App\Models\Ruangan($db);
 $stmt = $ruanganModel->readAll();
 ?>
 

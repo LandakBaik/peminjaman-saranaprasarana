@@ -1,4 +1,6 @@
 <?php
+namespace App\Models;
+
 class Peminjaman
 {
     private $conn;
@@ -128,7 +130,7 @@ class Peminjaman
         $stmt->bindParam(":id_ruangan", $this->id_ruangan);
         $stmt->execute();
 
-        $barangList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $barangList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($barangList as $b) {
             $this->insertDetail($b['id_barang'], 1);

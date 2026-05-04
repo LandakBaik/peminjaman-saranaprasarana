@@ -1,8 +1,8 @@
 <?php
-require_once 'config/Database.php';
+// require_once 'config/Autoload.php';
 
 // koneksi database
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
 
 // ambil id user dari session

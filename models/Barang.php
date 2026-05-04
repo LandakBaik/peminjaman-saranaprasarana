@@ -1,4 +1,6 @@
 <?php
+namespace App\Models;
+
 class Barang
 {
     private $conn;
@@ -126,6 +128,6 @@ class Barang
         $stmt->bindParam(":id_ruangan", $id_ruangan);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

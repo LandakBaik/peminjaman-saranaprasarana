@@ -3,6 +3,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+require 'config/Autoloader.php';
 require 'middleware/auth.php';
 require 'middleware/role.php';
 

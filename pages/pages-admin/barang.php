@@ -1,13 +1,11 @@
 <?php
-require_once 'config/Database.php';
-require_once 'models/Barang.php';
-require_once 'models/Ruangan.php';
+// require_once '../../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
-$barang = new Barang($db);
+$barang = new \App\Models\Barang($db);
 $stmt = $barang->readAll();
-$ruangan = new Ruangan($db);
+$ruangan = new \App\Models\Ruangan($db);
 $ruanganStmt = $ruangan->readAll();
 
 $ruanganData = [];
@@ -75,7 +73,7 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
                                             <small class="text-muted"><?= htmlspecialchars($row['deskripsi_barang']) ?></small>
                                         </td>
 
-                                        <td class="text-center"><?= htmlspecialchars($row['id_ruangan']) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($row['nama_ruangan']) ?></td>
 
                                         <td class="text-center"><?= $row['total_stok'] ?></td>
                                         <td class="text-center"><?= $row['stok_rusak'] ?></td>
@@ -89,7 +87,7 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
                                         </td>
 
                                         <td class="text-center">
-                                            <button class="btn btn-sm bg-info-subtle text-info"
+                                            <button class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editBarangModal"
                                                 onclick='fillEditForm(<?= json_encode($row) ?>)'>
@@ -97,12 +95,66 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
                                             </button>
 
                                             <a href="controllers/BarangController.php?action=delete&id_barang=<?= $row['id_barang'] ?>"
-                                                class="btn btn-sm bg-danger-subtle text-danger"
+                                                class="btn btn-danger btn-sm"
                                                 onclick="return confirm('Yakin ingin menghapus?')">
                                                 Hapus
                                             </a>
                                         </td>
                                     </tr>
+                                    <!-- Modal Edit Barang -->
+                                    <div class="modal fade" id="editBarangModal" tabindex="-1" aria-labelledby="editBarangModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content p-2">
+                                                <div class="modal-header border-0 pb-0">
+                                                    <h4 class="modal-title text-dark fw-bold" id="editBarangModalLabel">Edit Barang</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="controllers/BarangController.php?action=update" method="POST">
+
+                                                        <input type="hidden" name="id_barang" id="edit_id_barang">
+
+                                                        <div class="mb-3">
+                                                            <label>Nama Barang</label>
+                                                            <input type="text" class="form-control" name="nama_barang" id="edit_nama_barang" required>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label>Deskripsi</label>
+                                                            <textarea class="form-control" name="deskripsi_barang" id="edit_deskripsi"></textarea>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label>Nama Ruangan</label>
+                                                        </div>
+                                                        <select class="form-control" name="id_ruangan" id="edit_id_ruangan" required>
+                                                            <option value="">-- Pilih Ruangan --</option>
+                                                            <?php foreach ($ruanganData as $r) { ?>
+                                                                <option value="<?= $r['id_ruangan'] ?>">
+                                                                    <?= htmlspecialchars($r['nama_ruangan']) ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
+                                                        <div class="mb-3">
+                                                            <label>Total Stok</label>
+                                                            <input type="number" class="form-control" name="total_stok" id="edit_total_stok" required>
+                                                        </div>
+
+                                                        <div class="mb-4">
+                                                            <label>Stok Rusak</label>
+                                                            <input type="number" class="form-control" name="stok_rusak" id="edit_stok_rusak">
+                                                        </div>
+
+                                                        <div class="d-flex justify-content-end">
+                                                            <button type="button" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                        </div>
+
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php } ?>
                             </tbody>
                         </table>
@@ -165,61 +217,6 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
                             <div class="d-flex justify-content-end">
                                 <button type="button" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Batal</button>
                                 <button type="submit" class="btn btn-primary">Kirim</button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Edit Barang -->
-        <div class="modal fade" id="editBarangModal" tabindex="-1" aria-labelledby="editBarangModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content p-2">
-                    <div class="modal-header border-0 pb-0">
-                        <h4 class="modal-title text-dark fw-bold" id="editBarangModalLabel">Edit Barang</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form action="controllers/BarangController.php?action=update" method="POST">
-
-                            <input type="hidden" name="id_barang" id="edit_id_barang">
-
-                            <div class="mb-3">
-                                <label>Nama Barang</label>
-                                <input type="text" class="form-control" name="nama_barang" id="edit_nama_barang" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Deskripsi</label>
-                                <textarea class="form-control" name="deskripsi_barang" id="edit_deskripsi"></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Nama Ruangan</label>
-                            </div>
-                            <select class="form-control" name="id_ruangan" id="edit_id_ruangan" required>
-                                <option value="">-- Pilih Ruangan --</option>
-                                <?php foreach ($ruanganData as $r) { ?>
-                                    <option value="<?= $r['id_ruangan'] ?>">
-                                        <?= htmlspecialchars($r['nama_ruangan']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-
-                            <div class="mb-3">
-                                <label>Total Stok</label>
-                                <input type="number" class="form-control" name="total_stok" id="edit_total_stok" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label>Stok Rusak</label>
-                                <input type="number" class="form-control" name="stok_rusak" id="edit_stok_rusak">
-                            </div>
-
-                            <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
                             </div>
 
                         </form>

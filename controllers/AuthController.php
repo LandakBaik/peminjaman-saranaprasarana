@@ -1,11 +1,10 @@
 <?php
 session_start();
-require_once '../config/Database.php';
-require_once '../models/User.php';
+require_once '../config/Autoloader.php';
 
-$database = new Database();
+$database = new \App\Config\Database();
 $db = $database->getConnection();
-$user = new User($db);
+$user = new \App\Models\User($db);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
