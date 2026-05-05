@@ -1,6 +1,7 @@
 <?php
 // require_once '../config/Autoloader.php';
 // hallo dunia
+// hallo dunia dua
 $database = new \App\Config\Database();
 $db = $database->getConnection();
 
