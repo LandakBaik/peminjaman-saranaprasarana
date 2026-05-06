@@ -14,21 +14,21 @@ $profil = $_SESSION['profil'] ?? [];
 
                         <!-- FOTO -->
                         <img src="<?= !empty($profil['foto_profil']) 
-                            ? 'uploads/' . $profil['foto_profil'] 
+                            ? 'uploads/' . htmlspecialchars($profil['foto_profil']) 
                             : 'img/profile.jpg'; ?>" 
                             class="rounded-3" width="115" height="115" style="object-fit:cover;">
 
                         <div>
                             <h3 class="mb-1 fw-semibold">
-                                <?= $profil['nama_panggilan'] ?? $_SESSION['user']['nama'] ?? 'User'; ?>
+                                <?= htmlspecialchars($profil['nama_panggilan'] ?? $_SESSION['user']['nama'] ?? 'User'); ?>
                             </h3>
 
                             <p class="text-muted mb-4">
-                                <?= $_SESSION['user']['role'] ?? '-'; ?>
+                                <?= htmlspecialchars($_SESSION['user']['role'] ?? '-'); ?>
                             </p>
 
                             <p class="text-secondary mb-0">
-                                <?= $_SESSION['user']['email'] ?? '-'; ?>
+                                <?= htmlspecialchars($_SESSION['user']['email'] ?? '-'); ?>
                             </p>
                         </div>
                     </div>
@@ -47,28 +47,28 @@ $profil = $_SESSION['profil'] ?? [];
                         <div class="col-md-6">
                             <label class="form-label text-muted">Nama Lengkap</label>
                             <input type="text" class="form-control"
-                                value="<?= $_SESSION['user']['nama'] ?? '' ?>" disabled>
+                                value="<?= htmlspecialchars($_SESSION['user']['nama'] ?? '') ?>" disabled>
                         </div>
 
                         <!-- Nama Panggilan -->
                         <div class="col-md-6">
                             <label class="form-label text-muted">Nama Panggilan</label>
                             <input type="text" name="nama_panggilan" class="form-control"
-                                value="<?= $profil['nama_panggilan'] ?? '' ?>">
+                                value="<?= htmlspecialchars($profil['nama_panggilan'] ?? '') ?>" required>
                         </div>
 
                         <!-- Nomor Telepon -->
                         <div class="col-md-6">
                             <label class="form-label text-muted">Nomor Telepon</label>
                             <input type="text" name="nomor_telepon" class="form-control"
-                                value="<?= $profil['nomor_telepon'] ?? '' ?>">
+                                value="<?= htmlspecialchars($profil['nomor_telepon'] ?? '') ?>" required>
                         </div>
 
                         <!-- Tanggal Lahir -->
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Tahun, Bulan, Tanggal Lahir</label>
+                            <label class="form-label text-muted">Tanggal Lahir</label>
                             <input type="date" name="tanggal_lahir" class="form-control"
-                                value="<?= $profil['tanggal_lahir'] ?? '' ?>">
+                                value="<?= !empty($profil['tanggal_lahir']) ? htmlspecialchars($profil['tanggal_lahir']) : '' ?>">
                         </div>
 
                         <!-- Jenis Kelamin -->
@@ -79,14 +79,14 @@ $profil = $_SESSION['profil'] ?? [];
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" 
                                            name="jenis_kelamin" value="Laki-laki"
-                                           <?= ($profil['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' ?>>
+                                           <?= (($profil['jenis_kelamin'] ?? '') === 'Laki-laki') ? 'checked' : '' ?> required>
                                     <label class="form-check-label">Laki-Laki</label>
                                 </div>
 
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" 
                                            name="jenis_kelamin" value="Perempuan"
-                                           <?= ($profil['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' ?>>
+                                           <?= (($profil['jenis_kelamin'] ?? '') === 'Perempuan') ? 'checked' : '' ?>>
                                     <label class="form-check-label">Perempuan</label>
                                 </div>
 
@@ -96,7 +96,7 @@ $profil = $_SESSION['profil'] ?? [];
                         <!-- Upload Foto -->
                         <div class="col-12">
                             <label class="form-label text-muted">Foto Profil</label>
-                            <input type="file" name="foto_profil" class="form-control">
+                            <input type="file" name="foto_profil" class="form-control" accept="image/*">
                         </div>
 
                     </div>

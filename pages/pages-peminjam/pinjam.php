@@ -95,7 +95,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                     <div class="col-md-6">
                                         <label class="form-label">Nama</label>
                                         <input type="text" class="form-control"
-                                            value="<?= $_SESSION['user']['nama'] ?? '' ?>" readonly>
+                                            value="<?= $_SESSION['user']['nama'] ?? '' ?>" disabled>
                                     </div>
 
                                     <div class="col-md-6">
@@ -171,7 +171,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <!-- CATATAN -->
                                 <div class="mb-3">
                                     <label>Catatan</label>
-                                    <textarea class="form-control" name="catatan"></textarea>
+                                    <textarea class="form-control" name="catatan" style="height: 115px;"></textarea>
                                 </div>
 
                             </div>
@@ -184,7 +184,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                     <div>
                                         <img src="<?= $ruangan['foto_ruangan'] ?>"
                                             class="img-fluid rounded shadow-sm"
-                                            style="max-height: auto; object-fit: cover;"
+                                            style="max-height: 337.5px; object-fit: cover;"
                                             alt="Foto Ruangan">
                                     </div>
                                 </div>
@@ -197,6 +197,12 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <button type="submit" class="btn btn-primary w-100">
                                     Kirim
                                 </button>
+                            </div>
+
+                            <div style="margin-top: 5px;">
+                                <span class="text-muted small">
+                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                </span>
                             </div>
 
                         </form>
