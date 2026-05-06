@@ -60,7 +60,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                     <div id="calendarDates" class="calendar-grid"></div>
                 </div>
 
-                <!-- ================= MODAL ================= -->
+                <!--  MODAL  -->
                 <div id="loanModal" class="modal">
                     <div class="modal-content large-modal">
                         <span class="close">&times;</span>
@@ -182,9 +182,9 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <div class="mb-3 text-center">
                                     <label class="form-label fw-bold">Foto Ruangan</label>
                                     <div>
-                                        <img src="uploads/ruangan/<?= $ruangan['foto_ruangan'] ?>"
+                                        <img src="<?= $ruangan['foto_ruangan'] ?>"
                                             class="img-fluid rounded shadow-sm"
-                                            style="max-height: 180px; object-fit: cover;"
+                                            style="max-height: auto; object-fit: cover;"
                                             alt="Foto Ruangan">
                                     </div>
                                 </div>

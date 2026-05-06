@@ -70,14 +70,12 @@ $stmt = $ruangan->readAll();
                                                 class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editRuanganModal"
-                                                onclick="
-                                                    document.getElementById('edit_id').value='<?= $row['id_ruangan'] ?>';
-                                                    document.getElementById('edit_nama').value='<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>';
-                                                    document.getElementById('edit_kapasitas').value='<?= $row['kapasitas'] ?>';
-                                                    document.getElementById('edit_tipe').value='<?= $row['tipe_ruangan'] ?>';
-                                                    document.getElementById('edit_foto_lama').value='<?= $row['foto_ruangan'] ?>';
-                                                    document.getElementById('edit_preview').src='<?= $row['foto_ruangan'] ?>';
-                                                ">
+
+                                                data-id="<?= $row['id_ruangan'] ?>"
+                                                data-nama="<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>"
+                                                data-kapasitas="<?= $row['kapasitas'] ?>"
+                                                data-tipe="<?= $row['tipe_ruangan'] ?>"
+                                                data-foto="<?= $row['foto_ruangan'] ?>">
                                                 Edit
                                             </button>
                                             <a href="controllers/RuanganController.php?action=delete&id_ruangan=<?= $row['id_ruangan'] ?>"
@@ -261,7 +259,37 @@ $stmt = $ruangan->readAll();
                 </div>
             </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
 
+                const modal = document.getElementById('editRuanganModal');
+
+                modal.addEventListener('show.bs.modal', function(event) {
+
+                    let button = event.relatedTarget;
+
+                    let id = button.getAttribute('data-id');
+                    let nama = button.getAttribute('data-nama');
+                    let kapasitas = button.getAttribute('data-kapasitas');
+                    let tipe = button.getAttribute('data-tipe');
+                    let foto = button.getAttribute('data-foto');
+
+                    // isi form
+                    document.getElementById('edit_id').value = id;
+                    document.getElementById('edit_nama').value = nama;
+                    document.getElementById('edit_kapasitas').value = kapasitas;
+
+                    // Select tipe
+                    tipe = tipe.trim().toLowerCase();
+                    document.getElementById('edit_tipe').value = tipe;
+
+                    // preview foto
+                    document.getElementById('edit_preview').src = foto;
+                    document.getElementById('edit_foto_lama').value = foto;
+                });
+
+            });
+        </script>
     </main>
 
     <footer>

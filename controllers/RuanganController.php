@@ -59,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $allowedTipe = ['laboratorium', 'non-laboratorium'];
     $tipe = $_POST['tipe_ruangan'] ?? '';
 
+    if (empty($tipe)) {
+        $tipe = $_POST['tipe_lama'];
+    }
+
     if (!in_array($tipe, $allowedTipe)) {
         header("Location: ../index.php?page=ruangan&error=invalid_tipe");
         exit();
