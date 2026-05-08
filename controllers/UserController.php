@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user->role = 'staff';
 
         if ($user->register()) {
-            header("Location: ../index.php?page=akun-staff&success=added");
+            header("Location: ../index.php?page=daftar-akun&success=added");
         } else {
-            header("Location: ../index.php?page=akun-staff&error=add_failed");
+            header("Location: ../index.php?page=daftar-akun&error=add_failed");
         }
         exit();
     }

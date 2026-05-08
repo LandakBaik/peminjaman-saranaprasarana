@@ -43,7 +43,7 @@ $stmt = $ruangan->readAll();
                                     <th>Nama Ruangan</th>
                                     <th>Kapasitas</th>
                                     <th>Tipe</th>
-                                    <th>Foto</th>
+                                    <th>Tanggal Dibuat</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -63,19 +63,18 @@ $stmt = $ruangan->readAll();
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <img src="<?= $row['foto_ruangan'] ?>" width="60" class="rounded">
+                                            <?= date('d M Y', strtotime($row['tanggal_dibuat'])) ?>
                                         </td>
                                         <td class="text-center">
                                             <button
                                                 class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editRuanganModal"
-
                                                 data-id="<?= $row['id_ruangan'] ?>"
                                                 data-nama="<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>"
                                                 data-kapasitas="<?= $row['kapasitas'] ?>"
                                                 data-tipe="<?= $row['tipe_ruangan'] ?>"
-                                                data-foto="<?= $row['foto_ruangan'] ?>">
+                                                data-foto="<?= htmlspecialchars($row['foto_ruangan'] ?? '', ENT_QUOTES) ?>">
                                                 Edit
                                             </button>
                                             <a href="controllers/RuanganController.php?action=delete&id_ruangan=<?= $row['id_ruangan'] ?>"
@@ -155,20 +154,33 @@ $stmt = $ruangan->readAll();
 
                                 <!-- Right (Upload) -->
                                 <div class="col-md-5">
-                                    <label class="form-label">Foto Ruangan</label>
+                                    <label class="form-label">Upload Foto Ruangan</label>
 
-                                    <div class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3"
+                                    <div id="uploadBox"
+                                        class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3 overflow-hidden"
                                         style="min-height: 250px; cursor: pointer;"
                                         onclick="document.getElementById('fotoInput').click();">
 
-                                        <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                        <span class="text-muted">Klik untuk upload</span>
+                                        <!-- Placeholder -->
+                                        <div id="uploadPlaceholder"
+                                            class="d-flex flex-column align-items-center object-fit: contain; justify-content-center">
 
-                                        <input type="file" name="foto_ruangan" id="fotoInput" class="d-none" required>
+                                            <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                            <span class="text-muted">Klik untuk upload</span>
+                                        </div>
+
+                                        <!-- Input -->
+                                        <input type="file"
+                                            name="foto_ruangan"
+                                            id="fotoInput"
+                                            class="d-none"
+                                            accept="image/*">
+
+                                        <!-- Preview -->
+                                        <img id="previewImg"
+                                            class="w-100 rounded d-none mt-2"
+                                            style="height: auto; object-fit: contain;">
                                     </div>
-
-                                    <!-- Preview -->
-                                    <img id="previewImg" class="mt-2 w-100 d-none rounded" />
                                 </div>
 
                             </div>
@@ -233,14 +245,35 @@ $stmt = $ruangan->readAll();
                                 </select>
                             </div>
 
-                            <!-- Preview -->
+                            <!-- Upload Foto Edit -->
                             <div class="mb-3">
-                                <img id="edit_preview" width="120">
-                            </div>
+                                <label class="form-label">Ganti Foto</label>
 
-                            <div class="mb-3">
-                                <label>Ganti Foto (opsional)</label>
-                                <input type="file" name="foto_ruangan" class="form-control">
+                                <div id="editUploadBox"
+                                    class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3 overflow-hidden"
+                                    style="min-height: 180px; cursor: pointer;"
+                                    onclick="document.getElementById('edit_foto_input').click();">
+
+                                    <!-- Placeholder -->
+                                    <div id="editUploadPlaceholder"
+                                        class="d-flex flex-column align-items-center justify-content-center">
+
+                                        <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                        <span class="text-muted">Klik untuk upload</span>
+                                    </div>
+
+                                    <!-- Input -->
+                                    <input type="file"
+                                        name="foto_ruangan"
+                                        id="edit_foto_input"
+                                        class="d-none"
+                                        accept="image/*">
+
+                                    <!-- Preview -->
+                                    <img id="edit_preview"
+                                        class="w-100 rounded d-none mt-2"
+                                        style="height: auto; object-fit: contain;">
+                                </div>
                             </div>
 
                             <!-- Footer -->
@@ -260,6 +293,75 @@ $stmt = $ruangan->readAll();
             </div>
         </div>
         <script>
+            // PREVIEW FOTO TAMBAH RUANGAN
+            const fotoInput = document.getElementById('fotoInput');
+            const previewImg = document.getElementById('previewImg');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+            fotoInput.addEventListener('change', function(e) {
+
+                const file = e.target.files[0];
+
+                if (file) {
+
+                    // Validasi gambar
+                    if (!file.type.startsWith('image/')) {
+                        alert('File harus berupa gambar!');
+                        fotoInput.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+
+                        // tampilkan gambar
+                        previewImg.src = event.target.result;
+                        previewImg.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        uploadPlaceholder.classList.add('d-none');
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // PREVIEW FOTO EDIT
+            const editFotoInput = document.getElementById('edit_foto_input');
+            const editPreview = document.getElementById('edit_preview');
+            const editPlaceholder = document.getElementById('editUploadPlaceholder');
+
+            editFotoInput.addEventListener('change', function(e) {
+
+                const file = e.target.files[0];
+
+                if (file) {
+
+                    // validasi gambar
+                    if (!file.type.startsWith('image/')) {
+                        alert('File harus berupa gambar!');
+                        editFotoInput.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+
+                        // tampilkan preview baru
+                        editPreview.src = event.target.result;
+                        editPreview.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        editPlaceholder.classList.add('d-none');
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // MODAL EDIT
             document.addEventListener("DOMContentLoaded", function() {
 
                 const modal = document.getElementById('editRuanganModal');
@@ -284,8 +386,28 @@ $stmt = $ruangan->readAll();
                     document.getElementById('edit_tipe').value = tipe;
 
                     // preview foto
-                    document.getElementById('edit_preview').src = foto;
-                    document.getElementById('edit_foto_lama').value = foto;
+                    // preview foto lama
+                    const editPreview = document.getElementById('edit_preview');
+                    const editPlaceholder = document.getElementById('editUploadPlaceholder');
+
+                    if (foto && foto.trim() !== '') {
+
+                        // tampilkan preview
+                        editPreview.src = foto;
+                        editPreview.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        editPlaceholder.classList.add('d-none');
+
+                    } else {
+
+                        // reset preview
+                        editPreview.src = '';
+                        editPreview.classList.add('d-none');
+
+                        // tampilkan placeholder
+                        editPlaceholder.classList.remove('d-none');
+                    }
                 });
 
             });

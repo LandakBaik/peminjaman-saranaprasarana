@@ -33,7 +33,7 @@ function uploadFoto($file)
         return false;
     }
 
-    // cek MIME asli (lebih aman)
+    // cek MIME asli
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime = finfo_file($finfo, $file["tmp_name"]);
     finfo_close($finfo);
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipe = $_POST['tipe_ruangan'] ?? '';
 
     if (empty($tipe)) {
-        $tipe = $_POST['tipe_lama'];
+        $tipe = $_POST['tipe_lama'] ?? '';
     }
 
     if (!in_array($tipe, $allowedTipe)) {
@@ -70,24 +70,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ================= CREATE =================
     if ($action == 'create') {
+
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
         $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
         $ruangan->id_pengguna = $_SESSION['user']["id"] ?? null;
 
-        $upload = uploadFoto($_FILES['foto_ruangan']);
-        if (!$upload) {
-            header("Location: ../index.php?page=ruangan&error=upload_failed");
-            exit();
-        }
+        // FOTO OPSIONAL
+        if (!empty($_FILES['foto_ruangan']['name'])) {
 
-        $ruangan->foto_ruangan = $upload;
+            $upload = uploadFoto($_FILES['foto_ruangan']);
+
+            if (!$upload) {
+                header("Location: ../index.php?page=ruangan&error=upload_failed");
+                exit();
+            }
+
+            $ruangan->foto_ruangan = $upload;
+
+        } else {
+
+            // jika kosong
+            $ruangan->foto_ruangan = null;
+        }
 
         if ($ruangan->create()) {
             header("Location: ../index.php?page=ruangan&success=added");
         } else {
             header("Location: ../index.php?page=ruangan&error=add_failed");
         }
+
         exit();
     }
 
@@ -100,22 +112,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
         $ruangan->id_pengguna = $_SESSION['user']['id'] ?? null;
 
+        // jika upload foto baru
         if (!empty($_FILES['foto_ruangan']['name'])) {
 
-            // hapus foto lama
-            if (!empty($_POST['foto_lama']) && file_exists("../" . $_POST['foto_lama'])) {
+            // hapus foto lama jika ada
+            if (
+                !empty($_POST['foto_lama']) &&
+                file_exists("../" . $_POST['foto_lama'])
+            ) {
                 unlink("../" . $_POST['foto_lama']);
             }
 
             $upload = uploadFoto($_FILES['foto_ruangan']);
+
             if (!$upload) {
                 header("Location: ../index.php?page=ruangan&error=upload_failed");
                 exit();
             }
 
             $ruangan->foto_ruangan = $upload;
+
         } else {
-            $ruangan->foto_ruangan = $_POST['foto_lama'];
+
+            // pakai foto lama
+            $ruangan->foto_ruangan = $_POST['foto_lama'] ?? null;
         }
 
         if ($ruangan->update()) {
@@ -123,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             header("Location: ../index.php?page=ruangan&error=update_failed");
         }
+
         exit();
     }
 }
@@ -132,10 +153,15 @@ elseif ($action == 'delete') {
 
     $ruangan->id_ruangan = $_GET['id_ruangan'];
 
-    // ambil data dulu untuk hapus file
+    // ambil data dulu
     $data = $ruangan->getById($ruangan->id_ruangan);
 
-    if ($data && file_exists("../" . $data['foto_ruangan'])) {
+    // hapus file jika ada
+    if (
+        $data &&
+        !empty($data['foto_ruangan']) &&
+        file_exists("../" . $data['foto_ruangan'])
+    ) {
         unlink("../" . $data['foto_ruangan']);
     }
 
@@ -144,5 +170,6 @@ elseif ($action == 'delete') {
     } else {
         header("Location: ../index.php?page=ruangan&error=delete_failed");
     }
+
     exit();
 }

@@ -43,9 +43,9 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
                 <?php endif; ?>
 
                 <?php if (in_array($role, ['admin'])) : ?>
-                <a class="nav-link" href="index.php?page=akun-staff">
+                <a class="nav-link" href="index.php?page=daftar-akun">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
-                    Akun Staff
+                    Daftar Akun
                 </a>
                 <?php endif; ?>
 

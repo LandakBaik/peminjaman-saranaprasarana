@@ -2,9 +2,9 @@
     <main id="dashboard">
         <div class="container-fluid px-4">
 
-            <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mt-4 mb-0">
                 <div>
-                    <h1 class="m-0">Dashboard</h1>
+                    <h1 class="mb-3">Dashboard</h1>
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item active">Dashboard Overview (Mode Dummy)</li>
                     </ol>
@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            <div class="row g-3 my-5">
+            <div class="row g-3 my-4 mt-0">
                 <!-- Total -->
                 <div class="col-xl-3 col-md-6">
                     <div class="card border-1 shadow-sm">

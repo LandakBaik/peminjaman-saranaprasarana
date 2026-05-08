@@ -3,9 +3,7 @@
         <div class="d-flex align-items-center justify-content-between small">
             <div class="text-muted">Copyright &copy; Pinjam JTI 2026</div>
             <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
+                <a href="#" class="text-decoration-none text-primary">Ketentuan Pengguna</a>
             </div>
         </div>
     </div>

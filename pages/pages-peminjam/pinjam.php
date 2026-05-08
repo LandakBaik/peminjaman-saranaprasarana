@@ -182,16 +182,23 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <div class="mb-3 text-center">
                                     <label class="form-label fw-bold">Foto Ruangan</label>
                                     <div>
-                                        <img src="<?= $ruangan['foto_ruangan'] ?>"
+                                        <img src="<?= !empty($ruangan['foto_ruangan']) ? $ruangan['foto_ruangan'] : 'assets/img/error-404-monochrome.svg' ?>"
                                             class="img-fluid rounded shadow-sm"
-                                            style="max-height: 337.5px; object-fit: cover;"
-                                            alt="Foto Ruangan">
+                                            style="max-height: 330px; object-fit: cover;">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label>Jaminan</label>
-                                    <input type="file" name="jaminan" class="form-control">
+                                    <label class="form-label fw-bold">Jaminan</label>
+
+                                    <input type="file"
+                                        name="jaminan"
+                                        class="form-control"
+                                        required>
+
+                                    <div class="invalid-feedback">
+                                        Foto jaminan wajib diisi.
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-100">

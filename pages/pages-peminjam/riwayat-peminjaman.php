@@ -179,5 +179,3 @@
         </div>
     </main>
 </div> 
-<!-- Script Filter -->
-<script src="js/filter.js"></script>
