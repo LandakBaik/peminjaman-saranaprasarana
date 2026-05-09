@@ -42,6 +42,9 @@ $page = $_GET['page'] ?? 'dashboard';
             case 'detail-profil-edit':
                 include 'pages/detail-profil-edit.php';
                 break;
+            case 'ketentuan':
+                include 'pages/ketentuan.php';
+                break;
             // Peminjam
             case 'select-room':
                 only(['user']);

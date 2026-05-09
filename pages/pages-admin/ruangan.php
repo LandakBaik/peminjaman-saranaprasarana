@@ -206,7 +206,7 @@ $stmt = $ruangan->readAll();
                             <!-- Footer -->
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
                                 <span class="text-muted small">
-                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                    Lihat <a href="index.php?page=ketentuan" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
 
                                 <div>
@@ -297,7 +297,7 @@ $stmt = $ruangan->readAll();
                             <!-- Footer -->
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
                                 <span class="text-muted small">
-                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                    Lihat <a href="index.php?page=ketentuan" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
 
                                 <div>

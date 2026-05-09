@@ -209,7 +209,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
 
                             <div style="margin-top: 5px;">
                                 <span class="text-muted small">
-                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                    Lihat <a href="index.php?page=ketentuan" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
                             </div>
 
