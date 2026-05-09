@@ -111,7 +111,6 @@ class Ruangan
             return false;
         }
 
-        // Membuat placeholders (?,?,?) sesuai jumlah elemen array
         $placeholders = implode(',', array_fill(0, count($ruangan_ids), '?'));
         
         $query = "UPDATE " . $this->table_name . " 
@@ -120,10 +119,8 @@ class Ruangan
 
         $stmt = $this->conn->prepare($query);
         
-        // Bind parameter id_pengguna ke tanda tanya pertama
         $stmt->bindValue(1, $id_pengguna);
 
-        // Bind masing-masing id_ruangan ke tanda tanya selanjutnya
         foreach ($ruangan_ids as $index => $id_ruangan) {
             $stmt->bindValue($index + 2, $id_ruangan);
         }
