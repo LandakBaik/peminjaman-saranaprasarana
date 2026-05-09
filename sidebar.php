@@ -58,7 +58,7 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
                 <?php endif; ?>
 
                 <?php if (in_array($role, ['staff'])) : ?>
-                <a class="nav-link" href="index.php?page=approve-peminjaman">
+                <a class="nav-link" href="index.php?page=pengembalian">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-rotate-left"></i></div>
                     Pengembalian
                 </a>

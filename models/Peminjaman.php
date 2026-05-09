@@ -208,4 +208,19 @@ class Peminjaman
 
         return $stmt->execute();
     }
+
+    // 🔹 UPDATE STATUS ONLY
+    public function updateStatusOnly()
+    {
+        $query = "UPDATE peminjaman 
+                  SET status=:status 
+                  WHERE id_peminjaman = :id_peminjaman";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+
+        return $stmt->execute();
+    }
 }

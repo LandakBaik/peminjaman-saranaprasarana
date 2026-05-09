@@ -101,5 +101,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit();
     }
+
+    // 🔥 AJUKAN PENGEMBALIAN (USER)
+    elseif ($action == 'ajukan_pengembalian') {
+        if (!isset($_SESSION['user'])) {
+            die("Unauthorized");
+        }
+
+        $peminjaman->id_peminjaman = $_POST['id_peminjaman'];
+        $peminjaman->status = 'Pengembalian';
+
+        if ($peminjaman->updateStatusOnly()) {
+            header("Location: ../index.php?page=peminjaman-saya&success=pengembalian");
+        } else {
+            header("Location: ../index.php?page=peminjaman-saya&error=failed");
+        }
+        exit();
+    }
+
+    // 🔥 VERIFIKASI PENGEMBALIAN (STAFF)
+    elseif ($action == 'verifikasi_pengembalian') {
+        if (!isset($_SESSION['user'])) {
+            die("Unauthorized");
+        }
+
+        $peminjaman->id_peminjaman = $_POST['id_peminjaman'];
+        $peminjaman->status = 'Selesai';
+
+        if ($peminjaman->updateStatusOnly()) {
+            header("Location: ../index.php?page=pengembalian&success=updated");
+        } else {
+            header("Location: ../index.php?page=pengembalian&error=failed");
+        }
+        exit();
+    }
 }
 ?>

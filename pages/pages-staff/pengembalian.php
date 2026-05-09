@@ -9,19 +9,17 @@ $peminjaman = new \App\Models\Peminjaman($db);
 $userId = $_SESSION['user']['id'] ?? 0;
 $stmt = $peminjaman->readByStaff($userId);
 
-
-
 ?>
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
 
             <!-- Title -->
-            <h1 class="mt-4">Persetujuan Peminjaman</h1>
+            <h1 class="mt-4">Verifikasi Pengembalian</h1>
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Kelola pengajuan peminjaman untuk ruangan Anda</span>
+                <span class="text-muted">Kelola verifikasi pengembalian untuk ruangan Anda</span>
             </div>
 
             <!-- Card -->
@@ -55,11 +53,14 @@ $stmt = $peminjaman->readByStaff($userId);
                             <tbody>
                                 <?php
                                 $no = 1;
+                                $ada_data = false;
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $statusClass = 'bg-primary-subtle text-primary';
-                                    if (strtolower($row['status']) == 'approved' || strtolower($row['status']) == 'disetujui') $statusClass = 'bg-success-subtle text-success';
-                                    if (strtolower($row['status']) == 'rejected' || strtolower($row['status']) == 'ditolak') $statusClass = 'bg-danger-subtle text-danger';
-                                    if (strtolower($row['status']) == 'returned' || strtolower($row['status']) == 'dikembalikan') $statusClass = 'bg-secondary-subtle text-secondary';
+                                    if (strtolower($row['status']) != 'pengembalian' && strtolower($row['status']) != 'menunggu pengembalian') {
+                                        continue;
+                                    }
+                                    $ada_data = true;
+                                    
+                                    $statusClass = 'bg-warning-subtle text-warning';
 
                                     // Untuk peminjaman ruangan, biasanya jenisnya adalah ruangan
                                     $nama_tampil = $row['jenis_peminjaman'] == 'ruangan' ? $row['nama_ruangan'] : $row['nama_barang'];
@@ -85,26 +86,16 @@ $stmt = $peminjaman->readByStaff($userId);
                                         <?= htmlspecialchars(date('d M Y', strtotime($row['tanggal_dibuat']))) ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if (strtolower($row['status']) == 'pending'): ?>
-                                            <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="d-inline">
-                                                <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                                <input type="hidden" name="status" value="Disetujui">
-                                                <button type="submit" class="btn btn-success btn-sm mb-1" onclick="return confirm('Setujui peminjaman ini?')">Setuju</button>
-                                            </form>
-                                            <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="d-inline">
-                                                <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                                <input type="hidden" name="status" value="Ditolak">
-                                                <button type="submit" class="btn btn-danger btn-sm mb-1" onclick="return confirm('Tolak peminjaman ini?')">Tolak</button>
-                                            </form>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
+                                        <form action="controllers/PeminjamanController.php?action=verifikasi_pengembalian" method="POST" class="d-inline">
+                                            <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
+                                            <button type="submit" class="btn btn-primary btn-sm mb-1" onclick="return confirm('Verifikasi pengembalian ini?')">Verifikasi Pengembalian</button>
+                                        </form>
                                     </td>
                                 </tr>
                                 <?php } ?>
-                                <?php if ($stmt->rowCount() == 0): ?>
+                                <?php if (!$ada_data): ?>
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted py-3">Tidak ada pengajuan peminjaman untuk ruangan Anda.</td>
+                                    <td colspan="9" class="text-center text-muted py-3">Tidak ada pengajuan pengembalian untuk ruangan Anda.</td>
                                 </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -121,6 +112,3 @@ $stmt = $peminjaman->readByStaff($userId);
         <?php include 'footer.php'; ?>
     </footer>
 </div>
-<?
-
-?>
