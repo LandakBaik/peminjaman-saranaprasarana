@@ -206,7 +206,8 @@ $stmt = $userModel->readAll();
 
                                         <td class="text-center">
                                             <input type="checkbox"
-                                                class="row-checkbox">
+                                                class="row-checkbox"
+                                                value="<?= $row['id_user'] ?>">
                                         </td>
 
                                         <td class="text-center">

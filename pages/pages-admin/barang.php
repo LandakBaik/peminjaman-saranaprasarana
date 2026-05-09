@@ -22,21 +22,28 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-
                 <span class="text-muted">
                     Daftar barang yang tersedia
                 </span>
 
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#tambahBarangModal">
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-white border border-primary text-primary btn-sm"
+                        onclick="checkExport()">
+                        <i class="fas fa-download me-1"></i>
+                        Export
+                    </button>
 
-                    <i class="fas fa-plus me-1"></i>
-                    Tambah Barang
-                </button>
-
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#tambahBarangModal">
+                        <i class="fas fa-plus me-1"></i>
+                        Tambah Barang
+                    </button>
+                </div>
             </div>
 
             <!-- Card -->
@@ -200,7 +207,8 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
                                         <td class="text-center">
                                             <input
                                                 type="checkbox"
-                                                class="row-checkbox">
+                                                class="row-checkbox export-checkbox"
+                                                value="<?= $row['id_barang'] ?>">
                                         </td>
 
                                         <!-- No -->
@@ -508,6 +516,44 @@ while ($r = $ruanganStmt->fetch(PDO::FETCH_ASSOC)) {
             document.getElementById('edit_total_stok').value = data.total_stok;
             document.getElementById('edit_stok_rusak').value = data.stok_rusak;
         }
+
+        function checkExport() {
+
+            let checked = document.querySelectorAll(
+                '.export-checkbox:checked'
+            );
+
+            if (checked.length === 0) {
+
+                alert('Anda perlu memilih minimal 1 barang untuk membuat laporan.');
+
+                return;
+            }
+
+            let form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'controllers/BarangController.php?action=export';
+
+            checked.forEach(function(checkbox) {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id_barang[]';
+                input.value = checkbox.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => document.body.removeChild(form), 1000);
+        }
+
+        // Add Select All functionality
+        document.getElementById('selectAllBarang')?.addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.export-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
     </script>
 
     <footer>

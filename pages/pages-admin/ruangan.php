@@ -15,10 +15,28 @@ $stmt = $ruangan->readAll();
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Daftar ruangan yang tersedia</span>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahRuanganModal">
-                    <i class="fas fa-plus me-1"></i> Tambah Ruangan
-                </button>
+                <span class="text-muted">
+                    Daftar ruangan yang tersedia
+                </span>
+
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-white border border-primary text-primary btn-sm"
+                        onclick="checkExporRuangan()">
+                        <i class="fas fa-download me-1"></i>
+                        Export
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#tambahRuanganModal">
+                        <i class="fas fa-plus me-1"></i>
+                        Tambah Ruangan
+                    </button>
+                </div>
             </div>
 
             <!-- Card -->
@@ -38,7 +56,7 @@ $stmt = $ruangan->readAll();
                         <table class="table table-bordered align-middle">
                             <thead class="table-light">
                                 <tr class="text-center">
-                                    <th><input type="checkbox"></th>
+                                    <th><input type="checkbox" id="selectAllRuangan"></th>
                                     <th>No</th>
                                     <th>Nama Ruangan</th>
                                     <th>Kapasitas</th>
@@ -53,7 +71,7 @@ $stmt = $ruangan->readAll();
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 ?>
                                     <tr>
-                                        <td class="text-center"><input type="checkbox"></td>
+                                        <td class="text-center"><input type="checkbox" class="export-checkbox" value="<?= $row['id_ruangan'] ?>"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
                                         <td class="text-center"><?= htmlspecialchars($row['kapasitas']) ?></td>
@@ -293,6 +311,44 @@ $stmt = $ruangan->readAll();
             </div>
         </div>
         <script>
+            // Export Data Ruangan
+            function checkExporRuangan() {
+
+                let checked = document.querySelectorAll(
+                    '.export-checkbox:checked'
+                );
+
+                if (checked.length === 0) {
+
+                    alert('Anda perlu memilih minimal 1 ruangan untuk membuat laporan.');
+
+                    return;
+                }
+
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'controllers/RuanganController.php?action=export';
+
+                checked.forEach(function(checkbox) {
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'id_ruangan[]';
+                    input.value = checkbox.value;
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
+                setTimeout(() => document.body.removeChild(form), 1000);
+            }
+
+        // Add Select All functionality
+        document.getElementById('selectAllRuangan')?.addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.export-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
             // PREVIEW FOTO TAMBAH RUANGAN
             const fotoInput = document.getElementById('fotoInput');
             const previewImg = document.getElementById('previewImg');

@@ -130,4 +130,41 @@ class Barang
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getByIds($ids)
+    {
+        $inQuery = implode(',', array_fill(0, count($ids), '?'));
+        
+        $query = "SELECT 
+                b.*,
+                r.nama_ruangan,
+                COALESCE(SUM(
+                    CASE 
+                        WHEN p.status = 'dipinjam' THEN 1
+                        ELSE 0
+                    END
+                ), 0) AS dipinjam,
+                (b.total_stok - b.stok_rusak - COALESCE(SUM(
+                    CASE 
+                        WHEN p.status = 'dipinjam' THEN 1
+                        ELSE 0
+                    END
+                ), 0)) AS tersedia
+              FROM " . $this->table_name . " b
+              LEFT JOIN ruangan r 
+                ON b.id_ruangan = r.id_ruangan
+              LEFT JOIN detail_peminjaman dp 
+                ON dp.id_barang = b.id_barang
+              LEFT JOIN peminjaman p 
+                ON p.id_peminjaman = dp.id_peminjaman
+              WHERE b.id_barang IN ($inQuery)
+              GROUP BY b.id_barang";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($ids as $k => $id) {
+            $stmt->bindValue(($k+1), $id);
+        }
+        $stmt->execute();
+        return $stmt;
+    }
 }

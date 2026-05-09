@@ -56,20 +56,19 @@ function uploadFoto($file)
 // ================= REQUEST =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $allowedTipe = ['laboratorium', 'non-laboratorium'];
-    $tipe = $_POST['tipe_ruangan'] ?? '';
 
-    if (empty($tipe)) {
-        $tipe = $_POST['tipe_lama'] ?? '';
-    }
-
-    if (!in_array($tipe, $allowedTipe)) {
-        header("Location: ../index.php?page=ruangan&error=invalid_tipe");
-        exit();
-    }
 
     // ================= CREATE =================
     if ($action == 'create') {
+        $allowedTipe = ['laboratorium', 'non-laboratorium'];
+        $tipe = $_POST['tipe_ruangan'] ?? '';
+        if (empty($tipe)) {
+            $tipe = $_POST['tipe_lama'] ?? '';
+        }
+        if (!in_array($tipe, $allowedTipe)) {
+            header("Location: ../index.php?page=ruangan&error=invalid_tipe");
+            exit();
+        }
 
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
         $ruangan->kapasitas = $_POST['kapasitas'];
@@ -105,6 +104,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ================= UPDATE =================
     elseif ($action == 'update') {
+        $allowedTipe = ['laboratorium', 'non-laboratorium'];
+        $tipe = $_POST['tipe_ruangan'] ?? '';
+        if (empty($tipe)) {
+            $tipe = $_POST['tipe_lama'] ?? '';
+        }
+        if (!in_array($tipe, $allowedTipe)) {
+            header("Location: ../index.php?page=ruangan&error=invalid_tipe");
+            exit();
+        }
 
         $ruangan->id_ruangan = $_POST['id_ruangan'];
         $ruangan->nama_ruangan = $_POST['nama_ruangan'];
@@ -145,6 +153,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         exit();
+    }
+
+    // ================= EXPORT =================
+    elseif ($action == 'export') {
+        if (!empty($_POST['id_ruangan']) && is_array($_POST['id_ruangan'])) {
+            $ids = $_POST['id_ruangan'];
+            $stmt = $ruangan->getByIds($ids);
+
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Data_Ruangan.xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "<table border='1'>";
+            echo "<tr>";
+            echo "<th>Nama Ruangan</th>";
+            echo "<th>Kapasitas</th>";
+            echo "<th>Tipe</th>";
+            echo "</tr>";
+
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($row['nama_ruangan']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['kapasitas']) . "</td>";
+                echo "<td>" . htmlspecialchars(ucfirst($row['tipe_ruangan'])) . "</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            exit();
+        } else {
+            header("Location: ../index.php?page=ruangan&error=no_items_selected");
+            exit();
+        }
     }
 }
 
