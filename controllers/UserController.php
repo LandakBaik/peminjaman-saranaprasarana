@@ -22,12 +22,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ruangan = new \App\Models\Ruangan($db);
                 $ruangan->assignStaffToRooms($user->id_pengguna, $_POST['ruangan_ids']);
             }
-
-            header("Location: ../index.php?page=akun-staff&success=added");
+            header("Location: ../index.php?page=daftar-akun&success=added");
         } else {
-            header("Location: ../index.php?page=akun-staff&error=add_failed");
+            header("Location: ../index.php?page=daftar-akun&error=add_failed");
         }
         exit();
+    } elseif ($action == 'export') {
+        if (!empty($_POST['id_user']) && is_array($_POST['id_user'])) {
+            $ids = $_POST['id_user'];
+            $stmt = $user->getByIds($ids);
+
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Data_Akun.xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "<table border='1'>";
+            echo "<tr>";
+            echo "<th>ID Pengguna</th>";
+            echo "<th>Nama</th>";
+            echo "<th>Email</th>";
+            echo "<th>Role</th>";
+            echo "</tr>";
+
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($row['id_pengguna'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['nama'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['email'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['role'] ?? '') . "</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            exit();
+        } else {
+            header("Location: ../index.php?page=daftar-akun&error=no_items_selected");
+            exit();
+        }
     }
 }
 ?>

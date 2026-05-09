@@ -15,10 +15,28 @@ $stmt = $ruangan->readAll();
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-muted">Daftar ruangan yang tersedia</span>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambahRuanganModal">
-                    <i class="fas fa-plus me-1"></i> Tambah Ruangan
-                </button>
+                <span class="text-muted">
+                    Daftar ruangan yang tersedia
+                </span>
+
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-white border border-primary text-primary btn-sm"
+                        onclick="checkExportRuangan()">
+                        <i class="fas fa-download me-1"></i>
+                        Export
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#tambahRuanganModal">
+                        <i class="fas fa-plus me-1"></i>
+                        Tambah Ruangan
+                    </button>
+                </div>
             </div>
 
             <!-- Card -->
@@ -38,12 +56,12 @@ $stmt = $ruangan->readAll();
                         <table class="table table-bordered align-middle">
                             <thead class="table-light">
                                 <tr class="text-center">
-                                    <th><input type="checkbox"></th>
+                                    <th><input type="checkbox" id="selectAllRuangan"></th>
                                     <th>No</th>
                                     <th>Nama Ruangan</th>
                                     <th>Kapasitas</th>
                                     <th>Tipe</th>
-                                    <th>Foto</th>
+                                    <th>Tanggal Dibuat</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -53,7 +71,7 @@ $stmt = $ruangan->readAll();
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 ?>
                                     <tr>
-                                        <td class="text-center"><input type="checkbox"></td>
+                                        <td class="text-center"><input type="checkbox" class="export-checkbox" value="<?= $row['id_ruangan'] ?>"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
                                         <td class="text-center"><?= htmlspecialchars($row['kapasitas']) ?></td>
@@ -63,21 +81,18 @@ $stmt = $ruangan->readAll();
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <img src="<?= $row['foto_ruangan'] ?>" width="60" class="rounded">
+                                            <?= date('d M Y', strtotime($row['tanggal_dibuat'])) ?>
                                         </td>
                                         <td class="text-center">
                                             <button
                                                 class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editRuanganModal"
-                                                onclick="
-                                                    document.getElementById('edit_id').value='<?= $row['id_ruangan'] ?>';
-                                                    document.getElementById('edit_nama').value='<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>';
-                                                    document.getElementById('edit_kapasitas').value='<?= $row['kapasitas'] ?>';
-                                                    document.getElementById('edit_tipe').value='<?= $row['tipe_ruangan'] ?>';
-                                                    document.getElementById('edit_foto_lama').value='<?= $row['foto_ruangan'] ?>';
-                                                    document.getElementById('edit_preview').src='<?= $row['foto_ruangan'] ?>';
-                                                ">
+                                                data-id="<?= $row['id_ruangan'] ?>"
+                                                data-nama="<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>"
+                                                data-kapasitas="<?= $row['kapasitas'] ?>"
+                                                data-tipe="<?= $row['tipe_ruangan'] ?>"
+                                                data-foto="<?= htmlspecialchars($row['foto_ruangan'] ?? '', ENT_QUOTES) ?>">
                                                 Edit
                                             </button>
                                             <a href="controllers/RuanganController.php?action=delete&id_ruangan=<?= $row['id_ruangan'] ?>"
@@ -157,20 +172,33 @@ $stmt = $ruangan->readAll();
 
                                 <!-- Right (Upload) -->
                                 <div class="col-md-5">
-                                    <label class="form-label">Foto Ruangan</label>
+                                    <label class="form-label">Upload Foto Ruangan</label>
 
-                                    <div class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3"
+                                    <div id="uploadBox"
+                                        class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3 overflow-hidden"
                                         style="min-height: 250px; cursor: pointer;"
                                         onclick="document.getElementById('fotoInput').click();">
 
-                                        <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                        <span class="text-muted">Klik untuk upload</span>
+                                        <!-- Placeholder -->
+                                        <div id="uploadPlaceholder"
+                                            class="d-flex flex-column align-items-center object-fit: contain; justify-content-center">
 
-                                        <input type="file" name="foto_ruangan" id="fotoInput" class="d-none" required>
+                                            <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                            <span class="text-muted">Klik untuk upload</span>
+                                        </div>
+
+                                        <!-- Input -->
+                                        <input type="file"
+                                            name="foto_ruangan"
+                                            id="fotoInput"
+                                            class="d-none"
+                                            accept="image/*">
+
+                                        <!-- Preview -->
+                                        <img id="previewImg"
+                                            class="w-100 rounded d-none mt-2"
+                                            style="height: auto; object-fit: contain;">
                                     </div>
-
-                                    <!-- Preview -->
-                                    <img id="previewImg" class="mt-2 w-100 d-none rounded" />
                                 </div>
 
                             </div>
@@ -235,14 +263,35 @@ $stmt = $ruangan->readAll();
                                 </select>
                             </div>
 
-                            <!-- Preview -->
+                            <!-- Upload Foto Edit -->
                             <div class="mb-3">
-                                <img id="edit_preview" width="120">
-                            </div>
+                                <label class="form-label">Ganti Foto</label>
 
-                            <div class="mb-3">
-                                <label>Ganti Foto (opsional)</label>
-                                <input type="file" name="foto_ruangan" class="form-control">
+                                <div id="editUploadBox"
+                                    class="bg-light w-100 d-flex flex-column align-items-center justify-content-center border rounded p-3 overflow-hidden"
+                                    style="min-height: 180px; cursor: pointer;"
+                                    onclick="document.getElementById('edit_foto_input').click();">
+
+                                    <!-- Placeholder -->
+                                    <div id="editUploadPlaceholder"
+                                        class="d-flex flex-column align-items-center justify-content-center">
+
+                                        <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                        <span class="text-muted">Klik untuk upload</span>
+                                    </div>
+
+                                    <!-- Input -->
+                                    <input type="file"
+                                        name="foto_ruangan"
+                                        id="edit_foto_input"
+                                        class="d-none"
+                                        accept="image/*">
+
+                                    <!-- Preview -->
+                                    <img id="edit_preview"
+                                        class="w-100 rounded d-none mt-2"
+                                        style="height: auto; object-fit: contain;">
+                                </div>
                             </div>
 
                             <!-- Footer -->
@@ -261,7 +310,164 @@ $stmt = $ruangan->readAll();
                 </div>
             </div>
         </div>
+        <script>
+            // Export Data Ruangan
+            function checkExportRuangan() {
 
+                let checked = document.querySelectorAll(
+                    '.export-checkbox:checked'
+                );
+
+                if (checked.length === 0) {
+
+                    alert('Anda perlu memilih minimal 1 ruangan untuk membuat laporan.');
+
+                    return;
+                }
+
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'controllers/RuanganController.php?action=export';
+
+                checked.forEach(function(checkbox) {
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'id_ruangan[]';
+                    input.value = checkbox.value;
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
+                setTimeout(() => document.body.removeChild(form), 1000);
+            }
+
+        // Add Select All functionality
+        document.getElementById('selectAllRuangan')?.addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.export-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+            // PREVIEW FOTO TAMBAH RUANGAN
+            const fotoInput = document.getElementById('fotoInput');
+            const previewImg = document.getElementById('previewImg');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+            fotoInput.addEventListener('change', function(e) {
+
+                const file = e.target.files[0];
+
+                if (file) {
+
+                    // Validasi gambar
+                    if (!file.type.startsWith('image/')) {
+                        alert('File harus berupa gambar!');
+                        fotoInput.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+
+                        // tampilkan gambar
+                        previewImg.src = event.target.result;
+                        previewImg.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        uploadPlaceholder.classList.add('d-none');
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // PREVIEW FOTO EDIT
+            const editFotoInput = document.getElementById('edit_foto_input');
+            const editPreview = document.getElementById('edit_preview');
+            const editPlaceholder = document.getElementById('editUploadPlaceholder');
+
+            editFotoInput.addEventListener('change', function(e) {
+
+                const file = e.target.files[0];
+
+                if (file) {
+
+                    // validasi gambar
+                    if (!file.type.startsWith('image/')) {
+                        alert('File harus berupa gambar!');
+                        editFotoInput.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+
+                        // tampilkan preview baru
+                        editPreview.src = event.target.result;
+                        editPreview.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        editPlaceholder.classList.add('d-none');
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // MODAL EDIT
+            document.addEventListener("DOMContentLoaded", function() {
+
+                const modal = document.getElementById('editRuanganModal');
+
+                modal.addEventListener('show.bs.modal', function(event) {
+
+                    let button = event.relatedTarget;
+
+                    let id = button.getAttribute('data-id');
+                    let nama = button.getAttribute('data-nama');
+                    let kapasitas = button.getAttribute('data-kapasitas');
+                    let tipe = button.getAttribute('data-tipe');
+                    let foto = button.getAttribute('data-foto');
+
+                    // isi form
+                    document.getElementById('edit_id').value = id;
+                    document.getElementById('edit_nama').value = nama;
+                    document.getElementById('edit_kapasitas').value = kapasitas;
+
+                    // Select tipe
+                    tipe = tipe.trim().toLowerCase();
+                    document.getElementById('edit_tipe').value = tipe;
+
+                    // preview foto
+                    // preview foto lama
+                    const editPreview = document.getElementById('edit_preview');
+                    const editPlaceholder = document.getElementById('editUploadPlaceholder');
+
+                    if (foto && foto.trim() !== '') {
+
+                        // tampilkan preview
+                        editPreview.src = foto;
+                        editPreview.classList.remove('d-none');
+
+                        // sembunyikan placeholder
+                        editPlaceholder.classList.add('d-none');
+
+                    } else {
+
+                        // reset preview
+                        editPreview.src = '';
+                        editPreview.classList.add('d-none');
+
+                        // tampilkan placeholder
+                        editPlaceholder.classList.remove('d-none');
+                    }
+                });
+
+            });
+        </script>
     </main>
 
     <footer>

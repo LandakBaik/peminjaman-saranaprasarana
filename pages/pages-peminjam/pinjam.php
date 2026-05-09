@@ -60,7 +60,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                     <div id="calendarDates" class="calendar-grid"></div>
                 </div>
 
-                <!-- ================= MODAL ================= -->
+                <!--  MODAL  -->
                 <div id="loanModal" class="modal">
                     <div class="modal-content large-modal">
                         <span class="close">&times;</span>
@@ -95,7 +95,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                     <div class="col-md-6">
                                         <label class="form-label">Nama</label>
                                         <input type="text" class="form-control"
-                                            value="<?= $_SESSION['user']['nama'] ?? '' ?>" readonly>
+                                            value="<?= $_SESSION['user']['nama'] ?? '' ?>" disabled>
                                     </div>
 
                                     <div class="col-md-6">
@@ -171,7 +171,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <!-- CATATAN -->
                                 <div class="mb-3">
                                     <label>Catatan</label>
-                                    <textarea class="form-control" name="catatan"></textarea>
+                                    <textarea class="form-control" name="catatan" style="height: 115px;"></textarea>
                                 </div>
 
                             </div>
@@ -182,21 +182,35 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <div class="mb-3 text-center">
                                     <label class="form-label fw-bold">Foto Ruangan</label>
                                     <div>
-                                        <img src="uploads/ruangan/<?= $ruangan['foto_ruangan'] ?>"
+                                        <img src="<?= !empty($ruangan['foto_ruangan']) ? $ruangan['foto_ruangan'] : 'assets/img/no-image.png' ?>"
                                             class="img-fluid rounded shadow-sm"
-                                            style="max-height: 180px; object-fit: cover;"
+                                            style="max-height: 330px; object-fit: cover;"
                                             alt="Foto Ruangan">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label>Jaminan</label>
-                                    <input type="file" name="jaminan" class="form-control">
+                                    <label class="form-label fw-bold">Jaminan</label>
+
+                                    <input type="file"
+                                        name="jaminan"
+                                        class="form-control"
+                                        required>
+
+                                    <div class="invalid-feedback">
+                                        Foto jaminan wajib diisi.
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-100">
                                     Kirim
                                 </button>
+                            </div>
+
+                            <div style="margin-top: 5px;">
+                                <span class="text-muted small">
+                                    Lihat <a href="#" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                </span>
                             </div>
 
                         </form>

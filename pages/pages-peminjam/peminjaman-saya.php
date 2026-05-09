@@ -166,6 +166,3 @@ $stmt = $peminjaman->readByUser($userId);
         <?php include 'footer.php'; ?>
     </footer>
 </div>
-
-<!-- Script Filter -->
-<script src="js/filter.js"></script>

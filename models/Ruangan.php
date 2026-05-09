@@ -73,6 +73,27 @@ class Ruangan
         return $stmt->execute();
     }
 
+    public function getByIds($ids)
+    {
+        $inQuery = implode(',', array_fill(0, count($ids), '?'));
+
+        $query = "
+            SELECT *
+            FROM " . $this->table_name . "
+            WHERE id_ruangan IN ($inQuery)
+        ";
+
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($ids as $k => $id) {
+            $stmt->bindValue(($k + 1), $id);
+        }
+
+        $stmt->execute();
+
+        return $stmt;
+    }
+
     // DELETE
     public function delete()
     {
