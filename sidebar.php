@@ -7,12 +7,12 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
     <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
             <div class="nav">
-                <div class="sb-sidenav-menu-heading">Core</div>
+                <div class="sb-sidenav-menu-heading">Main</div>
                 <a class="nav-link" href="index.php?page=dashboard">
                     <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                     Dashboard
                 </a>
-                <div class="sb-sidenav-menu-heading">Interface</div>
+                <div class="sb-sidenav-menu-heading">Features</div>
 
                 <!-- user -->
                  <?php if ($role === 'user') : ?>
@@ -115,7 +115,7 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
                         </div>
                     </nav>
                 </div> -->
-                <div class="sb-sidenav-menu-heading">Addons</div>
+                <div class="sb-sidenav-menu-heading">Settings</div>
 
                 <?php if (in_array($role, ['user', 'admin', 'staff'])) : ?>
                 <a class="nav-link" href="index.php?page=detail-profil">

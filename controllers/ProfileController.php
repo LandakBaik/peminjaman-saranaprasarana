@@ -33,22 +33,28 @@ if ($action == 'get') {
 // ================== UPDATE / INSERT ==================
 if ($action == 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // ================== AMBIL DATA (AMAN) ==================
-    $nama_panggilan  = $_POST['nama_panggilan'] ?? '';
-    $nomor_telepon   = $_POST['nomor_telepon'] ?? '';
-    $tanggal_lahir   = $_POST['tanggal_lahir'] ?? null;
-    $jenis_kelamin   = $_POST['jenis_kelamin'] ?? null;
+    // ================== AMBIL DATA ==================
+    $nama_panggilan = $_POST['nama_panggilan'] ?? null;
+    $nomor_telepon  = $_POST['nomor_telepon'] ?? null;
+    $tanggal_lahir  = $_POST['tanggal_lahir'] ?? null;
+    $jenis_kelamin  = $_POST['jenis_kelamin'] ?? null;
 
-    // handle tanggal kosong → NULL (biar tidak error di MySQL)
-    if (empty($tanggal_lahir)) {
-        $tanggal_lahir = null;
-    }
+    // ================== HANDLE KOSONG ==================
+    $nama_panggilan = trim($nama_panggilan ?? '') !== ''
+        ? trim($nama_panggilan)
+        : null;
 
-    // ================== VALIDASI SEDERHANA ==================
-    if (!$nama_panggilan || !$nomor_telepon) {
-        header("Location: ../index.php?page=detail-profil-edit&error=required");
-        exit();
-    }
+    $nomor_telepon = trim($nomor_telepon ?? '') !== ''
+        ? trim($nomor_telepon)
+        : null;
+
+    $jenis_kelamin = trim($jenis_kelamin ?? '') !== ''
+        ? trim($jenis_kelamin)
+        : null;
+
+    $tanggal_lahir = !empty($tanggal_lahir)
+        ? $tanggal_lahir
+        : null;
 
     // ================== AMBIL DATA LAMA ==================
     $query = "SELECT * FROM detail_profil WHERE id_pengguna = :id LIMIT 1";
@@ -80,82 +86,87 @@ if ($action == 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ================== QUERY ==================
     if ($profil) {
+
         // UPDATE
         $query = "UPDATE detail_profil SET
-                    nama_panggilan  = :nama,
-                    nomor_telepon   = :telepon,
-                    tanggal_lahir   = :tgl,
-                    jenis_kelamin   = :jk,
-                    foto_profil     = :foto
+                    nama_panggilan = :nama,
+                    nomor_telepon  = :telepon,
+                    tanggal_lahir  = :tgl,
+                    jenis_kelamin  = :jk,
+                    foto_profil    = :foto
                   WHERE id_pengguna = :id";
+
     } else {
+
         // INSERT
-        $query = "INSERT INTO detail_profil 
-                  (id_pengguna, nama_panggilan, nomor_telepon, tanggal_lahir, jenis_kelamin, foto_profil)
-                  VALUES (:id, :nama, :telepon, :tgl, :jk, :foto)";
+        $query = "INSERT INTO detail_profil
+                    (
+                        id_pengguna,
+                        nama_panggilan,
+                        nomor_telepon,
+                        tanggal_lahir,
+                        jenis_kelamin,
+                        foto_profil
+                    )
+                  VALUES
+                    (
+                        :id,
+                        :nama,
+                        :telepon,
+                        :tgl,
+                        :jk,
+                        :foto
+                    )";
     }
 
     $stmt = $db->prepare($query);
 
-    // ================== BINDING (AMAN) ==================
-    $stmt->bindValue(":id", $userId);
-    $stmt->bindValue(":nama", $nama_panggilan);
-    $stmt->bindValue(":telepon", $nomor_telepon);
+    // ================== BINDING ==================
+    $stmt->bindValue(":id", $userId, PDO::PARAM_INT);
 
-    // khusus tanggal (handle NULL)
-    $stmt->bindValue(":tgl", $tanggal_lahir, $tanggal_lahir ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    $stmt->bindValue(
+        ":nama",
+        $nama_panggilan,
+        $nama_panggilan !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+    );
 
-    $stmt->bindValue(":jk", $jenis_kelamin);
+    $stmt->bindValue(
+        ":telepon",
+        $nomor_telepon,
+        $nomor_telepon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+    );
+
+    $stmt->bindValue(
+        ":tgl",
+        $tanggal_lahir,
+        $tanggal_lahir !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+    );
+
+    $stmt->bindValue(
+        ":jk",
+        $jenis_kelamin,
+        $jenis_kelamin !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+    );
+
     $stmt->bindValue(":foto", $foto_nama);
 
     // ================== EKSEKUSI ==================
     if ($stmt->execute()) {
+
+        // refresh session profil
+        $query = "SELECT * FROM detail_profil WHERE id_pengguna = :id LIMIT 1";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(":id", $userId);
+        $stmt->execute();
+
+        $_SESSION['profil'] = $stmt->fetch(PDO::FETCH_ASSOC);
+
         header("Location: ../index.php?page=detail-profil&success=1");
         exit();
+
     } else {
+
         header("Location: ../index.php?page=detail-profil-edit&error=1");
         exit();
     }
-
-    // ================== EKSPORT ==================
-    // if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //     elseif ($action == 'export') {
-    //     if (!empty($_POST['id_barang']) && is_array($_POST['id_barang'])) {
-    //         $ids = $_POST['id_barang'];
-    //         $stmt = $barang->getByIds($ids);
-
-    //         header("Content-Type: application/vnd.ms-excel");
-    //         header("Content-Disposition: attachment; filename=Data_Barang.xls");
-    //         header("Pragma: no-cache");
-    //         header("Expires: 0");
-
-    //         echo "<table border='1'>";
-    //         echo "<tr>";
-    //         echo "<th>Nama Barang</th>";
-    //         echo "<th>Deskripsi</th>";
-    //         echo "<th>Ruangan</th>";
-    //         echo "<th>Total</th>";
-    //         echo "<th>Rusak</th>";
-    //         echo "<th>Dipinjam</th>";
-    //         echo "<th>Tersedia</th>";
-    //         echo "</tr>";
-
-    //         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-    //             echo "<tr>";
-    //             echo "<td>" . htmlspecialchars($row['nama_barang']) . "</td>";
-    //             echo "<td>" . htmlspecialchars($row['deskripsi_barang']) . "</td>";
-    //             echo "<td>" . htmlspecialchars($row['nama_ruangan'] ?? '-') . "</td>";
-    //             echo "<td>" . $row['total_stok'] . "</td>";
-    //             echo "<td>" . $row['stok_rusak'] . "</td>";
-    //             echo "<td>" . $row['dipinjam'] . "</td>";
-    //             echo "<td>" . $row['tersedia'] . "</td>";
-    //             echo "</tr>";
-    //         }
-    //         echo "</table>";
-    //         exit();
-    //     } else {
-    //         header("Location: ../index.php?page=barang&error=no_items_selected");
-    //         exit();
-    //     }
-    // }    
 }

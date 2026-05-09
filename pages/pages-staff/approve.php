@@ -43,7 +43,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                 <tr class="text-center">
                                     <th>No</th>
                                     <th>Peminjam</th>
-                                    <th>Barang/Ruangan</th>
+                                    <th>Tipe</th>
                                     <th>Keterangan</th>
                                     <th>Status</th>
                                     <th>Waktu Mulai</th>
