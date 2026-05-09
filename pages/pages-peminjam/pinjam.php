@@ -182,9 +182,10 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                 <div class="mb-3 text-center">
                                     <label class="form-label fw-bold">Foto Ruangan</label>
                                     <div>
-                                        <img src="<?= !empty($ruangan['foto_ruangan']) ? $ruangan['foto_ruangan'] : 'assets/img/error-404-monochrome.svg' ?>"
+                                        <img src="<?= !empty($ruangan['foto_ruangan']) ? $ruangan['foto_ruangan'] : 'assets/img/no-image.png' ?>"
                                             class="img-fluid rounded shadow-sm"
-                                            style="max-height: 330px; object-fit: cover;">
+                                            style="max-height: 330px; object-fit: cover;"
+                                            alt="Foto Ruangan">
                                     </div>
                                 </div>
 
