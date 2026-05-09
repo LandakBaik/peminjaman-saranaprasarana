@@ -68,6 +68,10 @@ $page = $_GET['page'] ?? 'dashboard';
                 only(['staff']);
                 include 'pages/pages-staff/pengembalian.php';
                 break;
+            case 'riwayat-peminjaman-staff':
+                only(['staff']);
+                include 'pages/pages-staff/riwayat-peminjaman.php';
+                break;
             // Admin
             case 'ruangan':
                 only(['admin']);
@@ -80,6 +84,10 @@ $page = $_GET['page'] ?? 'dashboard';
             case 'barang':
                 only(['admin']);
                 include 'pages/pages-admin/barang.php';
+                break;
+            case 'riwayat-peminjaman-admin':
+                only(['admin']);
+                include 'pages/pages-admin/riwayat-peminjaman.php';
                 break;
             default:
                 include 'pages/dashboard.php';
