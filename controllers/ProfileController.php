@@ -116,4 +116,46 @@ if ($action == 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: ../index.php?page=detail-profil-edit&error=1");
         exit();
     }
+
+    // ================== EKSPORT ==================
+    // if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //     elseif ($action == 'export') {
+    //     if (!empty($_POST['id_barang']) && is_array($_POST['id_barang'])) {
+    //         $ids = $_POST['id_barang'];
+    //         $stmt = $barang->getByIds($ids);
+
+    //         header("Content-Type: application/vnd.ms-excel");
+    //         header("Content-Disposition: attachment; filename=Data_Barang.xls");
+    //         header("Pragma: no-cache");
+    //         header("Expires: 0");
+
+    //         echo "<table border='1'>";
+    //         echo "<tr>";
+    //         echo "<th>Nama Barang</th>";
+    //         echo "<th>Deskripsi</th>";
+    //         echo "<th>Ruangan</th>";
+    //         echo "<th>Total</th>";
+    //         echo "<th>Rusak</th>";
+    //         echo "<th>Dipinjam</th>";
+    //         echo "<th>Tersedia</th>";
+    //         echo "</tr>";
+
+    //         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+    //             echo "<tr>";
+    //             echo "<td>" . htmlspecialchars($row['nama_barang']) . "</td>";
+    //             echo "<td>" . htmlspecialchars($row['deskripsi_barang']) . "</td>";
+    //             echo "<td>" . htmlspecialchars($row['nama_ruangan'] ?? '-') . "</td>";
+    //             echo "<td>" . $row['total_stok'] . "</td>";
+    //             echo "<td>" . $row['stok_rusak'] . "</td>";
+    //             echo "<td>" . $row['dipinjam'] . "</td>";
+    //             echo "<td>" . $row['tersedia'] . "</td>";
+    //             echo "</tr>";
+    //         }
+    //         echo "</table>";
+    //         exit();
+    //     } else {
+    //         header("Location: ../index.php?page=barang&error=no_items_selected");
+    //         exit();
+    //     }
+    // }    
 }

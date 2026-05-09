@@ -99,6 +99,20 @@ class User
         return $stmt;
     }
 
+    public function getByIds($ids)
+    {
+        $inQuery = implode(',', array_fill(0, count($ids), '?'));
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id_pengguna IN ({$inQuery})";
+        
+        $stmt = $this->conn->prepare($query);
+        foreach ($ids as $k => $id) {
+            $stmt->bindValue(($k + 1), $id);
+        }
+        $stmt->execute();
+        
+        return $stmt;
+    }
+
     public function createResetToken($email, $token)
     {
         $delete = "DELETE FROM password_resets WHERE email = :email";

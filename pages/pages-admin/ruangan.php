@@ -23,7 +23,7 @@ $stmt = $ruangan->readAll();
                     <button
                         type="button"
                         class="btn btn-white border border-primary text-primary btn-sm"
-                        onclick="checkExporRuangan()">
+                        onclick="checkExportRuangan()">
                         <i class="fas fa-download me-1"></i>
                         Export
                     </button>
@@ -312,7 +312,7 @@ $stmt = $ruangan->readAll();
         </div>
         <script>
             // Export Data Ruangan
-            function checkExporRuangan() {
+            function checkExportRuangan() {
 
                 let checked = document.querySelectorAll(
                     '.export-checkbox:checked'

@@ -13,22 +13,29 @@ $stmt = $userModel->readAll();
         <div class="container-fluid px-4">
 
             <h1 class="mt-4">Akun</h1>
-
             <div class="d-flex justify-content-between align-items-center mb-3">
-
                 <span class="text-muted">
                     Daftar akun pengguna
                 </span>
 
-                <button type="button"
-                    class="btn btn-primary btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#tambahStaffModal">
+                <div class="d-flex gap-2">
+                    <button
+                        type="button"
+                        class="btn btn-white border border-primary text-primary btn-sm"
+                        onclick="checkExportUser()">
+                        <i class="fas fa-download me-1"></i>
+                        Export
+                    </button>
 
-                    <i class="fas fa-plus me-1"></i>
-                    Tambah Akun Staff
-                </button>
-
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#tambahStaffModal">
+                        <i class="fas fa-plus me-1"></i>
+                        Tambah Akun Staff
+                    </button>
+                </div>
             </div>
 
             <!-- Card -->
@@ -206,8 +213,8 @@ $stmt = $userModel->readAll();
 
                                         <td class="text-center">
                                             <input type="checkbox"
-                                                class="row-checkbox"
-                                                value="<?= $row['id_user'] ?>">
+                                                class="row-checkbox export-checkbox"
+                                                value="<?= $row['id_pengguna'] ?>">
                                         </td>
 
                                         <td class="text-center">
@@ -439,7 +446,38 @@ $stmt = $userModel->readAll();
 
         </div>
     </main>
+    <script>
+        function checkExportUser() {
 
+            let checked = document.querySelectorAll(
+                '.export-checkbox:checked'
+            );
+
+            if (checked.length === 0) {
+
+                alert('Anda perlu memilih minimal 1 akun untuk membuat laporan.');
+
+                return;
+            }
+
+            let form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'controllers/UserController.php?action=export';
+
+            checked.forEach(function(checkbox) {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id_user[]';
+                input.value = checkbox.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => document.body.removeChild(form), 1000);
+        }
+
+    </script>                                
     <footer>
         <?php include 'footer.php'; ?>
     </footer>
