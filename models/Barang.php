@@ -29,13 +29,13 @@ class Barang
                 r.nama_ruangan,
                 COALESCE(SUM(
                     CASE 
-                        WHEN p.status = 'dipinjam' THEN 1
+                        WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas
                         ELSE 0
                     END
                 ), 0) AS dipinjam,
                 (b.total_stok - b.stok_rusak - COALESCE(SUM(
                     CASE 
-                        WHEN p.status = 'dipinjam' THEN 1
+                        WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas
                         ELSE 0
                     END
                 ), 0)) AS tersedia
@@ -108,11 +108,11 @@ class Barang
         $query = "SELECT 
                 b.*,
                 COALESCE(SUM(
-                    CASE WHEN p.status = 'dipinjam' THEN dp.kuantitas ELSE 0 END
+                    CASE WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas ELSE 0 END
                 ),0) AS dipinjam,
 
                 (b.total_stok - b.stok_rusak - COALESCE(SUM(
-                    CASE WHEN p.status = 'dipinjam' THEN dp.kuantitas ELSE 0 END
+                    CASE WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas ELSE 0 END
                 ),0)) AS stok_tersedia
 
               FROM barang b
@@ -140,13 +140,13 @@ class Barang
                 r.nama_ruangan,
                 COALESCE(SUM(
                     CASE 
-                        WHEN p.status = 'dipinjam' THEN 1
+                        WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas
                         ELSE 0
                     END
                 ), 0) AS dipinjam,
                 (b.total_stok - b.stok_rusak - COALESCE(SUM(
                     CASE 
-                        WHEN p.status = 'dipinjam' THEN 1
+                        WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas
                         ELSE 0
                     END
                 ), 0)) AS tersedia

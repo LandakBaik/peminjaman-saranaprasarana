@@ -164,15 +164,13 @@ class Peminjaman
 
     } elseif ($this->jenis_peminjaman == 'ruangan') {
 
-        $query = "SELECT id_barang FROM barang WHERE id_ruangan = :id_ruangan";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id_ruangan", $this->id_ruangan);
-        $stmt->execute();
-
-        $barangList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $barangModel = new \App\Models\Barang($this->conn);
+        $barangList = $barangModel->getByRuangan($this->id_ruangan);
 
         foreach ($barangList as $b) {
-            $this->insertDetail($b['id_barang'], 1);
+            if ($b['stok_tersedia'] > 0) {
+                $this->insertDetail($b['id_barang'], $b['stok_tersedia']);
+            }
         }
     }
 
