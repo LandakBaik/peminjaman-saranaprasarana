@@ -77,6 +77,45 @@ class Peminjaman
         return $stmt;
     }
 
+    // 🔹 READ BY STAFF (FILTER BY ASSIGNED ROOMS)
+    public function readByStaff($id_pengguna)
+    {
+
+        
+
+        $query = "SELECT p.*,
+                         u.nama as peminjam,
+                         s.nama as staff_approval,
+                         GROUP_CONCAT(b.nama_barang SEPARATOR ', ') as nama_barang,
+                         MAX(r.nama_ruangan) as nama_ruangan
+
+                  FROM peminjaman p
+
+                  LEFT JOIN pengguna u 
+                        ON p.id_pengguna = u.id_pengguna
+
+                  LEFT JOIN pengguna s 
+                        ON p.approved_by = s.id_pengguna
+
+                  INNER JOIN detail_peminjaman dp 
+                        ON dp.id_peminjaman = p.id_peminjaman
+
+                  INNER JOIN barang b 
+                        ON dp.id_barang = b.id_barang
+
+                  INNER JOIN ruangan r 
+                        ON b.id_ruangan = r.id_ruangan
+
+                  WHERE r.id_pengguna = :id_pengguna
+                  GROUP BY p.id_peminjaman
+                  ORDER BY p.tanggal_dibuat DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        return $stmt;
+    }
+
    public function create()
 {
     if ($this->jenis_peminjaman == 'barang') {

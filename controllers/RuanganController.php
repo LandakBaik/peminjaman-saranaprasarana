@@ -142,3 +142,16 @@ elseif ($action == 'delete') {
     }
     exit();
 }
+
+// ================= GET BY TIPE (AJAX) =================
+elseif ($action == 'get_by_tipe') {
+    $tipe = $_GET['tipe'] ?? '';
+    $stmt = $ruangan->getByTipe($tipe);
+    $data = [];
+    while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        $data[] = $row;
+    }
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit();
+}

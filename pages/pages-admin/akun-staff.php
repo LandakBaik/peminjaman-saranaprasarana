@@ -121,15 +121,25 @@ $stmt = $userModel->readAll();
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-muted fw-semibold">Penanggung Jawab Ruangan</label>
-                                    <select class="form-select text-muted">
-                                        <option selected>Kelas</option>
-                                        <option value="1">Laboratorium</option>
-                                        <option value="2">Ruang Rapat</option>
+                                    <select class="form-select text-muted" id="select_tipe_ruangan">
+                                        <option value="" selected disabled>Pilih Tipe Ruangan...</option>
+                                        <option value="non-laboratorium">Kelas</option>
+                                        <option value="laboratorium">Laboratorium</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-muted fw-semibold">Password</label>
                                     <input type="password" class="form-control" name="password" placeholder="XXXXXX" required>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3" id="ruangan_container" style="display: none;">
+                                <div class="col-12">
+                                    <label class="form-label text-muted fw-semibold">Pilih Ruangan yang Dikelola</label>
+                                    <div class="border rounded p-3 bg-light" id="ruangan_list" style="max-height: 200px; overflow-y: auto;">
+                                        <!-- Checkboxes will be populated here -->
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">Hapus centang pada ruangan yang tidak dikelola oleh staff ini.</small>
                                 </div>
                             </div>
 
@@ -150,3 +160,42 @@ $stmt = $userModel->readAll();
         <?php include 'footer.php'; ?>
     </footer>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const selectTipe = document.getElementById('select_tipe_ruangan');
+    const ruanganContainer = document.getElementById('ruangan_container');
+    const ruanganList = document.getElementById('ruangan_list');
+
+    selectTipe.addEventListener('change', function() {
+        const tipe = this.value;
+        if (tipe) {
+            fetch(`controllers/RuanganController.php?action=get_by_tipe&tipe=${tipe}`)
+                .then(response => response.json())
+                .then(data => {
+                    ruanganList.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(ruangan => {
+                            const div = document.createElement('div');
+                            div.className = 'form-check mb-2';
+                            div.innerHTML = `
+                                <input class="form-check-input border-secondary" type="checkbox" name="ruangan_ids[]" value="${ruangan.id_ruangan}" id="ruang_${ruangan.id_ruangan}" checked>
+                                <label class="form-check-label" for="ruang_${ruangan.id_ruangan}">
+                                    ${ruangan.nama_ruangan} <small class="text-muted">(Kapasitas: ${ruangan.kapasitas})</small>
+                                </label>
+                            `;
+                            ruanganList.appendChild(div);
+                        });
+                        ruanganContainer.style.display = 'block';
+                    } else {
+                        ruanganList.innerHTML = '<span class="text-muted">Tidak ada ruangan ditemukan untuk tipe ini.</span>';
+                        ruanganContainer.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error fetching ruangan:', error));
+        } else {
+            ruanganContainer.style.display = 'none';
+        }
+    });
+});
+</script>

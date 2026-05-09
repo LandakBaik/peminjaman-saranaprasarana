@@ -94,4 +94,40 @@ class Ruangan
 
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
+
+    public function getByTipe($tipe_ruangan)
+    {
+        $query = "SELECT * FROM ruangan WHERE tipe_ruangan = :tipe_ruangan";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":tipe_ruangan", $tipe_ruangan);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    public function assignStaffToRooms($id_pengguna, $ruangan_ids)
+    {
+        if (empty($ruangan_ids)) {
+            return false;
+        }
+
+        // Membuat placeholders (?,?,?) sesuai jumlah elemen array
+        $placeholders = implode(',', array_fill(0, count($ruangan_ids), '?'));
+        
+        $query = "UPDATE " . $this->table_name . " 
+                  SET id_pengguna = ? 
+                  WHERE id_ruangan IN ($placeholders)";
+
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind parameter id_pengguna ke tanda tanya pertama
+        $stmt->bindValue(1, $id_pengguna);
+
+        // Bind masing-masing id_ruangan ke tanda tanya selanjutnya
+        foreach ($ruangan_ids as $index => $id_ruangan) {
+            $stmt->bindValue($index + 2, $id_ruangan);
+        }
+
+        return $stmt->execute();
+    }
 }

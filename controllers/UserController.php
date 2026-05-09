@@ -1,4 +1,4 @@
-<?php
+++<?php
 session_start();
 require_once '../config/Autoloader.php';
 
@@ -16,6 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user->role = 'staff';
 
         if ($user->register()) {
+
+            // Assign ruangan jika ada yang dipilih
+            if (isset($_POST['ruangan_ids']) && is_array($_POST['ruangan_ids']) && count($_POST['ruangan_ids']) > 0) {
+                $ruangan = new \App\Models\Ruangan($db);
+                $ruangan->assignStaffToRooms($user->id_pengguna, $_POST['ruangan_ids']);
+            }
+
             header("Location: ../index.php?page=akun-staff&success=added");
         } else {
             header("Location: ../index.php?page=akun-staff&error=add_failed");
