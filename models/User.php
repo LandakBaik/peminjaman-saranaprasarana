@@ -101,6 +101,27 @@ class User
         return $stmt;
     }
 
+    public function readByRoles($roles)
+    {
+        if (empty($roles)) {
+            return $this->readAll();
+        }
+
+        $placeholders = implode(',', array_fill(0, count($roles), '?'));
+        $query = "SELECT p.*, d.nomor_telepon, d.tanggal_lahir, d.jenis_kelamin, d.nama_panggilan, d.foto_profil 
+                  FROM " . $this->table_name . " p 
+                  LEFT JOIN detail_profil d ON p.id_pengguna = d.id_pengguna
+                  WHERE p.role IN ($placeholders)";
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($roles as $k => $role) {
+            $stmt->bindValue(($k + 1), $role);
+        }
+        $stmt->execute();
+
+        return $stmt;
+    }
+
     public function getByIds($ids)
     {
         $inQuery = implode(',', array_fill(0, count($ids), '?'));
@@ -165,6 +186,24 @@ class User
         $query = "DELETE FROM password_resets WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $email);
+        return $stmt->execute();
+    }
+
+    public function update()
+    {
+        $query = "UPDATE " . $this->table_name . "
+                  SET nama = :nama,
+                      email = :email,
+                      role = :role
+                  WHERE id_pengguna = :id_pengguna";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":nama", $this->nama);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":role", $this->role);
+        $stmt->bindParam(":id_pengguna", $this->id_pengguna);
+
         return $stmt->execute();
     }
 }

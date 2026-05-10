@@ -84,6 +84,10 @@ $page = $_GET['page'] ?? 'dashboard';
                 only(['admin']);
                 include 'pages/pages-admin/daftar-akun.php';
                 break;
+            case 'akun-staff':
+                only(['admin']);
+                include 'pages/pages-admin/akun-staff.php';
+                break;
             case 'barang':
                 only(['admin']);
                 include 'pages/pages-admin/barang.php';

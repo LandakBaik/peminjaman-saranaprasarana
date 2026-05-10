@@ -5,7 +5,7 @@ $database = new \App\Config\Database();
 $db = $database->getConnection();
 
 $userModel = new \App\Models\User($db);
-$stmt = $userModel->readAll();
+$stmt = $userModel->readByRoles(['user']);
 ?>
 
 <div id="layoutSidenav_content">
@@ -25,11 +25,10 @@ $stmt = $userModel->readAll();
                         Export
                     </button>
 
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#tambahStaffModal">
-                        <i class="fas fa-plus me-1"></i>
-                        Tambah Akun Staff
-                    </button>
+                    <a href="index.php?page=akun-staff" class="btn btn-primary btn-sm">
+                        <i class="fa-regular fa-user"></i>
+                        Akun Staff
+                    </a>
                 </div>
             </div>
 
@@ -323,133 +322,6 @@ $stmt = $userModel->readAll();
 
         </div>
 
-        <!-- Modal Tambah Akun Staff -->
-        <div class="modal fade" id="tambahStaffModal" tabindex="-1" aria-labelledby="tambahStaffModalLabel"
-            aria-hidden="true">
-
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-
-                <div class="modal-content">
-
-                    <div class="modal-header border-0 pb-0">
-
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        </button>
-
-                    </div>
-
-                    <div class="modal-body pt-0 px-5 pb-4">
-
-                        <div class="text-center mb-4">
-
-                            <h2 class="text-primary fw-bold" id="tambahStaffModalLabel">
-
-                                Akun Staff
-                            </h2>
-
-                            <div class="d-flex align-items-center justify-content-center mt-3">
-
-                                <hr class="w-25">
-
-                                <span class="text-muted mx-3">
-                                    Data Staff
-                                </span>
-
-                                <hr class="w-25">
-
-                            </div>
-
-                        </div>
-
-                        <form action="controllers/UserController.php?action=create_staff" method="POST">
-
-                            <div class="row g-4 mb-4">
-
-                                <div class="col-md-6">
-
-                                    <label class="form-label text-muted fw-semibold">
-                                        Nama Staff
-                                    </label>
-
-                                    <input type="text" class="form-control" name="nama" placeholder="Roland" required>
-
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <label class="form-label text-muted fw-semibold">
-                                        Email
-                                    </label>
-
-                                    <input type="email" class="form-control" name="email"
-                                        placeholder="rolan@polije.ac.id" required>
-
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <label class="form-label text-muted fw-semibold">
-                                        Penanggung Jawab Ruangan
-                                    </label>
-
-                                    <select class="form-select text-muted" id="select_tipe_ruangan">
-                                        <option value="" selected disabled>Pilih Tipe Ruangan...</option>
-                                        <option value="non-laboratorium">Kelas</option>
-                                        <option value="laboratorium">Laboratorium</option>
-                                    </select>
-
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <label class="form-label text-muted fw-semibold">
-                                        Password
-                                    </label>
-
-                                    <input type="password" class="form-control" name="password" placeholder="XXXXXX"
-                                        required>
-
-                                </div>
-
-                            </div>
-
-                            <div class="row mt-3" id="ruangan_container" style="display: none;">
-                                <div class="col-12">
-                                    <label class="form-label text-muted fw-semibold">Pilih Ruangan yang Dikelola</label>
-                                    <div class="border rounded p-3 bg-light" id="ruangan_list"
-                                        style="max-height: 200px; overflow-y: auto;">
-
-                                    </div>
-                                    <small class="text-muted mt-1 d-block">Hapus centang pada ruangan yang tidak
-                                        dikelola oleh staff ini.</small>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-end align-items-center mt-4 pt-3">
-
-                                <button type="button" class="btn btn-outline-secondary px-4 me-2"
-                                    data-bs-dismiss="modal">
-
-                                    Kembali
-                                </button>
-
-                                <button type="submit" class="btn btn-primary px-4">
-
-                                    Kirim
-                                </button>
-
-                            </div>
-
-                        </form>
-
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
     </main>
     <script>
         function checkExportUser() {

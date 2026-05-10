@@ -148,4 +148,31 @@ class Ruangan
 
         return $stmt->execute();
     }
+
+    public function unassignStaffFromAllRooms($id_pengguna, $fallback_id)
+    {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET id_pengguna = :fallback_id 
+                  WHERE id_pengguna = :id_pengguna";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":fallback_id", $fallback_id);
+        $stmt->bindParam(":id_pengguna", $id_pengguna);
+
+        return $stmt->execute();
+    }
+
+    public function getRoomsByStaff($id_pengguna)
+    {
+        $query = "SELECT id_ruangan FROM " . $this->table_name . " WHERE id_pengguna = :id_pengguna";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id_pengguna", $id_pengguna);
+        $stmt->execute();
+
+        $ids = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $ids[] = $row['id_ruangan'];
+        }
+        return $ids;
+    }
 }

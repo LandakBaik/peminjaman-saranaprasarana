@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user->nama = $_POST['nama'];
         $user->email = $_POST['email'];
         $user->password = $_POST['password'];
-        $user->role = 'staff';
+        $user->role = $_POST['role'] ?? 'staff';
 
         if ($user->register()) {
 
@@ -22,9 +22,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ruangan = new \App\Models\Ruangan($db);
                 $ruangan->assignStaffToRooms($user->id_pengguna, $_POST['ruangan_ids']);
             }
-            header("Location: ../index.php?page=daftar-akun&success=added");
+            header("Location: ../index.php?page=akun-staff&success=added");
         } else {
-            header("Location: ../index.php?page=daftar-akun&error=add_failed");
+            header("Location: ../index.php?page=akun-staff&error=add_failed");
+        }
+        exit();
+    } elseif ($action == 'update') {
+        $user->id_pengguna = $_POST['id_pengguna'];
+        $user->nama = $_POST['nama'];
+        $user->email = $_POST['email'];
+        $user->role = $_POST['role'];
+
+        if ($user->update()) {
+            $ruangan = new \App\Models\Ruangan($db);
+            // Unassign dari semua ruangan dulu (set ke admin saat ini jika kolom NOT NULL)
+            $adminId = $_SESSION['user']['id'];
+            $ruangan->unassignStaffFromAllRooms($user->id_pengguna, $adminId);
+            
+            // Assign ke ruangan baru jika ada yang dipilih
+            if (isset($_POST['ruangan_ids']) && is_array($_POST['ruangan_ids']) && count($_POST['ruangan_ids']) > 0) {
+                $ruangan->assignStaffToRooms($user->id_pengguna, $_POST['ruangan_ids']);
+            }
+            header("Location: ../index.php?page=akun-staff&success=updated");
+        } else {
+            header("Location: ../index.php?page=akun-staff&error=update_failed");
         }
         exit();
     } elseif ($action == 'export') {
