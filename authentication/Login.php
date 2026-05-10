@@ -46,5 +46,11 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="../js/scripts.js"></script>
+        <!-- loading -->
+        <?php
+        require_once '../config/Autoloader.php';
+        $loader = new \App\Utils\LoadingScreen("Memproses...", "Mohon Tunggu Sebentar");
+        $loader->render();
+        ?>
     </body>
 </html>

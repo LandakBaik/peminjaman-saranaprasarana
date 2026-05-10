@@ -60,4 +60,17 @@
             password.type = "password";
         }
     });
+    // Loading
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        
+        if (typeof showLoadingOverlay === 'function') {
+            showLoadingOverlay();
+        }
+        
+        setTimeout(() => {
+            form.submit();
+        }, 1500);
+    });
 </script>

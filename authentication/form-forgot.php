@@ -40,3 +40,17 @@
     </p>
 
 </form>
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        
+        if (typeof showLoadingOverlay === 'function') {
+            showLoadingOverlay();
+        }
+        
+        setTimeout(() => {
+            form.submit();
+        }, 2000);
+    });
+</script>

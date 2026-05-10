@@ -60,6 +60,17 @@ document.querySelector('form').addEventListener('submit', function(e) {
     if (password !== confirm) {
         e.preventDefault();
         document.getElementById('confirm_password').classList.add('is-invalid');
+    } else {
+        e.preventDefault();
+        const form = this;
+        
+        if (typeof showLoadingOverlay === 'function') {
+            showLoadingOverlay();
+        }
+        
+        setTimeout(() => {
+            form.submit();
+        }, 2000);
     }
 });
 
