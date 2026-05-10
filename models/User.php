@@ -91,7 +91,9 @@ class User
     public function readAll()
     {
 
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT p.*, d.nomor_telepon, d.tanggal_lahir, d.jenis_kelamin, d.nama_panggilan, d.foto_profil 
+                  FROM " . $this->table_name . " p 
+                  LEFT JOIN detail_profil d ON p.id_pengguna = d.id_pengguna";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();

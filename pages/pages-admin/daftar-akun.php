@@ -225,9 +225,56 @@ $stmt = $userModel->readAll();
 
                                         <td class="text-center">
 
-                                            <button class="btn btn-info btn-sm">
+                                            <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#detailProfilModal<?= $row['id_pengguna'] ?>">
                                                 Detail
                                             </button>
+
+                                            <!-- Modal Detail Profil -->
+                                            <div class="modal fade text-start" id="detailProfilModal<?= $row['id_pengguna'] ?>" tabindex="-1" aria-labelledby="detailProfilModalLabel<?= $row['id_pengguna'] ?>" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content rounded-4 border-0 shadow">
+                                                        <div class="modal-header border-0 pb-0">
+                                                            <h5 class="modal-title fw-bold" id="detailProfilModalLabel<?= $row['id_pengguna'] ?>">Detail Profil</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <div class="d-flex align-items-center gap-3 mb-4">
+                                                                <img src="<?= !empty($row['foto_profil']) ? 'uploads/' . htmlspecialchars($row['foto_profil']) : 'assets/img/no-image.png' ?>" 
+                                                                     class="rounded-3" width="80" height="80" style="object-fit:cover;">
+                                                                <div>
+                                                                    <h4 class="fw-semibold mb-1"><?= htmlspecialchars($row['nama_panggilan'] ?? $row['nama'] ?? 'User') ?></h4>
+                                                                    <span class="mb-0 mt-1 small"><?= ucfirst(htmlspecialchars($row['role'])) ?></span>
+                                                                    <p class="text-secondary mb-0 mt-1 small"><?= htmlspecialchars($row['email']) ?></p>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <hr class="my-4">
+
+                                                            <div class="row g-3">
+                                                                <div class="col-12">
+                                                                    <label class="form-label text-muted small mb-1">Nama Lengkap</label>
+                                                                    <div class="form-control bg-light"><?= htmlspecialchars($row['nama'] ?? '-') ?></div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6">
+                                                                    <label class="form-label text-muted small mb-1">Nomor Telepon</label>
+                                                                    <div class="form-control bg-light"><?= htmlspecialchars($row['nomor_telepon'] ?? '-') ?></div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6">
+                                                                    <label class="form-label text-muted small mb-1">Tanggal Lahir</label>
+                                                                    <div class="form-control bg-light"><?= !empty($row['tanggal_lahir']) ? date('d/m/Y', strtotime($row['tanggal_lahir'])) : '-' ?></div>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <label class="form-label text-muted small mb-1">Jenis Kelamin</label>
+                                                                    <div class="form-control bg-light"><?= htmlspecialchars($row['jenis_kelamin'] ?? '-') ?></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-0">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </td>
 
@@ -394,6 +441,7 @@ $stmt = $userModel->readAll();
                             </div>
 
                         </form>
+
 
                     </div>
 
