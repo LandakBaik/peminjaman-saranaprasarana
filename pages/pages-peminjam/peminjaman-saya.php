@@ -98,26 +98,42 @@ $stmt = $peminjaman->readByUser($userId);
                             <tbody id="peminjamanBody">
                                 <?php
                                 $no = 1;
+                                $currentTime = date('Y-m-d H:i:s');
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    $displayStatus = $row['status'];
+
+                                    // Dynamically set status to "Dipinjam" if approved and time has started
+
+                                    if (strtolower($row['status']) == 'disetujui' || strtolower($row['status']) == 'approved') {
+                                        if ($currentTime >= $row['waktu_mulai']) {
+                                            $displayStatus = 'Dipinjam';
+                                        }
+                                    }
+
                                     $statusClass = 'bg-primary-subtle text-primary';
-                                    if ($row['status'] == 'approved') $statusClass = 'bg-success-subtle text-success';
-                                    if ($row['status'] == 'rejected') $statusClass = 'bg-danger-subtle text-danger';
-                                    if ($row['status'] == 'returned') $statusClass = 'bg-secondary-subtle text-secondary';
+                                    if (strtolower($displayStatus) == 'approved' || strtolower($displayStatus) == 'disetujui') $statusClass = 'bg-success-subtle text-success';
+                                    if (strtolower($displayStatus) == 'rejected' || strtolower($displayStatus) == 'ditolak') $statusClass = 'bg-danger-subtle text-danger';
+                                    if (strtolower($displayStatus) == 'returned' || strtolower($displayStatus) == 'dikembalikan' || strtolower($displayStatus) == 'selesai') $statusClass = 'bg-secondary-subtle text-secondary';
+                                    if (strtolower($displayStatus) == 'dipinjam') $statusClass = 'bg-info-subtle text-info';
+                                    if (strtolower($displayStatus) == 'menunggu pengembalian' || strtolower($displayStatus) == 'pengembalian') $statusClass = 'bg-warning-subtle text-warning';
                                 ?>
-                                    <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>" data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
+                                    <tr data-status="<?= ucfirst(htmlspecialchars($displayStatus)) ?>" data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
                                         <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td>
-                                            <strong><?= htmlspecialchars($row['nama_barang'] ?? '-') ?></strong><br>
+                                            <strong><?= htmlspecialchars($row['nama_barang'] ?? $row['nama_ruangan'] ?? '-') ?></strong><br>
                                             <small class="text-muted"><?= ucfirst($row['jenis_peminjaman']) ?></small>
                                         </td>
                                         <td>
                                             <small class="text-muted">
                                                 <?= htmlspecialchars($row['keperluan']) ?>
                                             </small>
+                                            <?php if (strtolower($row['status']) != 'pending' && !empty($row['staff_approval'])): ?>
+                                                <br><small class="text-primary" style="font-size: 0.8em;">Disetujui oleh: <?= htmlspecialchars($row['staff_approval']) ?></small>
+                                            <?php endif; ?>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
+                                            <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($displayStatus)) ?></span>
                                         </td>
                                         <td class="text-center">
                                             <?= htmlspecialchars($row['waktu_mulai']) ?>
@@ -130,10 +146,13 @@ $stmt = $peminjaman->readByUser($userId);
                                             <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
                                         </td>
                                         <td class="text-center">
-                                            <?php if ($row['status'] == 'pending'): ?>
+                                            <?php if (strtolower($row['status']) == 'pending'): ?>
                                                 <button class="btn btn-danger btn-sm">Batalkan</button>
-                                            <?php elseif ($row['status'] == 'approved'): ?>
-                                                <button class="btn btn-info btn-sm">Kembalikan</button>
+                                            <?php elseif (strtolower($displayStatus) == 'dipinjam'): ?>
+                                                <form action="controllers/PeminjamanController.php?action=ajukan_pengembalian" method="POST" class="d-inline">
+                                                    <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
+                                                    <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('Ajukan pengembalian untuk peminjaman ini?')">Ajukan Pengembalian</button>
+                                                </form>
                                             <?php else: ?>
                                                 -
                                             <?php endif; ?>

@@ -27,92 +27,113 @@ class Peminjaman
     }
 
     // 🔹 READ ALL
-    public function readAll()
+    public function readAll($isHistory = false)
     {
         $query = "SELECT p.*,
-                         u.nama as peminjam,
-                         s.nama as staff_approval
-                  FROM peminjaman p
-                  LEFT JOIN pengguna u ON p.id_pengguna = u.id_pengguna
-                  LEFT JOIN pengguna s ON p.approved_by = s.id_pengguna
-                  ORDER BY p.tanggal_dibuat DESC";
+                     u.nama as peminjam,
+                     s.nama as staff_approval
+              FROM peminjaman p
+              LEFT JOIN pengguna u ON p.id_pengguna = u.id_pengguna
+              LEFT JOIN pengguna s ON p.approved_by = s.id_pengguna
+              WHERE 1=1 ";
+
+        if ($isHistory) {
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        } else {
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        }
+
+        $query .= " ORDER BY p.tanggal_dibuat DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
+
         return $stmt;
     }
 
     // 🔹 READ BY USER
-    public function readByUser($id_pengguna)
+    public function readByUser($id_pengguna, $isHistory = false)
     {
         $query = "SELECT p.*,
-                         u.nama as peminjam,
-                         s.nama as staff_approval,
-                         b.nama_barang,
-                         r.nama_ruangan
+                     u.nama as peminjam,
+                     s.nama as staff_approval,
+                     b.nama_barang,
+                     r.nama_ruangan
 
-                  FROM peminjaman p
+              FROM peminjaman p
 
-                  LEFT JOIN pengguna u 
-                        ON p.id_pengguna = u.id_pengguna
+              LEFT JOIN pengguna u 
+                    ON p.id_pengguna = u.id_pengguna
 
-                  LEFT JOIN pengguna s 
-                        ON p.approved_by = s.id_pengguna
+              LEFT JOIN pengguna s 
+                    ON p.approved_by = s.id_pengguna
 
-                  LEFT JOIN detail_peminjaman dp 
-                        ON dp.id_peminjaman = p.id_peminjaman
+              LEFT JOIN detail_peminjaman dp 
+                    ON dp.id_peminjaman = p.id_peminjaman
 
-                  LEFT JOIN barang b 
-                        ON dp.id_barang = b.id_barang
+              LEFT JOIN barang b 
+                    ON dp.id_barang = b.id_barang
 
-                  LEFT JOIN ruangan r 
-                        ON b.id_ruangan = r.id_ruangan
+              LEFT JOIN ruangan r 
+                    ON b.id_ruangan = r.id_ruangan
 
-                  WHERE p.id_pengguna = :id_pengguna
-                  ORDER BY p.tanggal_dibuat DESC";
+              WHERE p.id_pengguna = :id_pengguna";
+
+        if ($isHistory) {
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        } else {
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        }
+
+        $query .= " ORDER BY p.tanggal_dibuat DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
+
         return $stmt;
     }
 
-    // 🔹 READ BY STAFF (FILTER BY ASSIGNED ROOMS)
-    public function readByStaff($id_pengguna)
+    public function readByStaff($id_pengguna, $isHistory = false)
     {
-
-        
-
         $query = "SELECT p.*,
-                         u.nama as peminjam,
-                         s.nama as staff_approval,
-                         GROUP_CONCAT(b.nama_barang SEPARATOR ', ') as nama_barang,
-                         MAX(r.nama_ruangan) as nama_ruangan
+                     u.nama as peminjam,
+                     s.nama as staff_approval,
+                     GROUP_CONCAT(b.nama_barang SEPARATOR ', ') as nama_barang,
+                     MAX(r.nama_ruangan) as nama_ruangan
 
-                  FROM peminjaman p
+              FROM peminjaman p
 
-                  LEFT JOIN pengguna u 
-                        ON p.id_pengguna = u.id_pengguna
+              LEFT JOIN pengguna u 
+                    ON p.id_pengguna = u.id_pengguna
 
-                  LEFT JOIN pengguna s 
-                        ON p.approved_by = s.id_pengguna
+              LEFT JOIN pengguna s 
+                    ON p.approved_by = s.id_pengguna
 
-                  INNER JOIN detail_peminjaman dp 
-                        ON dp.id_peminjaman = p.id_peminjaman
+              INNER JOIN detail_peminjaman dp 
+                    ON dp.id_peminjaman = p.id_peminjaman
 
-                  INNER JOIN barang b 
-                        ON dp.id_barang = b.id_barang
+              INNER JOIN barang b 
+                    ON dp.id_barang = b.id_barang
 
-                  INNER JOIN ruangan r 
-                        ON b.id_ruangan = r.id_ruangan
+              INNER JOIN ruangan r 
+                    ON b.id_ruangan = r.id_ruangan
 
-                  WHERE r.id_pengguna = :id_pengguna
-                  GROUP BY p.id_peminjaman
-                  ORDER BY p.tanggal_dibuat DESC";
+              WHERE r.id_pengguna = :id_pengguna";
+
+        if ($isHistory) {
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        } else {
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+        }
+
+        $query .= " GROUP BY p.id_peminjaman
+                ORDER BY p.tanggal_dibuat DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
+
         return $stmt;
     }
 
@@ -164,15 +185,13 @@ class Peminjaman
 
     } elseif ($this->jenis_peminjaman == 'ruangan') {
 
-        $query = "SELECT id_barang FROM barang WHERE id_ruangan = :id_ruangan";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id_ruangan", $this->id_ruangan);
-        $stmt->execute();
-
-        $barangList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $barangModel = new \App\Models\Barang($this->conn);
+        $barangList = $barangModel->getByRuangan($this->id_ruangan);
 
         foreach ($barangList as $b) {
-            $this->insertDetail($b['id_barang'], 1);
+            if ($b['stok_tersedia'] > 0) {
+                $this->insertDetail($b['id_barang'], $b['stok_tersedia']);
+            }
         }
     }
 
@@ -204,6 +223,21 @@ class Peminjaman
 
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":approved_by", $this->approved_by);
+        $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+
+        return $stmt->execute();
+    }
+
+    // 🔹 UPDATE STATUS ONLY
+    public function updateStatusOnly()
+    {
+        $query = "UPDATE peminjaman 
+                  SET status=:status 
+                  WHERE id_peminjaman = :id_peminjaman";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
         return $stmt->execute();

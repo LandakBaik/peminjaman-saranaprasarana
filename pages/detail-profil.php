@@ -35,7 +35,7 @@ if (!$profil) {
                         <!-- FOTO -->
                         <img src="<?= !empty($profil['foto_profil']) 
                             ? 'uploads/' . $profil['foto_profil'] 
-                            : 'img/profile.jpg'; ?>" 
+                            : 'assets/img/no-image.png'; ?>" 
                             class="rounded-3" width="115" height="115" style="object-fit:cover;">
 
                         <div>
