@@ -38,9 +38,9 @@ class Peminjaman
               WHERE 1=1 ";
 
         if ($isHistory) {
-            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         } else {
-            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         }
 
         $query .= " ORDER BY p.tanggal_dibuat DESC";
@@ -80,9 +80,9 @@ class Peminjaman
               WHERE p.id_pengguna = :id_pengguna";
 
         if ($isHistory) {
-            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         } else {
-            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         }
 
         $query .= " GROUP BY p.id_peminjaman
@@ -123,9 +123,9 @@ class Peminjaman
               WHERE r.id_pengguna = :id_pengguna";
 
         if ($isHistory) {
-            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         } else {
-            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
+            $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Returned', 'Dikembalikan')";
         }
 
         $query .= " GROUP BY p.id_peminjaman
@@ -239,6 +239,24 @@ class Peminjaman
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+
+        return $stmt->execute();
+    }
+
+    // 🔹 DELETE
+    public function delete()
+    {
+        // Detail peminjaman akan terhapus otomatis jika ada ON DELETE CASCADE di database.
+        // Jika tidak, kita hapus manual detailnya dulu.
+        
+        $queryDetail = "DELETE FROM detail_peminjaman WHERE id_peminjaman = :id_peminjaman";
+        $stmtDetail = $this->conn->prepare($queryDetail);
+        $stmtDetail->bindParam(":id_peminjaman", $this->id_peminjaman);
+        $stmtDetail->execute();
+
+        $query = "DELETE FROM " . $this->table_name . " WHERE id_peminjaman = :id_peminjaman";
+        $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
         return $stmt->execute();

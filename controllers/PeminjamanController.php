@@ -135,5 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit();
     }
+
+    // 🔥 HAPUS PEMINJAMAN (USER)
+    elseif ($action == 'delete') {
+        if (!isset($_SESSION['user'])) {
+            die("Unauthorized");
+        }
+
+        $peminjaman->id_peminjaman = $_POST['id_peminjaman'];
+
+        if ($peminjaman->delete()) {
+            header("Location: ../index.php?page=peminjaman-saya&success=deleted");
+        } else {
+            header("Location: ../index.php?page=peminjaman-saya&error=failed");
+        }
+        exit();
+    }
 }
 ?>

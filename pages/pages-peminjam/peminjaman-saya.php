@@ -178,7 +178,13 @@ $stmt = $peminjaman->readByUser($userId);
                                                     Detail
                                                 </button>
                                                 <?php if (strtolower($row['status']) == 'pending'): ?>
-                                                    <button class="btn btn-danger btn-sm">Batalkan</button>
+                                                    <form action="controllers/PeminjamanController.php?action=delete"
+                                                        method="POST" class="d-inline">
+                                                        <input type="hidden" name="id_peminjaman"
+                                                            value="<?= $row['id_peminjaman'] ?>">
+                                                        <button type="submit" class="btn btn-danger btn-sm w-100"
+                                                            onclick="return confirm('Apakah anda yakin ingin membatalkan peminjaman ini? Tindakan ini tidak dapat dibatalkan.')">Batalkan</button>
+                                                    </form>
                                                 <?php elseif (strtolower($displayStatus) == 'dipinjam'): ?>
                                                     <form
                                                         action="controllers/PeminjamanController.php?action=ajukan_pengembalian"
