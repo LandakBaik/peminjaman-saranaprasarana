@@ -57,8 +57,8 @@ class Peminjaman
         $query = "SELECT p.*,
                      u.nama as peminjam,
                      s.nama as staff_approval,
-                     b.nama_barang,
-                     r.nama_ruangan
+                     GROUP_CONCAT(CONCAT(b.nama_barang, ' (', dp.kuantitas, ')') SEPARATOR ', ') as daftar_barang,
+                     MAX(r.nama_ruangan) as nama_ruangan
 
               FROM peminjaman p
 
@@ -85,7 +85,8 @@ class Peminjaman
             $query .= " AND p.status NOT IN ('Selesai', 'Ditolak', 'Dibatalkan', 'Returned', 'Dikembalikan')";
         }
 
-        $query .= " ORDER BY p.tanggal_dibuat DESC";
+        $query .= " GROUP BY p.id_peminjaman
+                ORDER BY p.tanggal_dibuat DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id_pengguna', $id_pengguna);
