@@ -10,7 +10,7 @@ $barangModel = new \App\Models\Barang($db);
 $action = $_GET['action'] ?? '';
 
 // ============================================================
-// 🔍 AJAX: CEK STOK TERSEDIA BERDASARKAN RANGE WAKTU (GET)
+// AJAX: CEK STOK TERSEDIA BERDASARKAN RANGE WAKTU (GET)
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'check_stock') {
     header('Content-Type: application/json');
@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // 🔥 APPROVAL STAFF
+    // APPROVAL STAFF
     elseif ($action == 'update_status') {
 
         if (!isset($_SESSION['user'])) {
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // 🔥 AJUKAN PENGEMBALIAN (USER)
+    // AJUKAN PENGEMBALIAN (USER)
     elseif ($action == 'ajukan_pengembalian') {
         if (!isset($_SESSION['user'])) {
             die("Unauthorized");
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // 🔥 VERIFIKASI PENGEMBALIAN (STAFF)
+    // VERIFIKASI PENGEMBALIAN (STAFF)
     elseif ($action == 'verifikasi_pengembalian') {
         if (!isset($_SESSION['user'])) {
             die("Unauthorized");
@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // 🔥 HAPUS PEMINJAMAN (USER)
+    // HAPUS PEMINJAMAN (USER)
     elseif ($action == 'delete') {
         if (!isset($_SESSION['user'])) {
             die("Unauthorized");
