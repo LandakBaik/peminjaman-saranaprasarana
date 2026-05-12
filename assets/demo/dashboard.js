@@ -1,102 +1,45 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const fullData = [
-    { value: 1 },
-    { value: 3 },
-    { value: 2 },
-    { value: 1 },
-    { value: 8 },
-    { value: 6 },
-    { value: 3 },
-    { value: 3 },
-    { value: 2 },
-    { value: 2 },
-    { value: 5 },
-    { value: 4 },
-    { value: 3 },
-  ];
-
+  // Initialize charts
   App.lineChart.init();
 
-  function processData(type) {
-    let labels = [];
-    let values = fullData.map((d) => d.value);
+  function updateDashboard() {
+    if (!window.dashboardStats) return;
 
-    if (type === "daily") {
-      values = values.slice(-7);
-      labels = values.map(
-        (_, i) =>
-          ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"][
-            i % 7
-          ],
-      );
-
-      let hari = [0, 0, 0, 0, 0, 0, 0];
-      values.forEach((val, i) => {
-        const index = Math.floor(i / 1) % 7;
-        hari[index] += val;
-      });
-    } else if (type === "weekly") {
-      labels = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
-
-      let minggu = [0, 0, 0, 0];
-      values.forEach((val, i) => {
-        const index = Math.floor(i / 3);
-        if (index < 4) minggu[index] += val;
-      });
-
-      values = minggu;
-    } else if (type === "monthly") {
-      labels = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
-
-      let bulan = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      values.forEach((val, i) => {
-        const index = Math.floor(i / 5);
-        if (index < 12) bulan[index] += val;
-      });
-
-      values = bulan;
+    // Update Line Chart (Trend)
+    if (window.dashboardStats.trend) {
+      const { labels, values } = window.dashboardStats.trend;
+      App.lineChart.update(labels, values);
     }
 
-    return { labels, values };
-  }
-
-  // =========================
-  // UPDATE SEMUA KOMPONEN
-  // =========================
-  function updateDashboard(type) {
-    const { labels, values } = processData(type);
-
-    App.lineChart.update(labels, values);
-
-    // dummy KPI
-    const kpiData = [8, 1, 1];
+    // Update KPI and Doughnut Chart
+    const kpiData = [
+      window.dashboardStats.total || 0,
+      window.dashboardStats.disetujui || 0,
+      window.dashboardStats.ditolak || 0,
+      window.dashboardStats.terlambat || 0
+    ];
 
     App.kpi.update(kpiData);
-    App.doughnutChart.render(kpiData);
+
+    // Doughnut chart only shows the breakdown (excluding total)
+    App.doughnutChart.render([
+      window.dashboardStats.disetujui || 0,
+      window.dashboardStats.ditolak || 0,
+      window.dashboardStats.terlambat || 0
+    ]);
   }
 
-  // =========================
-  // EVENT
-  // =========================
+  // Initial update
+  updateDashboard();
+
+  // Handle filter changes (handled by page reload in dashboard.php, 
+  // but we keep the listener if needed for future SPA-like behavior)
   const filter = document.getElementById("filterType");
   if (filter) {
     filter.addEventListener("change", function () {
-      updateDashboard(this.value);
+      // In current implementation, dashboard.php reloads the page on change
+      // so this might not be strictly necessary, but good for completeness
+      // updateDashboard(); 
     });
   }
-
-  updateDashboard("daily");
-});
+});

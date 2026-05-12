@@ -261,4 +261,307 @@ class Peminjaman
 
         return $stmt->execute();
     }
+
+    public function getStats($role, $id_pengguna = null, $filter = 'daily')
+    {
+        $stats = ['total' => 0, 'disetujui' => 0, 'ditolak' => 0, 'terlambat' => 0];
+        $filterQuery = "";
+
+        if ($filter === 'daily') {
+            $filterQuery = " AND DATE(p.tanggal_dibuat) = CURDATE()";
+        } elseif ($filter === 'weekly') {
+            $filterQuery = " AND p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)";
+        } elseif ($filter === 'monthly') {
+            $filterQuery = " AND p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)";
+        } elseif ($filter === 'yearly') {
+            $filterQuery = " AND YEAR(p.tanggal_dibuat) = YEAR(CURDATE())";
+        }
+
+        $baseQuery = "SELECT COUNT(*) FROM peminjaman p ";
+        $joinQuery = "";
+        $whereQuery = " WHERE 1=1 " . $filterQuery;
+
+        if ($role === 'user') {
+            $whereQuery .= " AND p.id_pengguna = :id_pengguna";
+        } elseif ($role === 'staff') {
+            $joinQuery = " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
+                           INNER JOIN barang b ON dp.id_barang = b.id_barang 
+                           INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+            $whereQuery .= " AND r.id_pengguna = :id_pengguna";
+        }
+
+        // Total
+        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery);
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        $stats['total'] = $stmt->fetchColumn();
+
+        // Disetujui
+        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status IN ('Disetujui', 'Dipinjam', 'Selesai')");
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        $stats['disetujui'] = $stmt->fetchColumn();
+
+        // Ditolak
+        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status = 'Ditolak'");
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        $stats['ditolak'] = $stmt->fetchColumn();
+
+        // Terlambat
+        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status = 'Dipinjam' AND p.waktu_selesai < NOW()");
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        $stats['terlambat'] = $stmt->fetchColumn();
+
+        return $stats;
+    }
+
+    public function getRecent($role, $id_pengguna = null, $limit = 5, $filter = 'daily')
+    {
+        $filterQuery = "";
+        if ($filter === 'daily') {
+            $filterQuery = " AND DATE(p.tanggal_dibuat) = CURDATE()";
+        } elseif ($filter === 'weekly') {
+            $filterQuery = " AND p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)";
+        } elseif ($filter === 'monthly') {
+            $filterQuery = " AND p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)";
+        } elseif ($filter === 'yearly') {
+            $filterQuery = " AND YEAR(p.tanggal_dibuat) = YEAR(CURDATE())";
+        }
+
+        $query = "SELECT p.*, 
+                         GROUP_CONCAT(DISTINCT b.nama_barang SEPARATOR ', ') as items,
+                         MAX(r.nama_ruangan) as nama_ruangan
+                  FROM peminjaman p
+                  LEFT JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  LEFT JOIN barang b ON dp.id_barang = b.id_barang
+                  LEFT JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+
+        if ($role === 'user') {
+            $query .= " WHERE p.id_pengguna = :id_pengguna " . $filterQuery;
+        } elseif ($role === 'staff') {
+            // Re-join for filtering but keep outer joins for data
+            $query .= " INNER JOIN detail_peminjaman dp2 ON p.id_peminjaman = dp2.id_peminjaman 
+                        INNER JOIN barang b2 ON dp2.id_barang = b2.id_barang 
+                        INNER JOIN ruangan r2 ON b2.id_ruangan = r2.id_ruangan 
+                        WHERE r2.id_pengguna = :id_pengguna " . $filterQuery;
+        } else {
+            $query .= " WHERE 1=1 " . $filterQuery;
+        }
+
+        $query .= " GROUP BY p.id_peminjaman ORDER BY p.tanggal_dibuat DESC LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    public function getTrendData($role, $id_pengguna = null, $filter = 'daily')
+    {
+        $labels = [];
+        $values = [];
+
+        // DAILY → per 3 jam
+        if ($filter === 'daily') {
+
+            $hours = [0, 3, 6, 9, 12, 15, 18, 21];
+
+            foreach ($hours as $hour) {
+
+                $start = date('Y-m-d') . ' ' .
+                    str_pad($hour, 2, '0', STR_PAD_LEFT) .
+                    ':00:00';
+
+                $endHour = $hour + 3;
+
+                if ($endHour >= 24) {
+
+                    $end = date('Y-m-d', strtotime('+1 day')) .
+                        ' 00:00:00';
+
+                } else {
+
+                    $end = date('Y-m-d') . ' ' .
+                        str_pad($endHour, 2, '0', STR_PAD_LEFT) .
+                        ':00:00';
+                }
+
+                $labels[] = sprintf('%02d:00', $hour);
+
+                $values[] = $this->getCountByRange(
+                    $role,
+                    $id_pengguna,
+                    $start,
+                    $end
+                );
+            }
+        }
+
+        // WEEKLY → 7 hari terakhir
+        elseif ($filter === 'weekly') {
+
+            for ($i = 6; $i >= 0; $i--) {
+
+                $date = date('Y-m-d', strtotime("-$i days"));
+
+                $labels[] = date('D', strtotime($date));
+
+                $values[] = $this->getCountByDate(
+                    $role,
+                    $id_pengguna,
+                    $date
+                );
+            }
+        }
+
+        // MONTHLY → Week 1-4
+        elseif ($filter === 'monthly') {
+
+            for ($i = 3; $i >= 0; $i--) {
+
+                $labels[] = 'Week ' . (4 - $i);
+
+                $values[] = $this->getCountByWeek(
+                    $role,
+                    $id_pengguna,
+                    $i
+                );
+            }
+        }
+
+        // YEARLY → Jan-Dec
+        elseif ($filter === 'yearly') {
+
+            $year = date('Y');
+
+            for ($m = 1; $m <= 12; $m++) {
+
+                $monthStr = str_pad($m, 2, '0', STR_PAD_LEFT);
+
+                $monthYear = "$year-$monthStr";
+
+                $labels[] = date(
+                    'M',
+                    strtotime("$monthYear-01")
+                );
+
+                $values[] = $this->getCountByMonth(
+                    $role,
+                    $id_pengguna,
+                    $monthYear
+                );
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'values' => $values
+        ];
+    }
+
+    private function getCountByDate($role, $id_pengguna, $date)
+    {
+        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        if ($role === 'staff') {
+            $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
+                        INNER JOIN barang b ON dp.id_barang = b.id_barang 
+                        INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+        }
+        $query .= " WHERE DATE(p.tanggal_dibuat) = :date";
+        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':date', $date);
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    private function getCountByWeek($role, $id_pengguna, $weeksAgo)
+    {
+        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        if ($role === 'staff') {
+            $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
+                        INNER JOIN barang b ON dp.id_barang = b.id_barang 
+                        INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+        }
+        $query .= " WHERE YEARWEEK(p.tanggal_dibuat, 1) = YEARWEEK(CURDATE() - INTERVAL :weeks WEEK, 1)";
+        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':weeks', $weeksAgo, \PDO::PARAM_INT);
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    private function getCountByMonth($role, $id_pengguna, $monthYear)
+    {
+        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        if ($role === 'staff') {
+            $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
+                        INNER JOIN barang b ON dp.id_barang = b.id_barang 
+                        INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+        }
+        $query .= " WHERE DATE_FORMAT(p.tanggal_dibuat, '%Y-%m') = :month";
+        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':month', $monthYear);
+        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    private function getCountByRange($role, $id_pengguna, $start, $end)
+    {
+        $query = "SELECT COUNT(*) FROM peminjaman p ";
+
+        if ($role === 'staff') {
+
+            $query .= "
+            INNER JOIN detail_peminjaman dp
+                ON p.id_peminjaman = dp.id_peminjaman
+
+            INNER JOIN barang b
+                ON dp.id_barang = b.id_barang
+
+            INNER JOIN ruangan r
+                ON b.id_ruangan = r.id_ruangan
+        ";
+        }
+
+        $query .= "
+        WHERE p.tanggal_dibuat >= :start
+        AND p.tanggal_dibuat < :end
+    ";
+
+        if ($role === 'user') {
+            $query .= " AND p.id_pengguna = :id_pengguna";
+        }
+
+        if ($role === 'staff') {
+            $query .= " AND r.id_pengguna = :id_pengguna";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':start', $start);
+        $stmt->bindParam(':end', $end);
+
+        if ($role !== 'admin') {
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
+        }
+
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
 }
