@@ -63,7 +63,6 @@ $stmt = $peminjaman->readByStaff($userId);
                         </button>
                         <input type="text" class="form-control w-25" placeholder="Search...">
                     </div>
-
                     <!-- Table -->
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
@@ -72,7 +71,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <th>No</th>
                                     <th>Peminjam</th>
                                     <th>Tipe</th>
-                                    <th>Keterangan</th>
+                                    <th>Ruangan</th>
                                     <th>Status</th>
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
@@ -87,46 +86,57 @@ $stmt = $peminjaman->readByStaff($userId);
                                     $statusClass = 'bg-primary-subtle text-primary';
                                     if (strtolower($row['status']) == 'approved' || strtolower($row['status']) == 'disetujui') $statusClass = 'bg-success-subtle text-success';
                                     if (strtolower($row['status']) == 'rejected' || strtolower($row['status']) == 'ditolak') $statusClass = 'bg-danger-subtle text-danger';
-                                    if (strtolower($row['status']) == 'returned' || strtolower($row['status']) == 'dikembalikan') $statusClass = 'bg-secondary-subtle text-secondary';
+                                    if (strtolower($row['status']) == 'returned' || strtolower($row['status']) == 'dikembalikan' || strtolower($row['status']) == 'selesai') $statusClass = 'bg-secondary-subtle text-secondary';
+                                    if (strtolower($row['status']) == 'dipinjam') $statusClass = 'bg-info-subtle text-info';
 
-                                    // Untuk peminjaman ruangan, biasanya jenisnya adalah ruangan
-                                    $nama_tampil = $row['jenis_peminjaman'] == 'ruangan' ? $row['nama_ruangan'] : $row['nama_barang'];
+                                    $tgl = date('dmY', strtotime($row['tanggal_dibuat']));
+                                    $kode = "PJM-" . $tgl . "-" . $row['id_peminjaman'];
                                 ?>
                                 <tr>
                                     <td class="text-center"><?= $no++ ?></td>
-                                    <td><?= htmlspecialchars($row['peminjam'] ?? '-') ?></td>
                                     <td>
-                                        <strong><?= htmlspecialchars($nama_tampil ?? '-') ?></strong><br>
-                                        <small class="text-muted"><?= ucfirst($row['jenis_peminjaman']) ?></small>
+                                        <strong><?= htmlspecialchars($row['peminjam'] ?? '-') ?></strong><br>
+                                        <small class="text-muted">ID: #<?= $row['id_pengguna'] ?></small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge border text-dark bg-light">
+                                            <?= ucfirst($row['jenis_peminjaman']) ?>
+                                        </span>
                                     </td>
                                     <td>
-                                        <small class="text-muted">
-                                            <?= htmlspecialchars($row['keperluan']) ?>
-                                        </small>
+                                        <strong><?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?></strong>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
                                     </td>
-                                    <td class="text-center"><?= htmlspecialchars($row['waktu_mulai']) ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($row['waktu_selesai']) ?></td>
-                                    <td class="text-center">
+                                    <td class="text-center small">
+                                        <?= date('d M, H:i', strtotime($row['waktu_mulai'])) ?>
+                                    </td>
+                                    <td class="text-center small">
+                                        <?= date('d M, H:i', strtotime($row['waktu_selesai'])) ?>
+                                    </td>
+                                    <td class="text-center small">
                                         <?= htmlspecialchars(date('d M Y', strtotime($row['tanggal_dibuat']))) ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if (strtolower($row['status']) == 'pending'): ?>
-                                            <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="d-inline">
-                                                <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                                <input type="hidden" name="status" value="Disetujui">
-                                                <button type="submit" class="btn btn-success btn-sm mb-1" onclick="return confirm('Setujui peminjaman ini?')">Setuju</button>
-                                            </form>
-                                            <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="d-inline">
-                                                <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                                <input type="hidden" name="status" value="Ditolak">
-                                                <button type="submit" class="btn btn-danger btn-sm mb-1" onclick="return confirm('Tolak peminjaman ini?')">Tolak</button>
-                                            </form>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
+                                        <button class="btn btn-primary btn-sm btn-detail" 
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detailModal" 
+                                            data-id="<?= $row['id_peminjaman'] ?>"
+                                            data-kode="<?= htmlspecialchars($kode) ?>"
+                                            data-peminjam="<?= htmlspecialchars($row['peminjam'] ?? '-') ?>"
+                                            data-ruangan="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
+                                            data-jenis="<?= htmlspecialchars(ucfirst($row['jenis_peminjaman'])) ?>"
+                                            data-mulai="<?= htmlspecialchars($row['waktu_mulai']) ?>"
+                                            data-selesai="<?= htmlspecialchars($row['waktu_selesai']) ?>"
+                                            data-keperluan="<?= htmlspecialchars($row['keperluan']) ?>"
+                                            data-catatan="<?= htmlspecialchars($row['catatan'] ?? '-') ?>"
+                                            data-jaminan="<?= htmlspecialchars($row['jaminan'] ?? '') ?>"
+                                            data-barang="<?= htmlspecialchars($row['nama_barang'] ?? '-') ?>"
+                                            data-status="<?= htmlspecialchars(ucfirst($row['status'])) ?>"
+                                            data-keterangan="<?= htmlspecialchars($row['keterangan'] ?? '') ?>">
+                                            Detail
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php } ?>
@@ -145,10 +155,238 @@ $stmt = $peminjaman->readByStaff($userId);
         </div>
     </main>
 
+    <!-- Modal Detail -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+
+                <!-- Header -->
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">Detail Peminjaman</h5>
+                        <small class="text-muted">Konfirmasi dan tinjau pengajuan peminjaman</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <!-- LEFT -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <h6 class="fw-bold text-primary mb-1">Informasi Peminjaman</h6>
+                                            <small class="text-muted" id="det-kode"></small>
+                                        </div>
+                                        <span class="badge rounded-pill px-3 py-2" id="det-status"></span>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="text-muted small">Peminjam</label>
+                                            <div class="fw-semibold" id="det-peminjam"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="text-muted small">Jenis</label>
+                                            <div class="fw-semibold" id="det-jenis"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="text-muted small">Ruangan</label>
+                                            <div class="fw-semibold" id="det-ruangan"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Waktu Mulai</label>
+                                                <div class="fw-semibold" id="det-mulai"></div>
+                                            </div>
+                                            <div>
+                                                <label class="text-muted small">Waktu Selesai</label>
+                                                <div class="fw-semibold" id="det-selesai"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body">
+                                    <label class="fw-bold mb-2">Keperluan</label>
+                                    <div class="bg-light rounded-3 p-3 mb-4" id="det-keperluan"></div>
+
+                                    <label class="fw-bold mb-2">Catatan Peminjam</label>
+                                    <div class="bg-light rounded-3 p-3 text-muted mb-4" id="det-catatan"></div>
+
+                                    <!-- Alasan Penolakan (Input for Staff) -->
+                                    <div id="rejection-input-section" style="display:none;">
+                                        <label class="fw-bold mb-2 text-danger">Alasan Penolakan (Wajib jika menolak)</label>
+                                        <textarea id="rejection-reason-input" class="form-control border-danger-subtle" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
+                                    </div>
+
+                                    <!-- Alasan Penolakan (Display if already rejected) -->
+                                    <div id="rejection-display-section" style="display:none;">
+                                        <label class="fw-bold mb-2 text-danger">Alasan Penolakan</label>
+                                        <div class="bg-danger-subtle text-danger rounded-3 p-3" id="det-keterangan"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="col-lg-4">
+                            <!-- Barang -->
+                            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                <div class="card-body">
+                                    <label class="fw-bold mb-3">Daftar Barang / Aset</label>
+                                    <div id="det-barang" class="pe-1" style="max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Jaminan -->
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body text-center">
+                                    <label class="fw-bold mb-3 d-block text-start">Foto Jaminan</label>
+                                    <div class="bg-light rounded-4 overflow-hidden d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <img id="det-jaminan" class="img-fluid w-100 h-100" style="object-fit: contain; display:none;">
+                                        <div id="det-no-jaminan" class="text-center text-muted py-5">
+                                            <i class="fas fa-image fa-2x mb-2 opacity-50"></i>
+                                            <div class="small">Tidak ada foto jaminan</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                    <div id="action-buttons" class="d-flex gap-2 w-100 justify-content-end">
+                        <!-- Dynamic Buttons -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <?php include 'footer.php'; ?>
     </footer>
 </div>
-<?
 
+<script>
+document.querySelectorAll('.btn-detail').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const d = btn.dataset;
+
+        // Basic Info
+        document.getElementById('det-kode').textContent = d.kode;
+        document.getElementById('det-peminjam').textContent = d.peminjam;
+        document.getElementById('det-jenis').textContent = d.jenis;
+        document.getElementById('det-ruangan').textContent = d.ruangan;
+        document.getElementById('det-mulai').textContent = d.mulai;
+        document.getElementById('det-selesai').textContent = d.selesai;
+        document.getElementById('det-keperluan').textContent = d.keperluan;
+        document.getElementById('det-catatan').textContent = d.catatan || '-';
+
+        // Status Badge
+        const status = document.getElementById('det-status');
+        status.textContent = d.status;
+        status.className = 'badge rounded-pill px-3 py-2';
+        
+        const colors = {
+            'pending': 'primary',
+            'disetujui': 'success',
+            'approved': 'success',
+            'ditolak': 'danger',
+            'rejected': 'danger',
+            'dipinjam': 'info'
+        };
+        const type = colors[d.status.toLowerCase()] || 'secondary';
+        status.classList.add(`bg-${type}-subtle`, `text-${type}`);
+
+        // Items
+        const barangContainer = document.getElementById('det-barang');
+        if (d.barang && d.barang !== '-') {
+            barangContainer.innerHTML = d.barang.split(', ').map(item => `
+                <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
+                    <i class="fas fa-box text-primary me-2"></i>
+                    <span class="small">${item}</span>
+                </div>
+            `).join('');
+        } else {
+            barangContainer.innerHTML = '<div class="text-muted small">Tidak ada daftar barang</div>';
+        }
+
+        // Jaminan
+        const img = document.getElementById('det-jaminan');
+        const noImg = document.getElementById('det-no-jaminan');
+        if (d.jaminan) {
+            img.src = 'uploads/' + d.jaminan;
+            img.style.display = 'block';
+            noImg.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+            noImg.style.display = 'block';
+        }
+
+        // Rejection Section Handling
+        const rejectInputSec = document.getElementById('rejection-input-section');
+        const rejectDispSec = document.getElementById('rejection-display-section');
+        const detKeterangan = document.getElementById('det-keterangan');
+        const rejectInput = document.getElementById('rejection-reason-input');
+
+        rejectInputSec.style.display = 'none';
+        rejectDispSec.style.display = 'none';
+        rejectInput.value = '';
+
+        if (d.status.toLowerCase() === 'pending') {
+            rejectInputSec.style.display = 'block';
+        } else if (d.status.toLowerCase() === 'ditolak' || d.status.toLowerCase() === 'rejected') {
+            rejectDispSec.style.display = 'block';
+            detKeterangan.textContent = d.keterangan || 'Tidak ada alasan penolakan spesifik.';
+        }
+
+        // Action Buttons
+        const actionBox = document.getElementById('action-buttons');
+        actionBox.innerHTML = '';
+        
+        if (d.status.toLowerCase() === 'pending') {
+            actionBox.innerHTML = `
+                <form id="form-reject" action="controllers/PeminjamanController.php?action=update_status" method="POST" class="m-0">
+                    <input type="hidden" name="id_peminjaman" value="${d.id}">
+                    <input type="hidden" name="status" value="Ditolak">
+                    <input type="hidden" name="keterangan" id="hidden-reject-reason">
+                    <button type="button" class="btn btn-outline-danger px-4" id="btn-submit-reject">Tolak</button>
+                </form>
+                <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="m-0">
+                    <input type="hidden" name="id_peminjaman" value="${d.id}">
+                    <input type="hidden" name="status" value="Disetujui">
+                    <button type="submit" class="btn btn-primary px-4" onclick="return confirm('Setujui pengajuan ini?')">Setujui Peminjaman</button>
+                </form>
+            `;
+
+            // Handle Rejection Submit
+            document.getElementById('btn-submit-reject').addEventListener('click', () => {
+                const reason = rejectInput.value.trim();
+                if (!reason) {
+                    alert('Harap masukkan alasan penolakan!');
+                    rejectInput.focus();
+                    return;
+                }
+                if (confirm('Tolak pengajuan ini?')) {
+                    document.getElementById('hidden-reject-reason').value = reason;
+                    document.getElementById('form-reject').submit();
+                }
+            });
+        } else {
+            actionBox.innerHTML = `<button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>`;
+        }
+    });
+});
+</script>
+<?php
+// PHP closing logic if any
 ?>

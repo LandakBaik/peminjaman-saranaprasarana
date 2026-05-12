@@ -174,7 +174,8 @@ $stmt = $peminjaman->readByUser($userId);
                                                     data-jaminan="<?= htmlspecialchars($row['jaminan'] ?? '') ?>"
                                                     data-barang="<?= htmlspecialchars($row['daftar_barang'] ?? '-') ?>"
                                                     data-status="<?= htmlspecialchars(ucfirst($displayStatus)) ?>"
-                                                    data-approval="<?= htmlspecialchars($row['staff_approval'] ?? '-') ?>">
+                                                    data-approval="<?= htmlspecialchars($row['staff_approval'] ?? '-') ?>"
+                                                    data-keterangan="<?= htmlspecialchars($row['keterangan'] ?? '') ?>">
                                                     Detail
                                                 </button>
                                                 <?php if (strtolower($row['status']) == 'pending'): ?>
@@ -354,8 +355,17 @@ $stmt = $peminjaman->readByUser($userId);
                                     Catatan
                                 </label>
 
-                                <div class="bg-light rounded-3 p-3 text-muted"
+                                <div class="bg-light rounded-3 p-3 text-muted mb-4"
                                     id="det-catatan"></div>
+
+                                <!-- Alasan Penolakan -->
+                                <div id="rejection-display-section" style="display:none;">
+                                    <label class="fw-bold mb-2 text-danger">
+                                        Alasan Penolakan
+                                    </label>
+                                    <div class="bg-danger-subtle text-danger rounded-3 p-3"
+                                        id="det-keterangan"></div>
+                                </div>
 
                             </div>
                         </div>
@@ -480,6 +490,17 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
             `bg-${type}-subtle`,
             `text-${type}`
         );
+
+        // KETERANGAN
+        const rejectDispSec = document.getElementById('rejection-display-section');
+        const detKeterangan = document.getElementById('det-keterangan');
+
+        if (d.status.toLowerCase() === 'ditolak' || d.status.toLowerCase() === 'rejected') {
+            rejectDispSec.style.display = 'block';
+            detKeterangan.textContent = d.keterangan || 'Tidak ada alasan penolakan spesifik.';
+        } else {
+            rejectDispSec.style.display = 'none';
+        }
 
         // BARANG
         document.getElementById('det-barang').innerHTML =

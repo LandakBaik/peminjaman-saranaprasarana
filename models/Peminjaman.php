@@ -20,6 +20,7 @@ class Peminjaman
     public $keperluan;
     public $catatan;
     public $jaminan;
+    public $keterangan;
 
     public function __construct($db)
     {
@@ -100,7 +101,7 @@ class Peminjaman
         $query = "SELECT p.*,
                      u.nama as peminjam,
                      s.nama as staff_approval,
-                     GROUP_CONCAT(b.nama_barang SEPARATOR ', ') as nama_barang,
+                     GROUP_CONCAT(CONCAT(b.nama_barang, ' (', dp.kuantitas, ')') SEPARATOR ', ') as nama_barang,
                      MAX(r.nama_ruangan) as nama_ruangan
 
               FROM peminjaman p
@@ -250,13 +251,14 @@ class Peminjaman
     public function updateStatus()
     {
         $query = "UPDATE peminjaman 
-                  SET status=:status, approved_by=:approved_by 
+                  SET status=:status, approved_by=:approved_by, keterangan=:keterangan
                   WHERE id_peminjaman = :id_peminjaman";
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":approved_by", $this->approved_by);
+        $stmt->bindParam(":keterangan", $this->keterangan);
         $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
         return $stmt->execute();

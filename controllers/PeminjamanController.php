@@ -185,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $peminjaman->id_peminjaman = $id_peminjaman;
         $peminjaman->status        = $status_baru;
         $peminjaman->approved_by   = $_SESSION['user']['id'];
+        $peminjaman->keterangan    = $_POST['keterangan'] ?? null;
 
         if ($peminjaman->updateStatus()) {
             header("Location: ../index.php?page=approve-peminjaman&success=updated");
