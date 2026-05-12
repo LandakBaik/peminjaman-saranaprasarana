@@ -21,6 +21,9 @@ $roomName = $ruangan['nama_ruangan'];
 
 $barangModel = new \App\Models\Barang($db);
 $barangList = $barangModel->getByRuangan($id_ruangan);
+
+$peminjamanModel = new \App\Models\Peminjaman($db);
+$bookedDates = $peminjamanModel->getApprovedDatesByRoom($id_ruangan);
 ?>
 
 <div id="layoutSidenav_content">
@@ -372,6 +375,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
         const inputMulai      = document.getElementById('waktu_mulai');
         const inputSelesai    = document.getElementById('waktu_selesai');
         const idRuangan       = '<?= $id_ruangan ?>';
+        const bookedDates     = <?= json_encode($bookedDates) ?>;
 
         // Stok awal dari server (sebelum ada input waktu)
         const stokAwal = {};
@@ -471,25 +475,38 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
         }
 
         // =========================
-        // VALIDASI JAM (07:00 - 22:00)
+        // VALIDASI JAM (07:00 - 22:00) & SAME DAY
         // =========================
         function validateTimeRange() {
             if (inputMulai.value) {
-                const time = inputMulai.value.split('T')[1];
-                const hour = parseInt(time.split(':')[0], 10);
-                if (hour < 7 || hour >= 22) {
+                const dateMulai = inputMulai.value.split('T')[0];
+                const timeMulai = inputMulai.value.split('T')[1];
+                const hourMulai = parseInt(timeMulai.split(':')[0], 10);
+                
+                if (hourMulai < 7 || hourMulai >= 22) {
                     alert('⚠️ Waktu mulai harus antara jam 07:00 - 22:00');
-                    inputMulai.value = inputMulai.value.split('T')[0] + 'T07:00';
+                    inputMulai.value = dateMulai + 'T07:00';
                 }
             }
-            if (inputSelesai.value) {
-                const time = inputSelesai.value.split('T')[1];
-                const hour = parseInt(time.split(':')[0], 10);
-                const min  = parseInt(time.split(':')[1], 10);
-                // Maksimal 22:00
-                if (hour < 7 || hour > 22 || (hour === 22 && min > 0)) {
+
+            if (inputMulai.value && inputSelesai.value) {
+                const dateMulai = inputMulai.value.split('T')[0];
+                const dateSelesai = inputSelesai.value.split('T')[0];
+                const timeSelesai = inputSelesai.value.split('T')[1];
+                const hourSelesai = parseInt(timeSelesai.split(':')[0], 10);
+                const minSelesai  = parseInt(timeSelesai.split(':')[1], 10);
+
+                // 1. Cek harus hari yang sama
+                if (dateMulai !== dateSelesai) {
+                    alert('⚠️ Peminjaman harus diselesaikan pada hari yang sama.');
+                    inputSelesai.value = dateMulai + 'T' + timeSelesai;
+                    return validateTimeRange(); // Re-run validation for the new value
+                }
+
+                // 2. Cek jam selesai (Maksimal 22:00)
+                if (hourSelesai < 7 || hourSelesai > 22 || (hourSelesai === 22 && minSelesai > 0)) {
                     alert('⚠️ Waktu selesai harus antara jam 07:00 - 22:00');
-                    inputSelesai.value = inputSelesai.value.split('T')[0] + 'T22:00';
+                    inputSelesai.value = dateSelesai + 'T22:00';
                 }
             }
         }
@@ -701,17 +718,22 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
 
                 day.innerHTML = `<div class="date-number">${date}</div>`;
 
+                // Cek apakah tanggal ini sudah di-booking (approved)
+                const yyyy = year;
+                const mm = String(month + 1).padStart(2, '0');
+                const dd = String(date).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                if (bookedDates.includes(dateStr)) {
+                    day.classList.add('bg-danger', 'text-white');
+                }
+
                 if (!isPastOrToday) {
                     day.addEventListener('click', () => {
                         document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
                         day.classList.add('selected');
 
                         // AUTO-FILL LOGIC
-                        const yyyy = year;
-                        const mm = String(month + 1).padStart(2, '0');
-                        const dd = String(date).padStart(2, '0');
-                        const dateStr = `${yyyy}-${mm}-${dd}`;
-
                         if (inputMulai && inputSelesai) {
                             inputMulai.value = `${dateStr}T07:00`;
                             inputSelesai.value = `${dateStr}T22:00`;

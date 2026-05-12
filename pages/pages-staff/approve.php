@@ -103,7 +103,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                             <?= ucfirst($row['jenis_peminjaman']) ?>
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <strong><?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?></strong>
                                     </td>
                                     <td class="text-center">

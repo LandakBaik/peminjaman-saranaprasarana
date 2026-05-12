@@ -42,8 +42,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <th>No</th>
                                     <th>Peminjam</th>
                                     <th>Tipe</th>
-                                    <th>Keterangan</th>
-                                    <th>Status</th>
+                                    <th>Ruangan</th>
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
                                     <th>Tanggal Pengajuan</th>
@@ -59,43 +58,41 @@ $stmt = $peminjaman->readByStaff($userId);
                                         continue;
                                     }
                                     $ada_data = true;
-                                    
-                                    $statusClass = 'bg-warning-subtle text-warning';
-
-                                    // Untuk peminjaman ruangan, biasanya jenisnya adalah ruangan
-                                    $nama_tampil = $row['jenis_peminjaman'] == 'ruangan' ? $row['nama_ruangan'] : $row['nama_barang'];
                                 ?>
                                 <tr>
                                     <td class="text-center"><?= $no++ ?></td>
-                                    <td><?= htmlspecialchars($row['peminjam'] ?? '-') ?></td>
                                     <td>
-                                        <strong><?= htmlspecialchars($nama_tampil ?? '-') ?></strong><br>
-                                        <small class="text-muted"><?= ucfirst($row['jenis_peminjaman']) ?></small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            <?= htmlspecialchars($row['keperluan']) ?>
-                                        </small>
+                                        <strong><?= htmlspecialchars($row['peminjam'] ?? '-') ?></strong><br>
+                                        <small class="text-muted">ID: #<?= $row['id_pengguna'] ?></small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($row['status'])) ?></span>
+                                        <span class="badge border text-dark bg-light">
+                                            <?= ucfirst($row['jenis_peminjaman']) ?>
+                                        </span>
                                     </td>
-                                    <td class="text-center"><?= htmlspecialchars($row['waktu_mulai']) ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($row['waktu_selesai']) ?></td>
                                     <td class="text-center">
+                                        <strong><?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?></strong>
+                                    </td>
+                                    <td class="text-center small">
+                                        <?= date('d M, H:i', strtotime($row['waktu_mulai'])) ?>
+                                    </td>
+                                    <td class="text-center small">
+                                        <?= date('d M, H:i', strtotime($row['waktu_selesai'])) ?>
+                                    </td>
+                                    <td class="text-center small">
                                         <?= htmlspecialchars(date('d M Y', strtotime($row['tanggal_dibuat']))) ?>
                                     </td>
                                     <td class="text-center">
                                         <form action="controllers/PeminjamanController.php?action=verifikasi_pengembalian" method="POST" class="d-inline">
                                             <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                            <button type="submit" class="btn btn-primary btn-sm mb-1" onclick="return confirm('Verifikasi pengembalian ini?')">Verifikasi Pengembalian</button>
+                                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Verifikasi pengembalian ini?')">Verifikasi Pengembalian</button>
                                         </form>
                                     </td>
                                 </tr>
                                 <?php } ?>
                                 <?php if (!$ada_data): ?>
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted py-3">Tidak ada pengajuan pengembalian untuk ruangan Anda.</td>
+                                    <td colspan="8" class="text-center text-muted py-3">Tidak ada pengajuan pengembalian untuk ruangan Anda.</td>
                                 </tr>
                                 <?php endif; ?>
                             </tbody>

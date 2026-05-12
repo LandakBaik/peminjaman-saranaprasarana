@@ -601,4 +601,21 @@ class Peminjaman
 
         return (int) $stmt->fetchColumn();
     }
+
+    public function getApprovedDatesByRoom($id_ruangan)
+    {
+        $query = "SELECT DISTINCT DATE(p.waktu_mulai) as tanggal 
+                  FROM peminjaman p
+                  JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  JOIN barang b ON dp.id_barang = b.id_barang
+                  WHERE b.id_ruangan = :id_ruangan 
+                  AND p.status IN ('Disetujui', 'Dipinjam')
+                  AND p.jenis_peminjaman = 'ruangan'";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_ruangan', $id_ruangan);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }
