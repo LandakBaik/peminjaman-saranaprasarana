@@ -186,10 +186,16 @@ class Peminjaman
 
     } elseif ($this->jenis_peminjaman == 'ruangan') {
 
-        $barangModel = new \App\Models\Barang($this->conn);
-        $barangList = $barangModel->getByRuangan($this->id_ruangan);
+        $barangModel  = new \App\Models\Barang($this->conn);
+        // Gunakan range waktu yang dipilih user agar konsisten dengan
+        // sistem validasi stok baru (hanya Disetujui & Dipinjam yang dihitung)
+        $availability = $barangModel->getAvailabilityByRange(
+            $this->id_ruangan,
+            $this->waktu_mulai,
+            $this->waktu_selesai
+        );
 
-        foreach ($barangList as $b) {
+        foreach ($availability as $b) {
             if ($b['stok_tersedia'] > 0) {
                 $this->insertDetail($b['id_barang'], $b['stok_tersedia']);
             }
@@ -213,6 +219,33 @@ class Peminjaman
 
     $stmt->execute();
 }
+    // 🔹 GET BY ID (dengan detail barang)
+    public function getById($id_peminjaman)
+    {
+        // Data peminjaman
+        $query = "SELECT p.*, b.id_ruangan
+                  FROM peminjaman p
+                  LEFT JOIN detail_peminjaman dp ON dp.id_peminjaman = p.id_peminjaman
+                  LEFT JOIN barang b ON b.id_barang = dp.id_barang
+                  WHERE p.id_peminjaman = :id_peminjaman
+                  LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_peminjaman', $id_peminjaman);
+        $stmt->execute();
+        $peminjaman = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$peminjaman) return null;
+
+        // Detail barang (id_barang => kuantitas)
+        $qDetail = "SELECT id_barang, kuantitas FROM detail_peminjaman WHERE id_peminjaman = :id";
+        $sDetail = $this->conn->prepare($qDetail);
+        $sDetail->bindParam(':id', $id_peminjaman);
+        $sDetail->execute();
+        $peminjaman['items'] = $sDetail->fetchAll(\PDO::FETCH_KEY_PAIR); // [id_barang => kuantitas]
+
+        return $peminjaman;
+    }
+
     // 🔹 UPDATE STATUS
     public function updateStatus()
     {

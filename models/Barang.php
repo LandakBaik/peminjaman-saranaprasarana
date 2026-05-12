@@ -105,30 +105,88 @@ class Barang
 
     public function getByRuangan($id_ruangan)
     {
-        $query = "SELECT 
-                b.*,
-                COALESCE(SUM(
-                    CASE WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas ELSE 0 END
-                ),0) AS dipinjam,
-
-                (b.total_stok - b.stok_rusak - COALESCE(SUM(
-                    CASE WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas ELSE 0 END
-                ),0)) AS stok_tersedia
-
-              FROM barang b
-              LEFT JOIN detail_peminjaman dp 
-                ON dp.id_barang = b.id_barang
-              LEFT JOIN peminjaman p 
-                ON p.id_peminjaman = dp.id_peminjaman
-
-              WHERE b.id_ruangan = :id_ruangan
-              GROUP BY b.id_barang";
+        // Mengembalikan stok dasar (total_stok - stok_rusak) tanpa pengurangan
+        // berdasarkan peminjaman aktif. Dipakai untuk tampilan awal form peminjaman.
+        // Validasi stok aktual per range waktu dilakukan oleh getAvailabilityByRange().
+        $query = "SELECT
+                    b.*,
+                    0 AS dipinjam,
+                    (b.total_stok - b.stok_rusak) AS stok_tersedia
+                  FROM barang b
+                  WHERE b.id_ruangan = :id_ruangan
+                  ORDER BY b.nama_barang ASC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id_ruangan", $id_ruangan);
         $stmt->execute();
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Hitung stok tersedia untuk barang-barang di suatu ruangan
+     * pada range waktu tertentu. Hanya peminjaman berstatus
+     * 'Disetujui' atau 'Dipinjam' yang ikut dihitung.
+     *
+     * Logika overlap: dua range [mulai1, selesai1] dan [mulai2, selesai2]
+     * overlap jika mulai1 < selesai2 DAN mulai2 < selesai1
+     *
+     * @param int    $id_ruangan
+     * @param string $start_time  format: 'Y-m-d H:i:s' atau 'Y-m-d\TH:i'
+     * @param string $end_time    format: 'Y-m-d H:i:s' atau 'Y-m-d\TH:i'
+     * @return array  [ id_barang => stok_tersedia, ... ]
+     */
+    public function getAvailabilityByRange($id_ruangan, $start_time, $end_time)
+    {
+        $query = "SELECT
+                    b.id_barang,
+                    b.nama_barang,
+                    b.total_stok,
+                    b.stok_rusak,
+                    COALESCE(SUM(
+                        CASE
+                            WHEN p.status IN ('Disetujui', 'Dipinjam')
+                             AND p.waktu_mulai < :end_time
+                             AND p.waktu_selesai > :start_time
+                            THEN dp.kuantitas
+                            ELSE 0
+                        END
+                    ), 0) AS terpinjam,
+                    (b.total_stok - b.stok_rusak - COALESCE(SUM(
+                        CASE
+                            WHEN p.status IN ('Disetujui', 'Dipinjam')
+                             AND p.waktu_mulai < :end_time2
+                             AND p.waktu_selesai > :start_time2
+                            THEN dp.kuantitas
+                            ELSE 0
+                        END
+                    ), 0)) AS stok_tersedia
+                  FROM barang b
+                  LEFT JOIN detail_peminjaman dp ON dp.id_barang = b.id_barang
+                  LEFT JOIN peminjaman p ON p.id_peminjaman = dp.id_peminjaman
+                  WHERE b.id_ruangan = :id_ruangan
+                  GROUP BY b.id_barang";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_ruangan',  $id_ruangan);
+        $stmt->bindParam(':start_time',  $start_time);
+        $stmt->bindParam(':end_time',    $end_time);
+        $stmt->bindParam(':start_time2', $start_time);
+        $stmt->bindParam(':end_time2',   $end_time);
+        $stmt->execute();
+
+        $result = [];
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            $result[$row['id_barang']] = [
+                'id_barang'     => $row['id_barang'],
+                'nama_barang'   => $row['nama_barang'],
+                'total_stok'    => (int) $row['total_stok'],
+                'stok_rusak'    => (int) $row['stok_rusak'],
+                'terpinjam'     => (int) $row['terpinjam'],
+                'stok_tersedia' => max(0, (int) $row['stok_tersedia']),
+            ];
+        }
+        return $result;
     }
 
     public function getByIds($ids)
