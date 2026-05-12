@@ -24,6 +24,34 @@ $stmt = $peminjaman->readByStaff($userId);
                 <span class="text-muted">Kelola pengajuan peminjaman untuk ruangan Anda</span>
             </div>
 
+            <?php if (isset($_GET['error'])): ?>
+                <?php if ($_GET['error'] === 'stok_kurang'): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>⚠️ Gagal Menyetujui!</strong>
+                        Stok tidak mencukupi untuk <strong><?= htmlspecialchars($_GET['barang'] ?? 'barang yang dipinjam') ?></strong>
+                        pada rentang waktu tersebut. Sudah ada peminjaman lain yang disetujui untuk waktu yang sama.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php elseif ($_GET['error'] === 'not_found'): ?>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Data tidak ditemukan.</strong> Peminjaman tidak dapat diproses.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php elseif ($_GET['error'] === 'failed'): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Gagal memperbarui status.</strong> Silakan coba lagi.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['success']) && $_GET['success'] === 'updated'): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ✅ Status peminjaman berhasil diperbarui.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
             <!-- Card -->
             <div class="card mb-4">
                 <div class="card-body">

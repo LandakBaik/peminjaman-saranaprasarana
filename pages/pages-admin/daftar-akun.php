@@ -5,7 +5,7 @@ $database = new \App\Config\Database();
 $db = $database->getConnection();
 
 $userModel = new \App\Models\User($db);
-$stmt = $userModel->readByRoles(['user']);
+$stmt = $userModel->readByRoles(['user','admin','staff']);
 ?>
 
 <div id="layoutSidenav_content">

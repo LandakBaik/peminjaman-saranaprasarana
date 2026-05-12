@@ -175,6 +175,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                         </label>
 
                                         <input type="datetime-local"
+                                            id="waktu_mulai"
                                             class="form-control"
                                             name="waktu_mulai"
                                             required>
@@ -188,6 +189,7 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                         </label>
 
                                         <input type="datetime-local"
+                                            id="waktu_selesai"
                                             class="form-control"
                                             name="waktu_selesai"
                                             required>
@@ -398,39 +400,122 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        const form =
-            document.getElementById('formPeminjaman');
+        const form            = document.getElementById('formPeminjaman');
+        const tableBarang     = document.getElementById('tableBarang');
+        const selectAll       = document.getElementById('selectAll');
+        const jenisPeminjaman = document.getElementById('jenisPeminjaman');
+        const inputMulai      = document.getElementById('waktu_mulai');
+        const inputSelesai    = document.getElementById('waktu_selesai');
+        const idRuangan       = '<?= $id_ruangan ?>';
 
-        const tableBarang =
-            document.getElementById('tableBarang');
+        // Stok awal dari server (sebelum ada input waktu)
+        const stokAwal = {};
+        document.querySelectorAll('#tableBarang tbody tr').forEach(row => {
+            const stokCell = row.querySelector('.stok-value');
+            const cb       = row.querySelector('.barang-checkbox');
+            if (stokCell && cb) {
+                const idBarang = cb.name.match(/barang\[(\d+)\]/)?.[1];
+                if (idBarang) stokAwal[idBarang] = parseInt(stokCell.dataset.stokAwal ?? stokCell.innerText.trim(), 10);
+                stokCell.dataset.stokAwal = stokCell.innerText.trim(); // simpan nilai awal
+            }
+        });
 
-        const selectAll =
-            document.getElementById('selectAll');
+        // =========================
+        // CEK STOK REAL-TIME (AJAX)
+        // =========================
+        let ajaxTimer = null;
 
-        const jenisPeminjaman =
-            document.getElementById('jenisPeminjaman');
+        function checkStock() {
+            const mulai   = inputMulai.value;
+            const selesai = inputSelesai.value;
 
-        const barangCheckboxes =
-            document.querySelectorAll('.barang-checkbox');
+            // Hanya jalankan jika kedua waktu sudah terisi & valid
+            if (!mulai || !selesai || mulai >= selesai) {
+                // Reset ke stok awal
+                resetToStokAwal();
+                return;
+            }
 
-        const jumlahInputs =
-            document.querySelectorAll('.jumlah-input');
+            clearTimeout(ajaxTimer);
+            ajaxTimer = setTimeout(() => {
+                const url = `controllers/PeminjamanController.php?action=check_stock` +
+                            `&id_ruangan=${encodeURIComponent(idRuangan)}` +
+                            `&waktu_mulai=${encodeURIComponent(mulai)}` +
+                            `&waktu_selesai=${encodeURIComponent(selesai)}`;
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => {
+                        if (!json.success) return;
+
+                        json.data.forEach(item => {
+                            const idBarang = String(item.id_barang);
+                            const stok     = item.stok_tersedia;
+
+                            // Cari baris berdasarkan id barang
+                            const cb = document.querySelector(
+                                `.barang-checkbox[name="barang[${idBarang}][checked]"]`
+                            );
+                            if (!cb) return;
+
+                            const row       = cb.closest('tr');
+                            const stokCell  = row.querySelector('.stok-value');
+                            const jumlahInput = row.querySelector('.jumlah-input');
+
+                            // Update tampilan stok
+                            stokCell.textContent = stok;
+
+                            if (stok <= 0) {
+                                // Tandai baris tidak tersedia
+                                row.classList.add('table-danger');
+                                row.classList.remove('table-warning');
+                                cb.checked  = false;
+                                cb.disabled = true;
+                                jumlahInput.disabled = true;
+                            } else if (item.terpinjam > 0) {
+                                // Ada sebagian dipinjam, beri peringatan
+                                row.classList.add('table-warning');
+                                row.classList.remove('table-danger');
+                                cb.disabled = (jenisPeminjaman.value === 'barang') ? false : true;
+                                // Batasi max jumlah sesuai stok tersedia
+                                jumlahInput.max = stok;
+                                if (parseInt(jumlahInput.value) > stok) {
+                                    jumlahInput.value = stok;
+                                }
+                            } else {
+                                row.classList.remove('table-danger', 'table-warning');
+                                cb.disabled = (jenisPeminjaman.value === 'barang') ? false : true;
+                                jumlahInput.max = stok;
+                            }
+                        });
+                    })
+                    .catch(err => console.warn('checkStock error:', err));
+            }, 400); // debounce 400ms
+        }
+
+        function resetToStokAwal() {
+            document.querySelectorAll('#tableBarang tbody tr').forEach(row => {
+                const stokCell  = row.querySelector('.stok-value');
+                const cb        = row.querySelector('.barang-checkbox');
+                if (!stokCell) return;
+                const stokOri   = stokCell.dataset.stokAwal ?? stokCell.innerText.trim();
+                stokCell.textContent = stokOri;
+                row.classList.remove('table-danger', 'table-warning');
+                if (cb && jenisPeminjaman.value === 'barang') cb.disabled = false;
+            });
+        }
+
+        // Pasang listener ke kedua input waktu
+        inputMulai.addEventListener('change', checkStock);
+        inputSelesai.addEventListener('change', checkStock);
 
         // =========================
         // SELECT ALL
         // =========================
         selectAll.addEventListener('change', function() {
-
-            barangCheckboxes.forEach(cb => {
-
-                if (!cb.disabled) {
-
-                    cb.checked = this.checked;
-
-                }
-
+            document.querySelectorAll('.barang-checkbox').forEach(cb => {
+                if (!cb.disabled) cb.checked = this.checked;
             });
-
         });
 
         // =========================
@@ -440,140 +525,101 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
 
             const value = this.value;
 
-            // =====================
-            // PEMINJAMAN RUANGAN
-            // =====================
             if (value === 'ruangan') {
 
-                // table disabled style
-                tableBarang.classList.add(
-                    'opacity-50',
-                    'bg-light',
-                    'border-secondary'
-                );
+                tableBarang.classList.add('opacity-50', 'bg-light', 'border-secondary');
 
-                barangCheckboxes.forEach(cb => {
-
-                    cb.checked = true;
+                document.querySelectorAll('.barang-checkbox').forEach(cb => {
+                    cb.checked  = true;
                     cb.disabled = true;
-
                 });
 
-                jumlahInputs.forEach(input => {
-
-                    let stok =
-                        input.closest('tr')
-                        .querySelector('.stok-value')
-                        .innerText.trim();
-
-                    // jumlah otomatis = stok
-                    input.value = stok;
-
-                    // disable jumlah
+                document.querySelectorAll('.jumlah-input').forEach(input => {
+                    let stok = input.closest('tr').querySelector('.stok-value').innerText.trim();
+                    input.value    = stok;
                     input.disabled = true;
-
                 });
 
-                selectAll.checked = true;
+                selectAll.checked  = true;
                 selectAll.disabled = true;
 
-            }
+            } else if (value === 'barang') {
 
-            // =====================
-            // PEMINJAMAN BARANG
-            // =====================
-            else if (value === 'barang') {
+                tableBarang.classList.remove('opacity-50', 'bg-light', 'border-secondary');
 
-                // table normal
-                tableBarang.classList.remove(
-                    'opacity-50',
-                    'bg-light',
-                    'border-secondary'
-                );
-
-                barangCheckboxes.forEach(cb => {
-
-                    cb.disabled = false;
-                    cb.checked = false;
-
+                document.querySelectorAll('.barang-checkbox').forEach(cb => {
+                    // Jangan enable baris yang stoknya 0
+                    const stok = parseInt(cb.closest('tr').querySelector('.stok-value').innerText.trim(), 10);
+                    cb.disabled = (stok <= 0);
+                    cb.checked  = false;
                 });
 
-                jumlahInputs.forEach(input => {
-
-                    input.value = 1;
+                document.querySelectorAll('.jumlah-input').forEach(input => {
+                    input.value    = 1;
                     input.disabled = false;
-
                 });
 
                 selectAll.disabled = false;
-                selectAll.checked = false;
+                selectAll.checked  = false;
 
-            }
+            } else {
 
-            // =====================
-            // DEFAULT
-            // =====================
-            else {
+                tableBarang.classList.add('opacity-50', 'bg-light', 'border-secondary');
 
-                // table disabled style
-                tableBarang.classList.add(
-                    'opacity-50',
-                    'bg-light',
-                    'border-secondary'
-                );
-
-                barangCheckboxes.forEach(cb => {
-
-                    cb.checked = false;
+                document.querySelectorAll('.barang-checkbox').forEach(cb => {
+                    cb.checked  = false;
                     cb.disabled = true;
-
                 });
 
-                jumlahInputs.forEach(input => {
-
-                    input.value = 1;
+                document.querySelectorAll('.jumlah-input').forEach(input => {
+                    input.value    = 1;
                     input.disabled = true;
-
                 });
 
-                selectAll.checked = false;
+                selectAll.checked  = false;
                 selectAll.disabled = true;
-
             }
-
         });
+
+        // =========================
+        // TAMPILKAN ERROR SERVER
+        // =========================
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === 'stok_kurang') {
+            const namaBarang = urlParams.get('barang') ?? 'barang yang dipilih';
+            alert(`❌ Stok tidak mencukupi untuk "${namaBarang}" pada rentang waktu yang dipilih. Silakan kurangi jumlah atau ubah waktu peminjaman.`);
+        }
 
         // =========================
         // VALIDASI SUBMIT
         // =========================
         form.addEventListener('submit', function(e) {
 
-            const jenis =
-                jenisPeminjaman.value;
+            if (jenisPeminjaman.value === 'barang') {
 
-            // validasi hanya untuk barang
-            if (jenis === 'barang') {
+                const checked = document.querySelectorAll('.barang-checkbox:checked');
 
-                const checked =
-                    document.querySelectorAll(
-                        '.barang-checkbox:checked'
-                    );
-
-                // minimal 1 barang
                 if (checked.length < 1) {
-
                     e.preventDefault();
-
-                    alert(
-                        'Pilih minimal 1 barang untuk dipinjam.'
-                    );
-
+                    alert('Pilih minimal 1 barang untuk dipinjam.');
                     return;
-
                 }
 
-            }
+                // Cek apakah ada barang yang dipilih tapi stoknya 0
+                let adaStokKurang = false;
+                checked.forEach(cb => {
+                    const row  = cb.closest('tr');
+                    const stok = parseInt(row.querySelector('.stok-value').innerText.trim(), 10);
+                    const qty  = parseInt(row.querySelector('.jumlah-input').value, 10);
+                    if (qty > stok || stok <= 0) adaStokKurang = true;
+                });
 
+                if (adaStokKurang) {
+                    e.preventDefault();
+                    alert('❌ Salah satu barang yang dipilih melebihi stok tersedia pada rentang waktu tersebut.');
+                    return;
+                }
+            }
         });
 
     });

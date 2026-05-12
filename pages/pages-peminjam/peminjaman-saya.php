@@ -162,7 +162,7 @@ $stmt = $peminjaman->readByUser($userId);
                                             <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
                                         </td>
                                         <td class="text-center">
-                                            <div class="d-flex flex-column gap-1">
+                                            <div class="d-flex justify-content-center gap-1">
                                                 <button class="btn btn-primary btn-sm btn-detail" data-bs-toggle="modal"
                                                     data-bs-target="#detailModal" data-kode="<?= htmlspecialchars($kode) ?>"
                                                     data-ruangan="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
@@ -182,7 +182,7 @@ $stmt = $peminjaman->readByUser($userId);
                                                         method="POST" class="d-inline">
                                                         <input type="hidden" name="id_peminjaman"
                                                             value="<?= $row['id_peminjaman'] ?>">
-                                                        <button type="submit" class="btn btn-danger btn-sm w-100"
+                                                        <button type="submit" class="btn btn-danger btn-sm"
                                                             onclick="return confirm('Apakah anda yakin ingin membatalkan peminjaman ini? Tindakan ini tidak dapat dibatalkan.')">Batalkan</button>
                                                     </form>
                                                 <?php elseif (strtolower($displayStatus) == 'dipinjam'): ?>
