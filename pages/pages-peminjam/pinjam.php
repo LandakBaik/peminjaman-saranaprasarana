@@ -210,24 +210,13 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
 
                                         <thead>
 
-                                            <tr>
-
-                                                <th class="text-center">
-
-                                                    <input type="checkbox"
-                                                        id="selectAll"
-                                                        disabled>
-
+                                                <th class="text-center" style="width: 50px;">
+                                                    <input type="checkbox" id="selectAll" disabled>
                                                 </th>
-
-                                                <th>ID</th>
-
-                                                <th>Nama</th>
-
-                                                <th>Jumlah</th>
-
-                                                <th>Stok</th>
-
+                                                <th class="text-center" style="width: 60px;">ID</th>
+                                                <th>Nama Barang</th>
+                                                <th class="text-center" style="width: 100px;">Jumlah</th>
+                                                <th class="text-center" style="width: 80px;">Stok</th>
                                             </tr>
 
                                         </thead>
@@ -239,39 +228,15 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                                                 <?php foreach ($barangList as $b): ?>
 
                                                     <tr>
-
                                                         <td class="text-center">
-
-                                                            <input type="checkbox"
-                                                                class="barang-checkbox"
-                                                                name="barang[<?= $b['id_barang'] ?>][checked]"
-                                                                disabled>
-
+                                                            <input type="checkbox" class="barang-checkbox" name="barang[<?= $b['id_barang'] ?>][checked]" disabled>
                                                         </td>
-
-                                                        <td>
-                                                            <?= $b['id_barang'] ?>
+                                                        <td class="text-center"><?= $b['id_barang'] ?></td>
+                                                        <td><?= htmlspecialchars($b['nama_barang']) ?></td>
+                                                        <td class="text-center">
+                                                            <input type="number" min="1" value="1" name="barang[<?= $b['id_barang'] ?>][kuantitas]" class="form-control form-control-sm jumlah-input mx-auto" style="width: 70px;" disabled>
                                                         </td>
-
-                                                        <td>
-                                                            <?= htmlspecialchars($b['nama_barang']) ?>
-                                                        </td>
-
-                                                        <td>
-
-                                                            <input type="number"
-                                                                min="1"
-                                                                value="1"
-                                                                name="barang[<?= $b['id_barang'] ?>][kuantitas]"
-                                                                class="form-control form-control-sm jumlah-input"
-                                                                disabled>
-
-                                                        </td>
-
-                                                        <td class="stok-value">
-                                                            <?= $b['stok_tersedia'] ?? 0 ?>
-                                                        </td>
-
+                                                        <td class="stok-value text-center"><?= $b['stok_tersedia'] ?? 0 ?></td>
                                                     </tr>
 
                                                 <?php endforeach; ?>

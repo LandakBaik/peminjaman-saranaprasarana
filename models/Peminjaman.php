@@ -20,7 +20,7 @@ class Peminjaman
     public $keperluan;
     public $catatan;
     public $jaminan;
-    public $keterangan;
+    public $keterangan = '';
 
     public function __construct($db)
     {
@@ -161,6 +161,7 @@ class Peminjaman
             keperluan=:keperluan,
             catatan=:catatan,
             jaminan=:jaminan,
+            keterangan=:keterangan,
             status='Pending'";
 
     $stmt = $this->conn->prepare($query);
@@ -172,6 +173,7 @@ class Peminjaman
     $stmt->bindParam(":keperluan", $this->keperluan);
     $stmt->bindParam(":catatan", $this->catatan);
     $stmt->bindParam(":jaminan", $this->jaminan);
+    $stmt->bindParam(":keterangan", $this->keterangan);
 
     $stmt->execute();
 
