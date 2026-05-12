@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tipe = $_POST['tipe_lama'] ?? '';
         }
         if (!in_array($tipe, $allowedTipe)) {
-            header("Location: ../index.php?page=ruangan&error=invalid_tipe");
+            header("Location: ../index.php?page=ruangan-barang&error=invalid_tipe");
             exit();
         }
 
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $upload = uploadFoto($_FILES['foto_ruangan']);
 
             if (!$upload) {
-                header("Location: ../index.php?page=ruangan&error=upload_failed");
+                header("Location: ../index.php?page=ruangan-barang&error=upload_failed");
                 exit();
             }
 
@@ -94,9 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($ruangan->create()) {
-            header("Location: ../index.php?page=ruangan&success=added");
+            header("Location: ../index.php?page=ruangan-barang&success=added");
         } else {
-            header("Location: ../index.php?page=ruangan&error=add_failed");
+            header("Location: ../index.php?page=ruangan-barang&error=add_failed");
         }
 
         exit();
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tipe = $_POST['tipe_lama'] ?? '';
         }
         if (!in_array($tipe, $allowedTipe)) {
-            header("Location: ../index.php?page=ruangan&error=invalid_tipe");
+            header("Location: ../index.php?page=ruangan-barang&error=invalid_tipe");
             exit();
         }
 
@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $upload = uploadFoto($_FILES['foto_ruangan']);
 
             if (!$upload) {
-                header("Location: ../index.php?page=ruangan&error=upload_failed");
+                header("Location: ../index.php?page=ruangan-barang&error=upload_failed");
                 exit();
             }
 
@@ -147,9 +147,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($ruangan->update()) {
-            header("Location: ../index.php?page=ruangan&success=updated");
+            header("Location: ../index.php?page=ruangan-barang&success=updated");
         } else {
-            header("Location: ../index.php?page=ruangan&error=update_failed");
+            header("Location: ../index.php?page=ruangan-barang&error=update_failed");
         }
 
         exit();
@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "</table>";
             exit();
         } else {
-            header("Location: ../index.php?page=ruangan&error=no_items_selected");
+            header("Location: ../index.php?page=ruangan-barang&error=no_items_selected");
             exit();
         }
     }
@@ -207,9 +207,9 @@ elseif ($action == 'delete') {
     }
 
     if ($ruangan->delete()) {
-        header("Location: ../index.php?page=ruangan&success=deleted");
+        header("Location: ../index.php?page=ruangan-barang&success=deleted");
     } else {
-        header("Location: ../index.php?page=ruangan&error=delete_failed");
+        header("Location: ../index.php?page=ruangan-barang&error=delete_failed");
     }
 
     exit();

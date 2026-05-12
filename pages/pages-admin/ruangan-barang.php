@@ -11,27 +11,22 @@ $stmt = $ruangan->readAll();
         <div class="container-fluid px-4">
 
             <!-- Title -->
-            <h1 class="mt-4">Ruangan</h1>
+            <h1 class="mt-4">Ruangan & Barang</h1>
 
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">
-                    Daftar ruangan yang tersedia
+                    Kelola data ruangan dan inventaris barang secara terpadu
                 </span>
 
                 <div class="d-flex gap-2">
-                    <button
-                        type="button"
-                        class="btn btn-white border border-primary text-primary btn-sm"
+                    <button type="button" class="btn btn-white border border-primary text-primary btn-sm"
                         onclick="checkExportRuangan()">
                         <i class="fas fa-download me-1"></i>
                         Export
                     </button>
 
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        data-bs-toggle="modal"
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                         data-bs-target="#tambahRuanganModal">
                         <i class="fas fa-plus me-1"></i>
                         Tambah Ruangan
@@ -60,6 +55,7 @@ $stmt = $ruangan->readAll();
                                     <th>No</th>
                                     <th>Nama Ruangan</th>
                                     <th>Kapasitas</th>
+                                    <th>Total Aset</th>
                                     <th>Tipe</th>
                                     <th>Tanggal Dibuat</th>
                                     <th>Aksi</th>
@@ -69,12 +65,18 @@ $stmt = $ruangan->readAll();
                                 <?php
                                 $no = 1;
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                ?>
+                                    ?>
                                     <tr>
-                                        <td class="text-center"><input type="checkbox" class="export-checkbox" value="<?= $row['id_ruangan'] ?>"></td>
+                                        <td class="text-center"><input type="checkbox" class="export-checkbox"
+                                                value="<?= $row['id_ruangan'] ?>"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
                                         <td class="text-center"><?= htmlspecialchars($row['kapasitas']) ?></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">
+                                                <?= $row['total_barang'] ?> Item
+                                            </span>
+                                        </td>
                                         <td class="text-center">
                                             <span class="badge bg-info text-dark">
                                                 <?= ucfirst($row['tipe_ruangan']) ?>
@@ -84,11 +86,13 @@ $stmt = $ruangan->readAll();
                                             <?= date('d M Y', strtotime($row['tanggal_dibuat'])) ?>
                                         </td>
                                         <td class="text-center">
-                                            <button
-                                                class="btn btn-warning btn-sm"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editRuanganModal"
-                                                data-id="<?= $row['id_ruangan'] ?>"
+                                            <button class="btn btn-info btn-sm text-white"
+                                                onclick="openAsetModal(<?= $row['id_ruangan'] ?>, '<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>')">
+                                                <i class="fas fa-box me-1"></i>
+                                                Aset
+                                            </button>
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#editRuanganModal" data-id="<?= $row['id_ruangan'] ?>"
                                                 data-nama="<?= htmlspecialchars($row['nama_ruangan'], ENT_QUOTES) ?>"
                                                 data-kapasitas="<?= $row['kapasitas'] ?>"
                                                 data-tipe="<?= $row['tipe_ruangan'] ?>"
@@ -126,7 +130,8 @@ $stmt = $ruangan->readAll();
         </div>
 
         <!-- Modal Tambah Ruangan -->
-        <div class="modal fade" id="tambahRuanganModal" tabindex="-1" aria-labelledby="tambahRuanganModalLabel" aria-hidden="true">
+        <div class="modal fade" id="tambahRuanganModal" tabindex="-1" aria-labelledby="tambahRuanganModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header border-0 pb-0">
@@ -142,7 +147,8 @@ $stmt = $ruangan->readAll();
                             </div>
                         </div>
 
-                        <form action="controllers/RuanganController.php?action=create" method="POST" enctype="multipart/form-data">
+                        <form action="controllers/RuanganController.php?action=create" method="POST"
+                            enctype="multipart/form-data">
                             <div class="row g-4">
 
                                 <!-- Left -->
@@ -188,15 +194,11 @@ $stmt = $ruangan->readAll();
                                         </div>
 
                                         <!-- Input -->
-                                        <input type="file"
-                                            name="foto_ruangan"
-                                            id="fotoInput"
-                                            class="d-none"
+                                        <input type="file" name="foto_ruangan" id="fotoInput" class="d-none"
                                             accept="image/*">
 
                                         <!-- Preview -->
-                                        <img id="previewImg"
-                                            class="w-100 rounded d-none mt-2"
+                                        <img id="previewImg" class="w-100 rounded d-none mt-2"
                                             style="height: auto; object-fit: contain;">
                                     </div>
                                 </div>
@@ -206,11 +208,13 @@ $stmt = $ruangan->readAll();
                             <!-- Footer -->
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
                                 <span class="text-muted small">
-                                    Lihat <a href="index.php?page=ketentuan" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                    Lihat <a href="index.php?page=ketentuan"
+                                        class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
 
                                 <div>
-                                    <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Kembali</button>
+                                    <button type="button" class="btn btn-outline-secondary me-2"
+                                        data-bs-dismiss="modal">Kembali</button>
                                     <button type="submit" class="btn btn-primary">Kirim</button>
                                 </div>
                             </div>
@@ -237,7 +241,8 @@ $stmt = $ruangan->readAll();
                             </div>
                         </div>
 
-                        <form action="controllers/RuanganController.php?action=update" method="POST" enctype="multipart/form-data">
+                        <form action="controllers/RuanganController.php?action=update" method="POST"
+                            enctype="multipart/form-data">
 
                             <!-- ID -->
                             <input type="hidden" name="id_ruangan" id="edit_id">
@@ -281,15 +286,11 @@ $stmt = $ruangan->readAll();
                                     </div>
 
                                     <!-- Input -->
-                                    <input type="file"
-                                        name="foto_ruangan"
-                                        id="edit_foto_input"
-                                        class="d-none"
+                                    <input type="file" name="foto_ruangan" id="edit_foto_input" class="d-none"
                                         accept="image/*">
 
                                     <!-- Preview -->
-                                    <img id="edit_preview"
-                                        class="w-100 rounded d-none mt-2"
+                                    <img id="edit_preview" class="w-100 rounded d-none mt-2"
                                         style="height: auto; object-fit: contain;">
                                 </div>
                             </div>
@@ -297,11 +298,13 @@ $stmt = $ruangan->readAll();
                             <!-- Footer -->
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
                                 <span class="text-muted small">
-                                    Lihat <a href="index.php?page=ketentuan" class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
+                                    Lihat <a href="index.php?page=ketentuan"
+                                        class="text-decoration-none text-primary">Ketentuan Peminjaman</a>
                                 </span>
 
                                 <div>
-                                    <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Kembali</button>
+                                    <button type="button" class="btn btn-outline-secondary me-2"
+                                        data-bs-dismiss="modal">Kembali</button>
                                     <button type="submit" class="btn btn-warning">Kirim</button>
                                 </div>
                             </div>
@@ -310,7 +313,452 @@ $stmt = $ruangan->readAll();
                 </div>
             </div>
         </div>
+        <!-- Modal Kelola Aset -->
+        <div class="modal fade" id="asetRuanganModal" tabindex="-1">
+
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+
+                <div class="modal-content border-0 shadow rounded-4">
+
+                    <!-- Header -->
+                    <div class="modal-header border-0 pb-0">
+
+                        <div>
+
+                            <h5 class="modal-title fw-bold mb-1">
+                                Daftar Aset
+                            </h5>
+
+                            <small class="text-muted">
+                                <span id="modal_nama_ruangan"></span>
+                            </small>
+
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+
+                    </div>
+
+                    <!-- Body -->
+                    <div class="modal-body pt-3">
+
+                        <!-- Top -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    Kelola Barang
+                                </h6>
+
+                                <small class="text-muted">
+                                    Inventaris barang pada ruangan ini
+                                </small>
+
+                            </div>
+
+                            <button class="btn btn-primary btn-sm px-3" onclick="openTambahAset()">
+
+                                <i class="fas fa-plus me-1"></i>
+                                Tambah Barang
+
+                            </button>
+
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+
+                            <table class="table align-middle" id="tableAset">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th>Nama Barang</th>
+
+                                        <th class="text-center">
+                                            Total
+                                        </th>
+
+                                        <th class="text-center">
+                                            Rusak
+                                        </th>
+
+                                        <th class="text-center">
+                                            Tersedia
+                                        </th>
+
+                                        <th class="text-center">
+                                            Aksi
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="bodyAset">
+                                    <!-- Dynamic -->
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Modal Tambah Aset -->
+        <div class="modal fade" id="tambahAsetModal" tabindex="-1">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content border-0 shadow rounded-4">
+
+                    <div class="modal-header border-0 pb-0">
+
+                        <div>
+
+                            <h5 class="modal-title fw-bold mb-1">
+                                Tambah Barang
+                            </h5>
+
+                            <small class="text-muted">
+                                Tambahkan barang baru ke ruangan
+                            </small>
+
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+
+                    </div>
+
+                    <form action="controllers/BarangController.php?action=create" method="POST">
+
+                        <input type="hidden" name="source" value="ruangan">
+
+                        <input type="hidden" name="id_ruangan" id="tambah_aset_id_ruangan">
+
+                        <div class="modal-body pt-3">
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Nama Barang
+                                </label>
+
+                                <input type="text" class="form-control" name="nama_barang" required>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Deskripsi
+                                </label>
+
+                                <textarea class="form-control" name="deskripsi_barang" rows="3"></textarea>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Total Stok
+                                </label>
+
+                                <input type="number" class="form-control" name="total_stok" min="1" required>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0">
+
+                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+
+                                Batal
+
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+
+                                Simpan Barang
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Modal Edit Aset -->
+        <div class="modal fade" id="editAsetModal" tabindex="-1">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content border-0 shadow rounded-4">
+
+                    <div class="modal-header border-0 pb-0">
+
+                        <div>
+
+                            <h5 class="modal-title fw-bold mb-1">
+                                Edit Barang
+                            </h5>
+
+                            <small class="text-muted">
+                                Perbarui data barang
+                            </small>
+
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+
+                    </div>
+
+                    <form action="controllers/BarangController.php?action=update" method="POST">
+
+                        <input type="hidden" name="source" value="ruangan">
+
+                        <input type="hidden" name="id_barang" id="edit_aset_id_barang">
+
+                        <input type="hidden" name="id_ruangan" id="edit_aset_id_ruangan">
+
+                        <div class="modal-body pt-3">
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Nama Barang
+                                </label>
+
+                                <input type="text" class="form-control" name="nama_barang" id="edit_aset_nama" required>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Deskripsi
+                                </label>
+
+                                <textarea class="form-control" name="deskripsi_barang" id="edit_aset_deskripsi"
+                                    rows="3"></textarea>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Total Stok
+                                    </label>
+
+                                    <input type="number" class="form-control" name="total_stok" id="edit_aset_total"
+                                        min="1" required>
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Stok Rusak
+                                    </label>
+
+                                    <input type="number" class="form-control" name="stok_rusak" id="edit_aset_rusak"
+                                        min="0" required>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0">
+
+                            <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+
+                                Batal
+
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+
+                                Simpan Perubahan
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
         <script>
+
+            let currentRoomId = null;
+            let currentRoomName = '';
+
+            function openAsetModal(id, nama) {
+
+                currentRoomId = id;
+                currentRoomName = nama;
+
+                document.getElementById('modal_nama_ruangan')
+                    .textContent = nama;
+
+                fetch(
+                    `controllers/BarangController.php?action=list_by_ruangan&id_ruangan=${id}`
+                )
+
+                    .then(res => res.json())
+
+                    .then(data => {
+
+                        const body =
+                            document.getElementById('bodyAset');
+
+                        body.innerHTML = '';
+
+                        if (data.length === 0) {
+
+                            body.innerHTML = `
+                <tr>
+                    <td colspan="5"
+                        class="text-center text-muted py-4">
+
+                        Belum ada barang di ruangan ini
+
+                    </td>
+                </tr>
+            `;
+
+                        } else {
+
+                            data.forEach(item => {
+
+                                body.innerHTML += `
+                    <tr>
+
+                        <td>
+
+                            <div class="fw-semibold">
+                                ${item.nama_barang}
+                            </div>
+
+                            <small class="text-muted">
+                                ${item.deskripsi_barang || '-'}
+                            </small>
+
+                        </td>
+
+                        <td class="text-center">
+                            ${item.total_stok}
+                        </td>
+
+                        <td class="text-center">
+                            ${item.stok_rusak}
+                        </td>
+
+                        <td class="text-center">
+
+                            <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+
+                                ${item.stok_tersedia}
+
+                            </span>
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <button class="btn btn-light border btn-sm"
+                                onclick='openEditAset(${JSON.stringify(item)})'>
+
+                                <i class="fas fa-edit"></i>
+
+                            </button>
+
+                            <a href="controllers/BarangController.php?action=delete&id_barang=${item.id_barang}&source=ruangan"
+                                class="btn btn-light border border-danger text-danger btn-sm"
+                                onclick="return confirm('Yakin ingin menghapus barang ini?')">
+
+                                <i class="fas fa-trash"></i>
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+                `;
+                            });
+
+                        }
+
+                        new bootstrap.Modal(
+                            document.getElementById('asetRuanganModal')
+                        ).show();
+
+                    });
+
+            }
+
+            function openTambahAset() {
+
+                document.getElementById('tambah_aset_id_ruangan')
+                    .value = currentRoomId;
+
+                new bootstrap.Modal(
+                    document.getElementById('tambahAsetModal')
+                ).show();
+
+            }
+
+            function openEditAset(item) {
+
+                document.getElementById('edit_aset_id_barang')
+                    .value = item.id_barang;
+
+                document.getElementById('edit_aset_id_ruangan')
+                    .value = item.id_ruangan;
+
+                document.getElementById('edit_aset_nama')
+                    .value = item.nama_barang;
+
+                document.getElementById('edit_aset_deskripsi')
+                    .value = item.deskripsi_barang;
+
+                document.getElementById('edit_aset_total')
+                    .value = item.total_stok;
+
+                document.getElementById('edit_aset_rusak')
+                    .value = item.stok_rusak;
+
+                new bootstrap.Modal(
+                    document.getElementById('editAsetModal')
+                ).show();
+
+            }
+
             // Export Data Ruangan
             function checkExportRuangan() {
 
@@ -329,7 +777,7 @@ $stmt = $ruangan->readAll();
                 form.method = 'POST';
                 form.action = 'controllers/RuanganController.php?action=export';
 
-                checked.forEach(function(checkbox) {
+                checked.forEach(function (checkbox) {
                     let input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'id_ruangan[]';
@@ -342,19 +790,19 @@ $stmt = $ruangan->readAll();
                 setTimeout(() => document.body.removeChild(form), 1000);
             }
 
-        // Add Select All functionality
-        document.getElementById('selectAllRuangan')?.addEventListener('change', function() {
-            let checkboxes = document.querySelectorAll('.export-checkbox');
-            for (let checkbox of checkboxes) {
-                checkbox.checked = this.checked;
-            }
-        });
+            // Add Select All functionality
+            document.getElementById('selectAllRuangan')?.addEventListener('change', function () {
+                let checkboxes = document.querySelectorAll('.export-checkbox');
+                for (let checkbox of checkboxes) {
+                    checkbox.checked = this.checked;
+                }
+            });
             // PREVIEW FOTO TAMBAH RUANGAN
             const fotoInput = document.getElementById('fotoInput');
             const previewImg = document.getElementById('previewImg');
             const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-            fotoInput.addEventListener('change', function(e) {
+            fotoInput.addEventListener('change', function (e) {
 
                 const file = e.target.files[0];
 
@@ -369,7 +817,7 @@ $stmt = $ruangan->readAll();
 
                     const reader = new FileReader();
 
-                    reader.onload = function(event) {
+                    reader.onload = function (event) {
 
                         // tampilkan gambar
                         previewImg.src = event.target.result;
@@ -388,7 +836,7 @@ $stmt = $ruangan->readAll();
             const editPreview = document.getElementById('edit_preview');
             const editPlaceholder = document.getElementById('editUploadPlaceholder');
 
-            editFotoInput.addEventListener('change', function(e) {
+            editFotoInput.addEventListener('change', function (e) {
 
                 const file = e.target.files[0];
 
@@ -403,7 +851,7 @@ $stmt = $ruangan->readAll();
 
                     const reader = new FileReader();
 
-                    reader.onload = function(event) {
+                    reader.onload = function (event) {
 
                         // tampilkan preview baru
                         editPreview.src = event.target.result;
@@ -418,11 +866,11 @@ $stmt = $ruangan->readAll();
             });
 
             // MODAL EDIT
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
 
                 const modal = document.getElementById('editRuanganModal');
 
-                modal.addEventListener('show.bs.modal', function(event) {
+                modal.addEventListener('show.bs.modal', function (event) {
 
                     let button = event.relatedTarget;
 

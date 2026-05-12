@@ -29,18 +29,13 @@ $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role'])
                 <!-- admin -->
 
                 <?php if (in_array($role, ['admin'])) : ?>
-                <a class="nav-link" href="index.php?page=ruangan">
+                <a class="nav-link" href="index.php?page=ruangan-barang">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-door-open"></i></div>
-                    Ruangan
+                    Ruangan & Barang
                 </a>
                 <?php endif; ?>
 
-                <?php if (in_array($role, ['admin'])) : ?>
-                <a class="nav-link" href="index.php?page=barang">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
-                    Barang
-                </a>
-                <?php endif; ?>
+
 
                 <?php if (in_array($role, ['admin'])) : ?>
                 <a class="nav-link" href="index.php?page=daftar-akun">

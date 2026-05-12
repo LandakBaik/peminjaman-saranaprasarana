@@ -27,6 +27,7 @@ class Barang
         $query = "SELECT 
                 b.*,
                 r.nama_ruangan,
+                (SELECT COUNT(*) FROM barang WHERE id_ruangan = b.id_ruangan) AS total_barang_ruangan,
                 COALESCE(SUM(
                     CASE 
                         WHEN p.status IN ('Dipinjam', 'Pengembalian', 'Menunggu Pengembalian') OR (p.status IN ('Disetujui', 'approved') AND p.waktu_mulai <= NOW()) THEN dp.kuantitas
@@ -168,21 +169,21 @@ class Barang
                   GROUP BY b.id_barang";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id_ruangan',  $id_ruangan);
-        $stmt->bindParam(':start_time',  $start_time);
-        $stmt->bindParam(':end_time',    $end_time);
+        $stmt->bindParam(':id_ruangan', $id_ruangan);
+        $stmt->bindParam(':start_time', $start_time);
+        $stmt->bindParam(':end_time', $end_time);
         $stmt->bindParam(':start_time2', $start_time);
-        $stmt->bindParam(':end_time2',   $end_time);
+        $stmt->bindParam(':end_time2', $end_time);
         $stmt->execute();
 
         $result = [];
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
             $result[$row['id_barang']] = [
-                'id_barang'     => $row['id_barang'],
-                'nama_barang'   => $row['nama_barang'],
-                'total_stok'    => (int) $row['total_stok'],
-                'stok_rusak'    => (int) $row['stok_rusak'],
-                'terpinjam'     => (int) $row['terpinjam'],
+                'id_barang' => $row['id_barang'],
+                'nama_barang' => $row['nama_barang'],
+                'total_stok' => (int) $row['total_stok'],
+                'stok_rusak' => (int) $row['stok_rusak'],
+                'terpinjam' => (int) $row['terpinjam'],
                 'stok_tersedia' => max(0, (int) $row['stok_tersedia']),
             ];
         }
@@ -192,7 +193,7 @@ class Barang
     public function getByIds($ids)
     {
         $inQuery = implode(',', array_fill(0, count($ids), '?'));
-        
+
         $query = "SELECT 
                 b.*,
                 r.nama_ruangan,
@@ -220,7 +221,7 @@ class Barang
 
         $stmt = $this->conn->prepare($query);
         foreach ($ids as $k => $id) {
-            $stmt->bindValue(($k+1), $id);
+            $stmt->bindValue(($k + 1), $id);
         }
         $stmt->execute();
         return $stmt;

@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ================= CREATE =================
     if ($action == 'create') {
 
-        $barang->id_barang = $_POST['id_barang']; // kalau pakai custom ID
+        $barang->id_barang = $_POST['id_barang'] ?? null;
         $barang->id_ruangan = $_POST['id_ruangan'];
         $barang->nama_barang = $_POST['nama_barang'];
         $barang->deskripsi_barang = $_POST['deskripsi_barang'];
@@ -21,9 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $barang->stok_rusak = 0; // default
 
         if ($barang->create()) {
-            header("Location: ../index.php?page=barang&success=added");
+            if (isset($_POST['source']) && $_POST['source'] == 'ruangan') {
+                header("Location: ../index.php?page=ruangan-barang&success=added");
+            } else {
+                header("Location: ../index.php?page=ruangan-barang&success=added");
+            }
         } else {
-            header("Location: ../index.php?page=barang&error=add_failed");
+            header("Location: ../index.php?page=ruangan-barang&error=add_failed");
         }
         exit();
     }
@@ -39,9 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $barang->stok_rusak = $_POST['stok_rusak'] ?? 0;
 
         if ($barang->update()) {
-            header("Location: ../index.php?page=barang&success=updated");
+            if (isset($_POST['source']) && $_POST['source'] == 'ruangan') {
+                header("Location: ../index.php?page=ruangan-barang&success=updated");
+            } else {
+                header("Location: ../index.php?page=ruangan-barang&success=updated");
+            }
         } else {
-            header("Location: ../index.php?page=barang&error=update_failed");
+            header("Location: ../index.php?page=ruangan-barang&error=update_failed");
         }
         exit();
     }
@@ -83,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "</table>";
             exit();
         } else {
-            header("Location: ../index.php?page=barang&error=no_items_selected");
+            header("Location: ../index.php?page=ruangan-barang&error=no_items_selected");
             exit();
         }
     }
@@ -95,10 +103,27 @@ elseif ($action == 'delete') {
     $barang->id_barang = $_GET['id_barang'];
 
     if ($barang->delete()) {
-        header("Location: ../index.php?page=barang&success=deleted");
+        // Cek jika request dari halaman ruangan (Master-Detail)
+        if (isset($_GET['source']) && $_GET['source'] == 'ruangan') {
+            header("Location: ../index.php?page=ruangan-barang&success=deleted");
+        } else {
+            header("Location: ../index.php?page=ruangan-barang&success=deleted");
+        }
     } else {
-        header("Location: ../index.php?page=barang&error=delete_failed");
+        header("Location: ../index.php?page=ruangan-barang&error=delete_failed");
     }
+    exit();
+}
+
+// ================= AJAX: LIST BY RUANGAN =================
+elseif ($action == 'list_by_ruangan') {
+    header('Content-Type: application/json');
+    $id_ruangan = $_GET['id_ruangan'] ?? 0;
+    
+    // Gunakan method existing yang sudah ada di model Barang
+    $stmt = $barang->getByRuangan($id_ruangan);
+    
+    echo json_encode($stmt);
     exit();
 }
 ?>

@@ -77,9 +77,9 @@ $page = $_GET['page'] ?? 'dashboard';
                 include 'pages/pages-staff/riwayat-peminjaman.php';
                 break;
             // Admin
-            case 'ruangan':
+            case 'ruangan-barang':
                 only(['admin']);
-                include 'pages/pages-admin/ruangan.php';
+                include 'pages/pages-admin/ruangan-barang.php';
                 break;
             case 'daftar-akun':
                 only(['admin']);
@@ -89,10 +89,7 @@ $page = $_GET['page'] ?? 'dashboard';
                 only(['admin']);
                 include 'pages/pages-admin/akun-staff.php';
                 break;
-            case 'barang':
-                only(['admin']);
-                include 'pages/pages-admin/barang.php';
-                break;
+
             case 'riwayat-peminjaman-admin':
                 only(['admin']);
                 include 'pages/pages-admin/riwayat-peminjaman.php';

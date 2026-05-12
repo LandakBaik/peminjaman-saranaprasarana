@@ -21,7 +21,12 @@ class Ruangan
     // READ ALL
     public function readAll()
     {
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT 
+                    r.*,
+                    COUNT(b.id_barang) AS total_barang
+                  FROM " . $this->table_name . " r
+                  LEFT JOIN barang b ON r.id_ruangan = b.id_ruangan
+                  GROUP BY r.id_ruangan";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -78,9 +83,13 @@ class Ruangan
         $inQuery = implode(',', array_fill(0, count($ids), '?'));
 
         $query = "
-            SELECT *
-            FROM " . $this->table_name . "
-            WHERE id_ruangan IN ($inQuery)
+            SELECT 
+                r.*,
+                COUNT(b.id_barang) AS total_barang
+            FROM " . $this->table_name . " r
+            LEFT JOIN barang b ON r.id_ruangan = b.id_ruangan
+            WHERE r.id_ruangan IN ($inQuery)
+            GROUP BY r.id_ruangan
         ";
 
         $stmt = $this->conn->prepare($query);
