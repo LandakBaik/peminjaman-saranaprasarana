@@ -66,13 +66,29 @@ function renderCalendar(month, year) {
         day.innerHTML = `<div class="date-number">${date}</div>`;
 
         day.addEventListener('click', () => {
+            console.log("Day clicked:", date, month + 1, year);
             document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
             day.classList.add('selected');
 
-            // tanggal yang dipilih dapat disimpan di sini bila diperlukan
+            // Format date for datetime-local (YYYY-MM-DDTHH:MM)
+            const yyyy = year;
+            const mm = String(month + 1).padStart(2, '0');
+            const dd = String(date).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+
+            const inputMulai = document.getElementById('waktu_mulai');
+            const inputSelesai = document.getElementById('waktu_selesai');
+
+            if (inputMulai && inputSelesai) {
+                inputMulai.value = `${dateStr}T08:00`;
+                inputSelesai.value = `${dateStr}T16:00`;
+                
+                inputMulai.dispatchEvent(new Event('change', { bubbles: true }));
+                inputSelesai.dispatchEvent(new Event('change', { bubbles: true }));
+            }
 
             const modal = document.getElementById('loanModal');
-            modal.style.display = 'flex';
+            if (modal) modal.style.display = 'flex';
         });
 
         calendarDates.appendChild(day);

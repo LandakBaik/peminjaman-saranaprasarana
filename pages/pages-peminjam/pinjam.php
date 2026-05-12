@@ -470,9 +470,39 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
             });
         }
 
+        // =========================
+        // VALIDASI JAM (07:00 - 22:00)
+        // =========================
+        function validateTimeRange() {
+            if (inputMulai.value) {
+                const time = inputMulai.value.split('T')[1];
+                const hour = parseInt(time.split(':')[0], 10);
+                if (hour < 7 || hour >= 22) {
+                    alert('⚠️ Waktu mulai harus antara jam 07:00 - 22:00');
+                    inputMulai.value = inputMulai.value.split('T')[0] + 'T07:00';
+                }
+            }
+            if (inputSelesai.value) {
+                const time = inputSelesai.value.split('T')[1];
+                const hour = parseInt(time.split(':')[0], 10);
+                const min  = parseInt(time.split(':')[1], 10);
+                // Maksimal 22:00
+                if (hour < 7 || hour > 22 || (hour === 22 && min > 0)) {
+                    alert('⚠️ Waktu selesai harus antara jam 07:00 - 22:00');
+                    inputSelesai.value = inputSelesai.value.split('T')[0] + 'T22:00';
+                }
+            }
+        }
+
         // Pasang listener ke kedua input waktu
-        inputMulai.addEventListener('change', checkStock);
-        inputSelesai.addEventListener('change', checkStock);
+        inputMulai.addEventListener('change', () => {
+            validateTimeRange();
+            checkStock();
+        });
+        inputSelesai.addEventListener('change', () => {
+            validateTimeRange();
+            checkStock();
+        });
 
         // =========================
         // SELECT ALL
@@ -586,6 +616,185 @@ $barangList = $barangModel->getByRuangan($id_ruangan);
                 }
             }
         });
+
+        // =========================
+        // LOGIKA KALENDER
+        // =========================
+        const monthSelect = document.getElementById('monthSelect');
+        const yearSelect = document.getElementById('yearSelect');
+        const calendarDates = document.getElementById('calendarDates');
+        const modal = document.getElementById('loanModal');
+        const closeModal = document.querySelector('.close');
+
+        const monthNames = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        const currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        // Isi dropdown bulan
+        if (monthSelect) {
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+        }
+
+        // Isi dropdown tahun
+        if (yearSelect) {
+            for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function renderCalendar(month, year) {
+            if (!calendarDates) return;
+            calendarDates.innerHTML = '';
+
+            if (monthSelect) monthSelect.value = month;
+            if (yearSelect) yearSelect.value = year;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            // Tanggal bulan sebelumnya
+            for (let i = firstDay; i > 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'day inactive';
+                day.innerHTML = `<div class="date-number">${daysInPrevMonth - i + 1}</div>`;
+                calendarDates.appendChild(day);
+            }
+
+            // Tanggal bulan sekarang
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let date = 1; date <= daysInMonth; date++) {
+                const day = document.createElement('div');
+                day.className = 'day';
+
+                const checkDate = new Date(year, month, date);
+                const isPastOrToday = checkDate <= today;
+
+                if (
+                    date === currentDate.getDate() &&
+                    month === currentDate.getMonth() &&
+                    year === currentDate.getFullYear()
+                ) {
+                    day.classList.add('today');
+                }
+
+                if (isPastOrToday) {
+                    day.classList.add('inactive');
+                    day.style.cursor = 'not-allowed';
+                    day.style.opacity = '0.5';
+                }
+
+                day.innerHTML = `<div class="date-number">${date}</div>`;
+
+                if (!isPastOrToday) {
+                    day.addEventListener('click', () => {
+                        document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+                        day.classList.add('selected');
+
+                        // AUTO-FILL LOGIC
+                        const yyyy = year;
+                        const mm = String(month + 1).padStart(2, '0');
+                        const dd = String(date).padStart(2, '0');
+                        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                        if (inputMulai && inputSelesai) {
+                            inputMulai.value = `${dateStr}T07:00`;
+                            inputSelesai.value = `${dateStr}T22:00`;
+                            
+                            // Trigger checkStock via change event
+                            inputMulai.dispatchEvent(new Event('change', { bubbles: true }));
+                            inputSelesai.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+
+                        if (modal) modal.style.display = 'flex';
+                    });
+                }
+
+                calendarDates.appendChild(day);
+            }
+
+            // Isi sisa kotak agar genap 42
+            const totalCells = firstDay + daysInMonth;
+            const remaining = 42 - totalCells;
+
+            for (let i = 1; i <= remaining; i++) {
+                const day = document.createElement('div');
+                day.className = 'day inactive';
+                day.innerHTML = `<div class="date-number">${i}</div>`;
+                calendarDates.appendChild(day);
+            }
+        }
+
+        // Tombol prev / next
+        const btnPrev = document.getElementById('prevMonth');
+        const btnNext = document.getElementById('nextMonth');
+
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+        }
+
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+        }
+
+        if (monthSelect) {
+            monthSelect.addEventListener('change', () => {
+                currentMonth = parseInt(monthSelect.value);
+                renderCalendar(currentMonth, currentYear);
+            });
+        }
+
+        if (yearSelect) {
+            yearSelect.addEventListener('change', () => {
+                currentYear = parseInt(yearSelect.value);
+                renderCalendar(currentMonth, currentYear);
+            });
+        }
+
+        // Tutup modal
+        if (closeModal) {
+            closeModal.addEventListener('click', () => {
+                if (modal) modal.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (modal && e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Jalankan kalender pertama kali
+        renderCalendar(currentMonth, currentYear);
 
     });
 </script>
