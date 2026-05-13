@@ -59,6 +59,9 @@
 
 <script>
 document.querySelector('form').addEventListener('submit', function(e) {
+    if (!this.checkValidity()) {
+        return;
+    }
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm_password').value;
     const alnumRegex = /^[a-zA-Z0-9]+$/;

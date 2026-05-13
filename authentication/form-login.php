@@ -18,12 +18,12 @@
 <form action="../controllers/AuthController.php?action=login" method="POST">
     <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" class="form-control" name="email">
+        <input type="email" class="form-control" name="email" required>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <input type="password" class="form-control" name="password" id="password">
+        <input type="password" class="form-control" name="password" id="password" required>
     </div>
 
     <div class="d-flex justify-content-between small mb-3">
@@ -62,6 +62,10 @@
     });
     // Loading
     document.querySelector('form').addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            return;
+        }
+
         e.preventDefault();
         const form = this;
         
