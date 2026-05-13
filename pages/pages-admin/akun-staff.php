@@ -315,8 +315,9 @@ $stmt = $userModel->readByRoles(['staff']);
                                     Password
                                 </label>
 
-                                <input type="password" class="form-control" name="password" placeholder="XXXXXX"
-                                    required>
+                                <input type="password" class="form-control" name="password" id="staff_password" placeholder="XXXXXX"
+                                    minlength="6" pattern="[a-zA-Z0-9]+" required>
+                                <div class="invalid-feedback">Password harus minimal 6 karakter dan hanya berisi huruf/angka!</div>
 
                             </div>
 
@@ -460,6 +461,26 @@ $stmt = $userModel->readByRoles(['staff']);
                     }
                 });
             });
+        });
+
+        // Password validation for Add Staff form
+        document.querySelector('#tambahStaffModal form').addEventListener('submit', function(e) {
+            const password = document.getElementById('staff_password').value;
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            
+            if (password.length < 6 || !alnumRegex.test(password)) {
+                e.preventDefault();
+                document.getElementById('staff_password').classList.add('is-invalid');
+            } else {
+                document.getElementById('staff_password').classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('staff_password').addEventListener('input', function() {
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            if (this.value.length >= 6 && alnumRegex.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
         });
     </script>
     <footer>

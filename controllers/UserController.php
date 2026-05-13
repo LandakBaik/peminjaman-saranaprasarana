@@ -15,6 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user->password = $_POST['password'];
         $user->role = $_POST['role'] ?? 'staff';
 
+        if (strlen($user->password) < 6) {
+            header("Location: ../index.php?page=akun-staff&error=password_too_short");
+            exit();
+        }
+
+        if (!ctype_alnum($user->password)) {
+            header("Location: ../index.php?page=akun-staff&error=password_not_alnum");
+            exit();
+        }
+
         if ($user->register()) {
 
             // Assign ruangan jika ada yang dipilih

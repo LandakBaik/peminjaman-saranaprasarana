@@ -14,6 +14,16 @@ if ($password !== $confirm_password) {
     exit();
 }
 
+if (strlen($password) < 6) {
+    header("Location: ../authentication/Login.php?page=reset&error=password_too_short");
+    exit();
+}
+
+if (!ctype_alnum($password)) {
+    header("Location: ../authentication/Login.php?page=reset&error=password_not_alnum");
+    exit();
+}
+
 if ($user->updatePasswordByEmail($email, $password)) {
 
     // hapus token
