@@ -80,7 +80,7 @@ while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         <div class="bg-success rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
                             <i class="fas fa-chalkboard-teacher text-white"></i>
                         </div>
-                        <h3 class="fw-bold mb-0">Non-Laboratorium</h3>
+                        <h3 class="fw-bold mb-0">Kelas</h3>
                     </div>
 
                     <div class="row g-4">
