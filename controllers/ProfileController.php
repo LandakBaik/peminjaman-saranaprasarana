@@ -39,6 +39,18 @@ if ($action == 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $tanggal_lahir  = $_POST['tanggal_lahir'] ?? null;
     $jenis_kelamin  = $_POST['jenis_kelamin'] ?? null;
 
+    // ================== VALIDASI ==================
+    if ($nomor_telepon !== null) {
+        $nomor_telepon = trim($nomor_telepon);
+        if (!empty($nomor_telepon)) {
+            // Cek apakah hanya angka dan panjang antara 11-13
+            if (!ctype_digit($nomor_telepon) || strlen($nomor_telepon) < 11 || strlen($nomor_telepon) > 13) {
+                header("Location: ../index.php?page=detail-profil-edit&error=invalid_phone");
+                exit();
+            }
+        }
+    }
+
     // ================== HANDLE KOSONG ==================
     $nama_panggilan = trim($nama_panggilan ?? '') !== ''
         ? trim($nama_panggilan)
