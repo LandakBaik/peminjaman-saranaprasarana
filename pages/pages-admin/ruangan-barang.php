@@ -39,11 +39,63 @@ $stmt = $ruangan->readAll();
                 <div class="card-body">
 
                     <!-- Search + Filter -->
-                    <div class="d-flex mb-3">
-                        <button class="btn btn-light border me-2">
-                            <i class="fas fa-filter"></i>
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- Tombol Filter -->
+                        <button type="button"
+                            class="btn btn-light border rounded-3 d-flex align-items-center justify-content-center me-3"
+                            style="width: 42px; height: 42px;" data-bs-toggle="modal" data-bs-target="#filterRuanganModal"
+                            id="btnFilterToggle" title="Filter">
+                            <i class="fas fa-filter" style="font-size: 16px;"></i>
                         </button>
-                        <input type="text" class="form-control w-25" placeholder="Search...">
+
+                        <!-- Search Bar -->
+                        <input type="text" class="form-control" style="max-width: 250px; height: 42px;"
+                            placeholder="Search..." id="searchRuangan">
+                    </div>
+
+                    <!-- popup filter -->
+                    <div class="modal fade" id="filterRuanganModal" tabindex="-1" aria-labelledby="filterModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0 shadow">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-semibold" id="filterModalLabel">Filter Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    <!-- Tipe -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Tipe Ruangan</label>
+                                        <select class="form-select" id="filterTipe">
+                                            <option value="" selected>Semua</option>
+                                            <option value="laboratorium">Laboratorium</option>
+                                            <option value="non-laboratorium">Non-Laboratorium</option>
+                                        </select>
+                                    </div>
+                                    <!-- Kapasitas -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Kapasitas (Minimal)</label>
+                                        <input type="number" class="form-control" id="filterKapasitas" placeholder="Contoh: 30">
+                                    </div>
+                                    <!-- Total Barang -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Total Aset (Minimal)</label>
+                                        <input type="number" class="form-control" id="filterAset" placeholder="Contoh: 10">
+                                    </div>
+                                    <!-- Tanggal -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Tanggal Dibuat</label>
+                                        <input type="date" class="form-control" id="filterTanggal">
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        id="btnResetRuanganFilter">Reset</button>
+                                    <button type="button" class="btn btn-primary" id="btnApplyRuanganFilter"
+                                        data-bs-dismiss="modal">Terapkan</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Table -->
@@ -61,13 +113,16 @@ $stmt = $ruangan->readAll();
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="ruanganBody">
                                 <?php
                                 $no = 1;
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     ?>
-                                    <tr>
-                                        <td class="text-center"><input type="checkbox" class="export-checkbox"
+                                     <tr data-tipe="<?= htmlspecialchars($row['tipe_ruangan']) ?>" 
+                                         data-kapasitas="<?= $row['kapasitas'] ?>" 
+                                         data-aset="<?= $row['total_barang'] ?>" 
+                                         data-tanggal="<?= date('Y-m-d', strtotime($row['tanggal_dibuat'])) ?>">
+                                        <td class="text-center"><input type="checkbox" class="export-checkbox row-checkbox"
                                                 value="<?= $row['id_ruangan'] ?>"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td><strong><?= htmlspecialchars($row['nama_ruangan']) ?></strong></td>
@@ -114,13 +169,20 @@ $stmt = $ruangan->readAll();
 
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted">1–2 of 2</small>
+                        <small class="text-muted" id="rowCountRuangan">Menampilkan 0 data</small>
 
                         <div class="d-flex align-items-center">
-                            <small class="me-2">Rows per page: 10</small>
-                            <button class="btn btn-light btn-sm me-1">&lt;</button>
-                            <span>1</span>
-                            <button class="btn btn-light btn-sm ms-1">&gt;</button>
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPageRuangan" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </small>
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPageRuangan">&lt;</button>
+                            <span id="currentPageNumRuangan" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPageRuangan">&gt;</button>
                         </div>
                     </div>
 
@@ -790,13 +852,7 @@ $stmt = $ruangan->readAll();
                 setTimeout(() => document.body.removeChild(form), 1000);
             }
 
-            // Add Select All functionality
-            document.getElementById('selectAllRuangan')?.addEventListener('change', function () {
-                let checkboxes = document.querySelectorAll('.export-checkbox');
-                for (let checkbox of checkboxes) {
-                    checkbox.checked = this.checked;
-                }
-            });
+
             // PREVIEW FOTO TAMBAH RUANGAN
             const fotoInput = document.getElementById('fotoInput');
             const previewImg = document.getElementById('previewImg');

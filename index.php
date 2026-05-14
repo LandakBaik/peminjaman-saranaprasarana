@@ -107,7 +107,9 @@ $page = $_GET['page'] ?? 'dashboard';
     <script src="js/datatables-simple-demo.js"></script>
     <script src="js/peminjaman-filter.js?v=<?= time() ?>"></script>
     <script src="js/barang-filter.js"></script>
-    <script src="js/user-filter.js"></script>
+    <script src="js/user-filter.js?v=<?= time() ?>"></script>
+    <script src="js/ruangan-filter.js?v=<?= time() ?>"></script>
+    <script src="js/riwayat-filter.js?v=<?= time() ?>"></script>
     <!-- <script src="assets/demo/chart-area-demo.js"></script> -->
     <!-- <script src="assets/demo/chart-bar-demo.js"></script> -->
     <!-- <script src="assets/demo/chart-pie-demo.js"></script> -->

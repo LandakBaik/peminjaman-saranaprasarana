@@ -294,31 +294,21 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
 
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-
-                        <small class="text-muted" id="rowCountUser">
-
-                            0 of 0
-
-                        </small>
+                        <small class="text-muted" id="rowCountUser">Menampilkan 0 data</small>
 
                         <div class="d-flex align-items-center">
-
-                            <small class="me-2">
-                                Rows per page: 10
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPageUser" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
                             </small>
-
-                            <button class="btn btn-light btn-sm me-1">
-                                &lt;
-                            </button>
-
-                            <span>1</span>
-
-                            <button class="btn btn-light btn-sm ms-1">
-                                &gt;
-                            </button>
-
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPageUser">&lt;</button>
+                            <span id="currentPageNumUser" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPageUser">&gt;</button>
                         </div>
-
                     </div>
 
                 </div>

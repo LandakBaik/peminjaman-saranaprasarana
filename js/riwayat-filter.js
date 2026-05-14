@@ -1,24 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // ========== DOM Elements ==========
-    const searchInput   = document.getElementById('searchUser');
-    const tableBody     = document.getElementById('userBody');
-    const rowCountEl    = document.getElementById('rowCountUser');
-    const selectAll     = document.getElementById('selectAllUser');
-    const btnApply      = document.getElementById('applyUserFilter');
-    const btnReset      = document.getElementById('resetUserFilter');
-    const filterRole    = document.getElementById('filterRole');
-    const filterStatus  = document.getElementById('filterStatusUser');
+    const searchInput   = document.getElementById('searchRiwayat');
+    const tableBody     = document.getElementById('riwayatBody');
+    const rowCountEl    = document.getElementById('rowCountRiwayat');
+    const selectAll     = document.getElementById('selectAllRiwayat');
+    const btnApply      = document.getElementById('btnApplyRiwayatFilter');
+    const btnReset      = document.getElementById('btnResetRiwayatFilter');
+    const filterStatus  = document.getElementById('filterStatusRiwayat');
+    const filterJenis   = document.getElementById('filterJenisRiwayat');
+    const filterTanggal = document.getElementById('filterTanggalRiwayat');
 
     // ========== Pagination State ==========
     let currentPage = 1;
     let rowsPerPage = 10;
     let filteredRows = [];
 
-    const rowsPerPageSelect = document.getElementById('rowsPerPageUser');
-    const btnPrevPage       = document.getElementById('btnPrevPageUser');
-    const btnNextPage       = document.getElementById('btnNextPageUser');
-    const currentPageNum    = document.getElementById('currentPageNumUser');
+    const rowsPerPageSelect = document.getElementById('rowsPerPageRiwayat');
+    const btnPrevPage       = document.getElementById('btnPrevPageRiwayat');
+    const btnNextPage       = document.getElementById('btnNextPageRiwayat');
+    const currentPageNum    = document.getElementById('currentPageNumRiwayat');
 
     // ========== Checkbox ==========
 
@@ -62,8 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnReset) {
         btnReset.addEventListener('click', function () {
-            if (filterRole) filterRole.value = '';
             if (filterStatus) filterStatus.value = '';
+            if (filterJenis) filterJenis.value = '';
+            if (filterTanggal) filterTanggal.value = '';
             currentPage = 1;
             applyAll();
         });
@@ -100,22 +102,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyAll() {
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const roleVal    = filterRole ? filterRole.value.toLowerCase().trim() : '';
         const statusVal  = filterStatus ? filterStatus.value.toLowerCase().trim() : '';
+        const jenisVal   = filterJenis ? filterJenis.value.toLowerCase().trim() : '';
+        const tanggalVal = filterTanggal ? filterTanggal.value : '';
 
-        const rows = tableBody ? tableBody.querySelectorAll('tr[data-role]') : [];
+        const rows = tableBody ? tableBody.querySelectorAll('tr[data-status]') : [];
         filteredRows = [];
 
         rows.forEach(row => {
             const text   = row.textContent.toLowerCase();
-            const role   = (row.getAttribute('data-role') || '').toLowerCase().trim();
             const status = (row.getAttribute('data-status') || '').toLowerCase().trim();
+            const type   = (row.getAttribute('data-type') || '').toLowerCase().trim();
+            const date   = (row.getAttribute('data-date') || '');
 
             const matchSearch = !searchTerm || text.includes(searchTerm);
-            const matchRole   = !roleVal   || role === roleVal;
             const matchStatus = !statusVal || status === statusVal;
+            const matchJenis  = !jenisVal  || type === jenisVal;
+            const matchDate   = !tanggalVal || date === tanggalVal;
 
-            if (matchSearch && matchRole && matchStatus) {
+            if (matchSearch && matchStatus && matchJenis && matchDate) {
                 filteredRows.push(row);
             } else {
                 row.style.display = 'none';
@@ -136,14 +141,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const endIndex = startIndex + rowsPerPage;
 
         // Hide all first
-        const allRows = tableBody ? tableBody.querySelectorAll('tr[data-role]') : [];
+        const allRows = tableBody ? tableBody.querySelectorAll('tr[data-status]') : [];
         allRows.forEach(r => r.style.display = 'none');
 
         // Show only current page
         filteredRows.forEach((row, index) => {
             if (index >= startIndex && index < endIndex) {
                 row.style.display = '';
-                // Update sequential number (assuming No is in the 2nd cell, index 1)
+                // Update sequential number (assuming No is in the 3nd cell, index 1)
+                // Wait, No is index 1 because checkbox is index 0
                 const noCell = row.cells[1];
                 if (noCell) noCell.textContent = index + 1;
             } else {
