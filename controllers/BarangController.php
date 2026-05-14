@@ -39,8 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $barang->id_ruangan = $_POST['id_ruangan'];
         $barang->nama_barang = $_POST['nama_barang'];
         $barang->deskripsi_barang = $_POST['deskripsi_barang'];
-        $barang->total_stok = $_POST['total_stok'];
-        $barang->stok_rusak = $_POST['stok_rusak'] ?? 0;
+        $barang->total_stok = (int)$_POST['total_stok'];
+        $barang->stok_rusak = (int)($_POST['stok_rusak'] ?? 0);
+
+        // VALIDASI: Stok rusak tidak boleh melebihi total stok
+        if ($barang->stok_rusak > $barang->total_stok) {
+            header("Location: ../index.php?page=ruangan-barang&error=stok_invalid");
+            exit();
+        }
 
         if ($barang->update()) {
             if (isset($_POST['source']) && $_POST['source'] == 'ruangan') {

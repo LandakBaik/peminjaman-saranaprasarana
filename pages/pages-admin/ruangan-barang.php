@@ -13,6 +13,14 @@ $stmt = $ruangan->readAll();
             <!-- Title -->
             <h1 class="mt-4">Ruangan & Barang</h1>
 
+            <?php if (isset($_GET['error']) && $_GET['error'] === 'stok_invalid'): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>⚠️ Gagal Memperbarui!</strong>
+                    Jumlah stok rusak tidak boleh melebihi stok total barang.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">
@@ -592,7 +600,7 @@ $stmt = $ruangan->readAll();
 
                     </div>
 
-                    <form action="controllers/BarangController.php?action=update" method="POST">
+                    <form action="controllers/BarangController.php?action=update" method="POST" id="formEditAset">
 
                         <input type="hidden" name="source" value="ruangan">
 
@@ -970,6 +978,23 @@ $stmt = $ruangan->readAll();
                     }
                 });
 
+                // Validasi Stok Rusak vs Stok Total
+                const formEditAset = document.getElementById('formEditAset');
+                if (formEditAset) {
+                    formEditAset.addEventListener('submit', function (e) {
+                        const totalInput = document.getElementById('edit_aset_total');
+                        const rusakInput = document.getElementById('edit_aset_rusak');
+                        
+                        const total = parseInt(totalInput.value) || 0;
+                        const rusak = parseInt(rusakInput.value) || 0;
+
+                        if (rusak > total) {
+                            alert('⚠️ Stok rusak tidak boleh melebihi stok total!');
+                            rusakInput.focus();
+                            e.preventDefault();
+                        }
+                    });
+                }
             });
         </script>
     </main>
