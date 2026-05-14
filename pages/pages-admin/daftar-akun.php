@@ -116,6 +116,10 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                                 Aktif
                                             </option>
 
+                                            <option value="nonaktif">
+                                                Nonaktif
+                                            </option>
+
                                         </select>
 
                                     </div>
@@ -183,9 +187,10 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                     if ($row['role'] == 'staff') {
                                         $roleClass = 'bg-secondary-subtle text-secondary';
                                     }
+                                    $statusClass = $row['status'] == 'aktif' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
                                     ?>
 
-                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="aktif">
+                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="<?= htmlspecialchars($row['status']) ?>">
 
                                         <td class="text-center">
                                             <input type="checkbox" class="row-checkbox export-checkbox"
@@ -209,15 +214,15 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                         <td class="text-center">
 
                                             <span class="badge <?= $roleClass ?>">
-                                                <?= ucfirst(htmlspecialchars($row['role'])) ?>
+                                                <?= ucfirst(htmlspecialchars($row['role'] ?? '')) ?>
                                             </span>
 
                                         </td>
 
                                         <td class="text-center">
 
-                                            <span class="badge bg-success-subtle text-success">
-                                                Aktif
+                                            <span class="badge <?= $statusClass ?>">
+                                                <?= ucfirst(htmlspecialchars($row['status'] ?? '')) ?>
                                             </span>
 
                                         </td>

@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user->nama = $_POST['nama'];
         $user->email = $_POST['email'];
         $user->role = $_POST['role'];
+        $user->status = $_POST['status'] ?? 'aktif';
 
         if ($user->update()) {
             $ruangan = new \App\Models\Ruangan($db);
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<th>Nama</th>";
             echo "<th>Email</th>";
             echo "<th>Role</th>";
+            echo "<th>Status</th>";
             echo "</tr>";
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -82,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<td>" . htmlspecialchars($row['nama'] ?? '') . "</td>";
                 echo "<td>" . htmlspecialchars($row['email'] ?? '') . "</td>";
                 echo "<td>" . htmlspecialchars($row['role'] ?? '') . "</td>";
+                echo "<td>" . htmlspecialchars($row['status'] ?? '') . "</td>";
                 echo "</tr>";
             }
             echo "</table>";
@@ -91,5 +94,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action == 'update_status') {
+    $id = $_GET['id'];
+    $status = $_GET['status'];
+
+    $query = "UPDATE pengguna SET status = :status WHERE id_pengguna = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(":status", $status);
+    $stmt->bindParam(":id", $id);
+
+    if ($stmt->execute()) {
+        header("Location: ../index.php?page=akun-staff&success=status_updated");
+    } else {
+        header("Location: ../index.php?page=akun-staff&error=status_update_failed");
+    }
+    exit();
 }
 ?>

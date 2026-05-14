@@ -93,8 +93,10 @@ $stmt = $userModel->readByRoles(['staff']);
                                     if ($row['role'] == 'staff') {
                                         $roleClass = 'bg-secondary-subtle text-secondary';
                                     }
+
+                                    $statusClass = $row['status'] == 'aktif' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
                                     ?>
-                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="aktif">
+                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="<?= htmlspecialchars($row['status']) ?>">
                                         <td class="text-center">
                                             <input type="checkbox" class="row-checkbox export-checkbox" value="<?= $row['id_pengguna'] ?>">
                                         </td>
@@ -103,11 +105,17 @@ $stmt = $userModel->readByRoles(['staff']);
                                         <td><?= htmlspecialchars($row['email'] ?? '') ?></td>
                                         <td class="text-center">
                                             <span class="badge <?= $roleClass ?>">
-                                                <?= ucfirst(htmlspecialchars($row['role'])) ?>
+                                                <?= ucfirst(htmlspecialchars($row['role'] ?? '')) ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                            <select class="form-select form-select-sm status-dropdown" 
+                                                onchange="location.href='controllers/UserController.php?action=update_status&id=<?= $row['id_pengguna'] ?>&status=' + this.value"
+                                                style="min-width: 100px; border-radius: 20px; font-size: 0.75rem; 
+                                                <?= $row['status'] == 'aktif' ? 'background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;' : 'background-color: #f8d7da; color: #842029; border-color: #f5c2c7;' ?>">
+                                                <option value="aktif" <?= $row['status'] == 'aktif' ? 'selected' : '' ?>>Aktif</option>
+                                                <option value="nonaktif" <?= $row['status'] == 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
+                                            </select>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-1">
@@ -181,6 +189,13 @@ $stmt = $userModel->readByRoles(['staff']);
                                                                 <div class="mb-3">
                                                                     <label class="form-label fw-semibold">Email</label>
                                                                     <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($row['email']) ?>" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Status Akun</label>
+                                                                    <select class="form-select" name="status">
+                                                                        <option value="aktif" <?= $row['status'] == 'aktif' ? 'selected' : '' ?>>Aktif</option>
+                                                                        <option value="nonaktif" <?= $row['status'] == 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
+                                                                    </select>
                                                                 </div>
                                                                 <input type="hidden" name="role" value="staff">
 

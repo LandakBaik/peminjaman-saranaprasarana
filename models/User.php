@@ -11,6 +11,7 @@ class User
     public $email;
     public $password;
     public $role;
+    public $status = 'aktif';
 
     public function __construct($db)
     {
@@ -22,7 +23,7 @@ class User
     {
 
         $query = "SELECT * FROM " . $this->table_name . " 
-                  WHERE email = :email 
+                  WHERE email = :email AND status = 'aktif'
                   LIMIT 1";
 
         $stmt = $this->conn->prepare($query);
@@ -39,6 +40,7 @@ class User
                 $this->nama        = $row['nama'];
                 $this->email       = $row['email'];
                 $this->role        = $row['role'];
+                $this->status      = $row['status'];
 
                 return true;
             }
@@ -71,7 +73,8 @@ class User
               SET nama     = :nama,
                   email    = :email,
                   password = :password,
-                  role     = :role";
+                  role     = :role,
+                  status   = :status";
 
         $stmt = $this->conn->prepare($query);
 
@@ -79,6 +82,7 @@ class User
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":password", $hashedPassword);
         $stmt->bindParam(":role", $this->role);
+        $stmt->bindParam(":status", $this->status);
 
         if ($stmt->execute()) {
             $this->id_pengguna = $this->conn->lastInsertId();
@@ -194,7 +198,8 @@ class User
         $query = "UPDATE " . $this->table_name . "
                   SET nama = :nama,
                       email = :email,
-                      role = :role
+                      role = :role,
+                      status = :status
                   WHERE id_pengguna = :id_pengguna";
 
         $stmt = $this->conn->prepare($query);
@@ -202,6 +207,7 @@ class User
         $stmt->bindParam(":nama", $this->nama);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":role", $this->role);
+        $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":id_pengguna", $this->id_pengguna);
 
         return $stmt->execute();
