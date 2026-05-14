@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterStatus  = document.getElementById('filterStatus');
     const filterJenis   = document.getElementById('filterJenis');
     const filterTanggal = document.getElementById('filterTanggal');
+    const filterRoom    = document.getElementById('filterRoom');
+    const filterPeminjam = document.getElementById('filterPeminjam');
 
     // Helper: ambil semua row checkbox
     const getRowCheckboxes = () => tableBody.querySelectorAll('.row-checkbox');
@@ -65,6 +67,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if(filterStatus) filterStatus.value  = '';
             if(filterJenis) filterJenis.value   = '';
             if(filterTanggal) filterTanggal.value = '';
+            if(filterRoom) filterRoom.value = '';
+            if(filterPeminjam) filterPeminjam.value = '';
             applyAll();
         });
     }
@@ -104,6 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const statusVal  = filterStatus ? filterStatus.value : '';
         const jenisVal   = filterJenis ? filterJenis.value : '';
         const tanggalVal = filterTanggal ? filterTanggal.value : '';
+        const roomVal    = filterRoom ? filterRoom.value.toLowerCase().trim() : '';
+        const peminjamVal = filterPeminjam ? filterPeminjam.value.toLowerCase().trim() : '';
 
         const rows = tableBody ? tableBody.querySelectorAll('tr[data-status]') : [];
         filteredRows = [];
@@ -113,13 +119,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const status = row.getAttribute('data-status');
             const type   = row.getAttribute('data-type');
             const rowDate = row.getAttribute('data-date');
+            const room   = (row.getAttribute('data-room') || '').toLowerCase();
+            const peminjam = (row.getAttribute('data-peminjam') || '').toLowerCase();
 
             const matchSearch = !searchTerm || text.includes(searchTerm);
             const matchStatus = !statusVal  || status === statusVal;
             const matchType   = !jenisVal   || type === jenisVal;
             const matchDate   = !tanggalVal || rowDate === tanggalVal;
+            const matchRoom   = !roomVal    || room.includes(roomVal);
+            const matchPeminjam = !peminjamVal || peminjam.includes(peminjamVal);
 
-            if (matchSearch && matchStatus && matchType && matchDate) {
+            if (matchSearch && matchStatus && matchType && matchDate && matchRoom && matchPeminjam) {
                 filteredRows.push(row);
             } else {
                 row.style.display = 'none';

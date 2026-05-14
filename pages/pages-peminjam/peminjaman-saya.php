@@ -74,6 +74,11 @@ $stmt = $peminjaman->readByUser($userId);
                                         <label class="form-label fw-semibold">Tanggal</label>
                                         <input type="date" class="form-control" id="filterTanggal">
                                     </div>
+                                    <!-- Ruangan -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Ruangan / Barang</label>
+                                        <input type="text" class="form-control" id="filterRoom" placeholder="Cari nama ruangan/barang...">
+                                    </div>
                                 </div>
                                 <div class="modal-footer border-0 pt-0">
                                     <button type="button" class="btn btn-outline-secondary"
@@ -130,8 +135,9 @@ $stmt = $peminjaman->readByUser($userId);
                                         $statusClass = 'bg-warning-subtle text-warning';
                                     ?>
                                     <tr data-status="<?= ucfirst(htmlspecialchars($displayStatus)) ?>"
-                                        data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
-                                        data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>">
+                                    data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
+                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>"
+                                    data-room="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>">
                                         <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td>
