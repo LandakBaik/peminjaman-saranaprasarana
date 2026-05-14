@@ -70,13 +70,8 @@ $stmt = $peminjaman->readByUser($userId, true);
                                     </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <label class="form-label fw-semibold">Tanggal Pengajuan</label>
                                         <input type="date" class="form-control" id="filterTanggal">
-                                    </div>
-                                    <!-- Ruangan -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Ruangan / Barang</label>
-                                        <input type="text" class="form-control" id="filterRoom" placeholder="Cari nama ruangan/barang...">
                                     </div>
                                 </div>
                                 <div class="modal-footer border-0 pt-0">
@@ -102,7 +97,7 @@ $stmt = $peminjaman->readByUser($userId, true);
                                     <th>Status</th>
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
-                                    <th>Tanggal</th>
+                                    <th>Tanggal Pengajuan</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -143,14 +138,14 @@ $stmt = $peminjaman->readByUser($userId, true);
                                                 class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($displayStatus)) ?></span>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_mulai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_mulai']))) ?>
                                         </td>
 
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_selesai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_selesai']))) ?>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
                                         </td>
                                         <td class="text-center">
                                             <button class="btn btn-info btn-sm text-white btn-detail" data-bs-toggle="modal"
