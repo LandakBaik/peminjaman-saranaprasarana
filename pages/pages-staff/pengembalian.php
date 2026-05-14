@@ -51,14 +51,8 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body pt-2">
-                                    <!-- Status (Hidden or simplified for pengembalian) -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Status</label>
-                                        <select class="form-select" id="filterStatus">
-                                            <option value="" selected>Semua</option>
-                                            <option value="Menunggu Pengembalian">Menunggu Pengembalian</option>
-                                        </select>
-                                    </div>
+                                    <!-- Status (Removed for pengembalian) -->
+
                                     <!-- Jenis -->
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Jenis</label>
