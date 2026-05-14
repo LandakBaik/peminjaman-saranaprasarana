@@ -27,11 +27,62 @@ $stmt = $peminjaman->readByStaff($userId);
                 <div class="card-body">
 
                     <!-- Search + Filter -->
-                    <div class="d-flex mb-3">
-                        <button class="btn btn-light border me-2">
-                            <i class="fas fa-filter"></i>
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- Tombol Filter -->
+                        <button type="button"
+                            class="btn btn-light border rounded-3 d-flex align-items-center justify-content-center me-3"
+                            style="width: 42px; height: 42px;" data-bs-toggle="modal" data-bs-target="#filterModal"
+                            id="btnFilterToggle" title="Filter">
+                            <i class="fas fa-filter" style="font-size: 16px;"></i>
                         </button>
-                        <input type="text" class="form-control w-25" placeholder="Search...">
+
+                        <!-- Search Bar -->
+                        <input type="text" class="form-control" style="max-width: 250px; height: 42px;"
+                            placeholder="Search..." id="searchInput">
+                    </div>
+
+                    <!-- popup filter -->
+                    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0 shadow">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-semibold" id="filterModalLabel">Filter Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    <!-- Status (Hidden or simplified for pengembalian) -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Status</label>
+                                        <select class="form-select" id="filterStatus">
+                                            <option value="" selected>Semua</option>
+                                            <option value="Menunggu Pengembalian">Menunggu Pengembalian</option>
+                                        </select>
+                                    </div>
+                                    <!-- Jenis -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Jenis</label>
+                                        <select class="form-select" id="filterJenis">
+                                            <option value="" selected>Semua</option>
+                                            <option value="Barang">Barang</option>
+                                            <option value="Ruangan">Ruangan</option>
+                                        </select>
+                                    </div>
+                                    <!-- Tanggal -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <input type="date" class="form-control" id="filterTanggal">
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        id="btnResetFilter">Reset</button>
+                                    <button type="button" class="btn btn-primary" id="btnApplyFilter"
+                                        data-bs-dismiss="modal">Terapkan</button>
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Table -->
@@ -49,7 +100,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="peminjamanBody">
                                 <?php
                                 $no = 1;
                                 $ada_data = false;
@@ -59,7 +110,9 @@ $stmt = $peminjaman->readByStaff($userId);
                                     }
                                     $ada_data = true;
                                 ?>
-                                <tr>
+                                <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>"
+                                    data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
+                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>">
                                     <td class="text-center"><?= $no++ ?></td>
                                     <td>
                                         <strong><?= htmlspecialchars($row['peminjam'] ?? '-') ?></strong><br>
@@ -97,6 +150,25 @@ $stmt = $peminjaman->readByStaff($userId);
                                 <?php endif; ?>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted" id="rowCount">Menampilkan 0 data</small>
+
+                        <div class="d-flex align-items-center">
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPage" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </small>
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPage">&lt;</button>
+                            <span id="currentPageNum" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPage">&gt;</button>
+                        </div>
                     </div>
 
                 </div>

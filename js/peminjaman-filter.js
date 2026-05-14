@@ -17,75 +17,157 @@ document.addEventListener('DOMContentLoaded', function () {
     const getRowCheckboxes = () => tableBody.querySelectorAll('.row-checkbox');
 
 
+    // ========== Pagination State ==========
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    let filteredRows = [];
+
+    const rowsPerPageSelect = document.getElementById('rowsPerPage');
+    const btnPrevPage       = document.getElementById('btnPrevPage');
+    const btnNextPage       = document.getElementById('btnNextPage');
+    const currentPageNum    = document.getElementById('currentPageNum');
+
     // ========== Checkbox ==========
 
-    selectAll.addEventListener('change', function () {
-        getRowCheckboxes().forEach(cb => cb.checked = selectAll.checked);
-    });
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            getRowCheckboxes().forEach(cb => cb.checked = selectAll.checked);
+        });
+    }
 
-    tableBody.addEventListener('change', function (e) {
-        if (e.target.classList.contains('row-checkbox')) {
-            const all = getRowCheckboxes();
-            selectAll.checked = [...all].every(cb => cb.checked);
-        }
-    });
-
+    if (tableBody) {
+        tableBody.addEventListener('change', function (e) {
+            if (e.target.classList.contains('row-checkbox')) {
+                const all = getRowCheckboxes();
+                selectAll.checked = [...all].every(cb => cb.checked);
+            }
+        });
+    }
 
     // ========== Search ==========
 
-    searchInput.addEventListener('input', function () {
-        applyAll();
-    });
-
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            applyAll();
+        });
+    }
 
     // ========== Filter ==========
 
-    btnApply.addEventListener('click', function () {
-        applyAll();
-    });
+    if (btnApply) {
+        btnApply.addEventListener('click', function () {
+            applyAll();
+        });
+    }
 
-    btnReset.addEventListener('click', function () {
-        filterStatus.value  = '';
-        filterJenis.value   = '';
-        filterTanggal.value = '';
-        applyAll();
-    });
+    if (btnReset) {
+        btnReset.addEventListener('click', function () {
+            if(filterStatus) filterStatus.value  = '';
+            if(filterJenis) filterJenis.value   = '';
+            if(filterTanggal) filterTanggal.value = '';
+            applyAll();
+        });
+    }
 
+    // ========== Pagination Listeners ==========
+
+    if (rowsPerPageSelect) {
+        rowsPerPageSelect.addEventListener('change', function () {
+            currentPage = 1;
+            renderPagination();
+        });
+    }
+
+    if (btnPrevPage) {
+        btnPrevPage.addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPagination();
+            }
+        });
+    }
+
+    if (btnNextPage) {
+        btnNextPage.addEventListener('click', function () {
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPagination();
+            }
+        });
+    }
 
     // ========== Core: Apply Search + Filter ==========
 
     function applyAll() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const statusVal  = filterStatus.value;
-        const jenisVal   = filterJenis.value;
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const statusVal  = filterStatus ? filterStatus.value : '';
+        const jenisVal   = filterJenis ? filterJenis.value : '';
+        const tanggalVal = filterTanggal ? filterTanggal.value : '';
 
-        const rows     = tableBody.querySelectorAll('tr');
-        let visible    = 0;
-        const totalRows = rows.length;
+        const rows = tableBody ? tableBody.querySelectorAll('tr[data-status]') : [];
+        filteredRows = [];
 
         rows.forEach(row => {
             const text   = row.textContent.toLowerCase();
             const status = row.getAttribute('data-status');
             const type   = row.getAttribute('data-type');
+            const rowDate = row.getAttribute('data-date');
 
             const matchSearch = !searchTerm || text.includes(searchTerm);
             const matchStatus = !statusVal  || status === statusVal;
             const matchType   = !jenisVal   || type === jenisVal;
+            const matchDate   = !tanggalVal || rowDate === tanggalVal;
 
-            if (matchSearch && matchStatus && matchType) {
-                row.style.display = '';
-                visible++;
+            if (matchSearch && matchStatus && matchType && matchDate) {
+                filteredRows.push(row);
             } else {
                 row.style.display = 'none';
             }
         });
 
-        // Update row count
-        if (visible === 0) {
-            rowCountEl.textContent = '0 of ' + totalRows;
-        } else {
-            rowCountEl.textContent = '1\u2013' + visible + ' of ' + visible;
-        }
+        currentPage = 1;
+        renderPagination();
     }
+
+    // ========== Render Pagination ==========
+
+    function renderPagination() {
+        if (!rowsPerPageSelect) return;
+
+        rowsPerPage = parseInt(rowsPerPageSelect.value, 10);
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        filteredRows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (rowCountEl) {
+            if (totalRows === 0) {
+                rowCountEl.textContent = 'Menampilkan 0 data';
+            } else {
+                const endDisplay = Math.min(endIndex, totalRows);
+                rowCountEl.textContent = `Menampilkan ${startIndex + 1}\u2013${endDisplay} dari ${totalRows} data`;
+            }
+        }
+
+        if (currentPageNum) currentPageNum.textContent = currentPage;
+        if (btnPrevPage) btnPrevPage.disabled = currentPage === 1;
+        if (btnNextPage) btnNextPage.disabled = currentPage === totalPages;
+    }
+
+    // Initial Call
+    applyAll();
 
 });
