@@ -51,8 +51,6 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body pt-2">
-                                    <!-- Status (Removed for pengembalian) -->
-
                                     <!-- Jenis -->
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Jenis</label>
@@ -64,18 +62,8 @@ $stmt = $peminjaman->readByStaff($userId);
                                     </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <label class="form-label fw-semibold">Tanggal Pengajuan</label>
                                         <input type="date" class="form-control" id="filterTanggal">
-                                    </div>
-                                    <!-- Peminjam -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Peminjam</label>
-                                        <input type="text" class="form-control" id="filterPeminjam" placeholder="Cari nama peminjam...">
-                                    </div>
-                                    <!-- Ruangan -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Ruangan / Barang</label>
-                                        <input type="text" class="form-control" id="filterRoom" placeholder="Cari nama ruangan/barang...">
                                     </div>
                                 </div>
                                 <div class="modal-footer border-0 pt-0">
@@ -133,13 +121,13 @@ $stmt = $peminjaman->readByStaff($userId);
                                         <strong><?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?></strong>
                                     </td>
                                     <td class="text-center small">
-                                        <?= date('d M, H:i', strtotime($row['waktu_mulai'])) ?>
+                                        <?= date('d M Y - H:i', strtotime($row['waktu_mulai'])) ?>
                                     </td>
                                     <td class="text-center small">
-                                        <?= date('d M, H:i', strtotime($row['waktu_selesai'])) ?>
+                                        <?= date('d M Y - H:i', strtotime($row['waktu_selesai'])) ?>
                                     </td>
                                     <td class="text-center small">
-                                        <?= htmlspecialchars(date('d M Y', strtotime($row['tanggal_dibuat']))) ?>
+                                        <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
                                     </td>
                                     <td class="text-center">
                                         <form action="controllers/PeminjamanController.php?action=verifikasi_pengembalian" method="POST" class="d-inline">

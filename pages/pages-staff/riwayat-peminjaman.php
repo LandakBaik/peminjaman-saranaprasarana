@@ -56,7 +56,6 @@ $stmt = $peminjaman->readByStaff($userId, true);
                                             <option value="" selected>Semua</option>
                                             <option value="Selesai">Selesai</option>
                                             <option value="Ditolak">Ditolak</option>
-                                            <option value="Dikembalikan">Dikembalikan</option>
                                         </select>
                                     </div>
                                     <!-- Jenis -->
@@ -70,18 +69,8 @@ $stmt = $peminjaman->readByStaff($userId, true);
                                     </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <label class="form-label fw-semibold">Tanggal Pengajuan</label>
                                         <input type="date" class="form-control" id="filterTanggal">
-                                    </div>
-                                    <!-- Peminjam -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Peminjam</label>
-                                        <input type="text" class="form-control" id="filterPeminjam" placeholder="Cari nama peminjam...">
-                                    </div>
-                                    <!-- Ruangan -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Ruangan / Barang</label>
-                                        <input type="text" class="form-control" id="filterRoom" placeholder="Cari nama ruangan/barang...">
                                     </div>
                                 </div>
                                 <div class="modal-footer border-0 pt-0">
@@ -160,15 +149,15 @@ $stmt = $peminjaman->readByStaff($userId, true);
                                         </td>
 
                                         <td class="text-center small">
-                                            <?= date('d M, H:i', strtotime($row['waktu_mulai'])) ?>
+                                            <?= date('d M Y - H:i', strtotime($row['waktu_mulai'])) ?>
                                         </td>
 
                                         <td class="text-center small">
-                                            <?= date('d M, H:i', strtotime($row['waktu_selesai'])) ?>
+                                            <?= date('d M Y - H:i', strtotime($row['waktu_selesai'])) ?>
                                         </td>
 
                                         <td class="text-center small">
-                                            <?= htmlspecialchars(date('d M Y', strtotime($row['tanggal_dibuat']))) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
                                         </td>
 
                                         <td class="text-center">
