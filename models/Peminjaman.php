@@ -642,4 +642,35 @@ class Peminjaman
         
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
+
+    public function rejectOverlappingRuanganRequests($id_peminjaman, $id_ruangan, $waktu_mulai, $waktu_selesai, $approved_by)
+    {
+        // Query untuk mencari semua peminjaman Pending bertipe ruangan yang meminjam barang di ruangan yang sama
+        // dan memiliki range waktu yang bertabrakan.
+        $query = "UPDATE peminjaman p
+                  INNER JOIN (
+                      SELECT DISTINCT dp.id_peminjaman
+                      FROM detail_peminjaman dp
+                      JOIN barang b ON dp.id_barang = b.id_barang
+                      WHERE b.id_ruangan = :id_ruangan
+                  ) conflicting_room_loans ON p.id_peminjaman = conflicting_room_loans.id_peminjaman
+                  SET p.status = 'Ditolak', 
+                      p.keterangan = 'telah dipinjam oleh user lain',
+                      p.approved_by = :approved_by,
+                      p.tanggal_diubah = NOW()
+                  WHERE p.id_peminjaman != :id_peminjaman
+                  AND p.status = 'Pending'
+                  AND p.jenis_peminjaman = 'ruangan'
+                  AND p.waktu_mulai < :waktu_selesai
+                  AND p.waktu_selesai > :waktu_mulai";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_ruangan', $id_ruangan);
+        $stmt->bindParam(':approved_by', $approved_by);
+        $stmt->bindParam(':id_peminjaman', $id_peminjaman);
+        $stmt->bindParam(':waktu_mulai', $waktu_mulai);
+        $stmt->bindParam(':waktu_selesai', $waktu_selesai);
+        
+        return $stmt->execute();
+    }
 }

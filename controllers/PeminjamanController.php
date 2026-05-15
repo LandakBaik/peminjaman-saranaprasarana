@@ -188,6 +188,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $peminjaman->keterangan    = $_POST['keterangan'] ?? '';
 
         if ($peminjaman->updateStatus()) {
+            // Auto reject overlapping if it's a room loan and being approved
+            if ($status_baru === 'Disetujui' && isset($dataPeminjaman) && $dataPeminjaman['jenis_peminjaman'] === 'ruangan' && !empty($dataPeminjaman['id_ruangan'])) {
+                $peminjaman->rejectOverlappingRuanganRequests(
+                    $id_peminjaman,
+                    $dataPeminjaman['id_ruangan'],
+                    $dataPeminjaman['waktu_mulai'],
+                    $dataPeminjaman['waktu_selesai'],
+                    $_SESSION['user']['id']
+                );
+            }
             header("Location: ../index.php?page=approve-peminjaman&success=updated");
         } else {
             header("Location: ../index.php?page=approve-peminjaman&error=failed");
