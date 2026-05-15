@@ -60,6 +60,15 @@ $stmt = $peminjaman->readByStaff($userId);
                                             <option value="Ruangan">Ruangan</option>
                                         </select>
                                     </div>
+                                    <!-- Status Kembali -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Status Kembali</label>
+                                        <select class="form-select" id="filterStatusKembali">
+                                            <option value="" selected>Semua</option>
+                                            <option value="Terlambat">Terlambat</option>
+                                            <option value="Tepat Waktu">Tepat Waktu</option>
+                                        </select>
+                                    </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Tanggal Pengajuan</label>
@@ -102,12 +111,18 @@ $stmt = $peminjaman->readByStaff($userId);
                                         continue;
                                     }
                                     $ada_data = true;
+
+                                    // Hitung status kembali
+                                    $waktu_selesai = strtotime($row['waktu_selesai']);
+                                    $waktu_pengajuan = strtotime($row['tanggal_diubah']);
+                                    $status_kembali = ($waktu_pengajuan > $waktu_selesai) ? 'Terlambat' : 'Tepat Waktu';
                                 ?>
                                 <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>"
                                     data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
                                     data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_diubah'] ?? 'now'))) ?>"
                                     data-room="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
-                                    data-peminjam="<?= htmlspecialchars($row['peminjam'] ?? '-') ?>">
+                                    data-peminjam="<?= htmlspecialchars($row['peminjam'] ?? '-') ?>"
+                                    data-status-kembali="<?= $status_kembali ?>">
                                     <td class="text-center"><?= $no++ ?></td>
                                     <td>
                                         <strong><?= htmlspecialchars($row['peminjam'] ?? '-') ?></strong><br>
@@ -132,10 +147,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                     </td>
                                     <td class="text-center">
                                         <?php
-                                        $waktu_selesai = strtotime($row['waktu_selesai']);
-                                        $waktu_pengajuan = strtotime($row['tanggal_diubah']);
-                                        
-                                        if ($waktu_pengajuan > $waktu_selesai) {
+                                        if ($status_kembali == 'Terlambat') {
                                             echo '<span class="badge bg-danger">Terlambat</span>';
                                         } else {
                                             echo '<span class="badge bg-success">Tepat Waktu</span>';
