@@ -214,20 +214,35 @@ class Peminjaman
     return true;
 }
     private function insertDetail($id_barang, $kuantitas)
-{
-    $query = "INSERT INTO detail_peminjaman 
+    {
+        $query = "INSERT INTO detail_peminjaman 
               SET id_peminjaman=:id_peminjaman,
                   id_barang=:id_barang,
                   kuantitas=:kuantitas";
 
-    $stmt = $this->conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
 
-    $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
-    $stmt->bindParam(":id_barang", $id_barang);
-    $stmt->bindParam(":kuantitas", $kuantitas);
+        $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
+        $stmt->bindParam(":id_barang", $id_barang);
+        $stmt->bindParam(":kuantitas", $kuantitas);
 
-    $stmt->execute();
-}
+        $stmt->execute();
+    }
+
+    public function updateDetailQuantity($id_peminjaman, $id_barang, $kuantitas)
+    {
+        $query = "UPDATE detail_peminjaman 
+                  SET kuantitas = :kuantitas 
+                  WHERE id_peminjaman = :id_peminjaman 
+                  AND id_barang = :id_barang";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":kuantitas", $kuantitas);
+        $stmt->bindParam(":id_peminjaman", $id_peminjaman);
+        $stmt->bindParam(":id_barang", $id_barang);
+        
+        return $stmt->execute();
+    }
     // 🔹 GET BY ID (dengan detail barang)
     public function getById($id_peminjaman)
     {
@@ -643,34 +658,84 @@ class Peminjaman
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
 
-    public function rejectOverlappingRuanganRequests($id_peminjaman, $id_ruangan, $waktu_mulai, $waktu_selesai, $approved_by)
+    public function rejectConflictingPendingLoans($id_peminjaman_approved, $approved_by)
     {
-        // Query untuk mencari semua peminjaman Pending bertipe ruangan yang meminjam barang di ruangan yang sama
-        // dan memiliki range waktu yang bertabrakan.
-        $query = "UPDATE peminjaman p
-                  INNER JOIN (
-                      SELECT DISTINCT dp.id_peminjaman
-                      FROM detail_peminjaman dp
-                      JOIN barang b ON dp.id_barang = b.id_barang
-                      WHERE b.id_ruangan = :id_ruangan
-                  ) conflicting_room_loans ON p.id_peminjaman = conflicting_room_loans.id_peminjaman
-                  SET p.status = 'Ditolak', 
-                      p.keterangan = 'telah dipinjam oleh user lain',
-                      p.approved_by = :approved_by,
-                      p.tanggal_diubah = NOW()
-                  WHERE p.id_peminjaman != :id_peminjaman
+        // 1. Ambil data peminjaman yang baru saja disetujui
+        $approvedData = $this->getById($id_peminjaman_approved);
+        if (!$approvedData) return;
+
+        $start_approved = $approvedData['waktu_mulai'];
+        $end_approved   = $approvedData['waktu_selesai'];
+        $items_approved = $approvedData['items']; // [id_barang => kuantitas]
+
+        if (empty($items_approved)) return;
+
+        // 2. Cari peminjaman lain yang berstatus 'Pending' dan rentang waktunya bertabrakan
+        // Serta memiliki setidaknya satu barang yang sama
+        $itemIds = array_keys($items_approved);
+        $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
+        
+        $query = "SELECT DISTINCT p.id_peminjaman
+                  FROM peminjaman p
+                  JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  WHERE p.id_peminjaman != ?
                   AND p.status = 'Pending'
-                  AND p.jenis_peminjaman = 'ruangan'
-                  AND p.waktu_mulai < :waktu_selesai
-                  AND p.waktu_selesai > :waktu_mulai";
+                  AND p.waktu_mulai < ?
+                  AND p.waktu_selesai > ?
+                  AND dp.id_barang IN ($placeholders)";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id_ruangan', $id_ruangan);
-        $stmt->bindParam(':approved_by', $approved_by);
-        $stmt->bindParam(':id_peminjaman', $id_peminjaman);
-        $stmt->bindParam(':waktu_mulai', $waktu_mulai);
-        $stmt->bindParam(':waktu_selesai', $waktu_selesai);
-        
-        return $stmt->execute();
+        $params = array_merge([$id_peminjaman_approved, $end_approved, $start_approved], $itemIds);
+        $stmt->execute($params);
+        $pendingIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        if (empty($pendingIds)) return;
+
+        $barangModel = new \App\Models\Barang($this->conn);
+
+        // 3. Re-validasi stok untuk setiap peminjaman pending yang terdeteksi konflik
+        foreach ($pendingIds as $pid) {
+            $pData = $this->getById($pid);
+            if (!$pData) continue;
+
+            $id_ruangan_p = $pData['id_ruangan'];
+            $items_p      = $pData['items'];
+            $start_p      = $pData['waktu_mulai'];
+            $end_p        = $pData['waktu_selesai'];
+
+            if ($id_ruangan_p) {
+                $availability = $barangModel->getAvailabilityByRange($id_ruangan_p, $start_p, $end_p);
+                
+                $shouldReject = false;
+                foreach ($items_p as $id_barang => $qty_requested) {
+                    $stok_tersedia = isset($availability[$id_barang]) ? $availability[$id_barang]['stok_tersedia'] : 0;
+                    
+                    if ($qty_requested > $stok_tersedia) {
+                        $shouldReject = true;
+                        break;
+                    }
+                }
+
+                if ($shouldReject) {
+                    // Pengecualian: Jika peminjaman yang pending adalah 'ruangan' 
+                    // dan yang baru saja disetujui adalah 'barang', jangan ditolak (dibuat dinamis).
+                    // Tapi jika sesama 'ruangan' atau jika yang pending adalah 'barang', tetap ditolak.
+                    if ($pData['jenis_peminjaman'] === 'ruangan' && $approvedData['jenis_peminjaman'] === 'barang') {
+                        continue;
+                    }
+
+                    $queryReject = "UPDATE peminjaman 
+                                    SET status = 'Ditolak', 
+                                        keterangan = 'telah dipinjam oleh user lain',
+                                        approved_by = :approved_by,
+                                        tanggal_diubah = NOW()
+                                    WHERE id_peminjaman = :id_p";
+                    $stmtReject = $this->conn->prepare($queryReject);
+                    $stmtReject->bindParam(':approved_by', $approved_by);
+                    $stmtReject->bindParam(':id_p', $pid);
+                    $stmtReject->execute();
+                }
+            }
+        }
     }
 }

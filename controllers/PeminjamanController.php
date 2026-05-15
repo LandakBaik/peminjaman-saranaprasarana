@@ -81,8 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // hanya ambil yang dicentang
                     if (isset($data['checked'])) {
 
-                        $jumlah = $data['jumlah'] ?? 1;
-
+                        $jumlah = $data['kuantitas'] ?? $data['jumlah'] ?? 1;
                         if ($jumlah < 1) $jumlah = 1;
 
                         $items[$id] = $jumlah;
@@ -173,6 +172,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         : 0;
 
                     if ($kuantitas > $stok_tersedia) {
+                        // Jika tipe ruangan, buat dinamis (sesuaikan stok yang ada)
+                        if ($dataPeminjaman['jenis_peminjaman'] === 'ruangan') {
+                            $peminjaman->updateDetailQuantity($id_peminjaman, $id_barang, $stok_tersedia);
+                            continue;
+                        }
+
                         $nama = $availability[$id_barang]['nama_barang'] ?? "Barang #$id_barang";
                         header("Location: ../index.php?page=approve-peminjaman&error=stok_kurang&barang=" . urlencode($nama));
                         exit();
@@ -188,15 +193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $peminjaman->keterangan    = $_POST['keterangan'] ?? '';
 
         if ($peminjaman->updateStatus()) {
-            // Auto reject overlapping if it's a room loan and being approved
-            if ($status_baru === 'Disetujui' && isset($dataPeminjaman) && $dataPeminjaman['jenis_peminjaman'] === 'ruangan' && !empty($dataPeminjaman['id_ruangan'])) {
-                $peminjaman->rejectOverlappingRuanganRequests(
-                    $id_peminjaman,
-                    $dataPeminjaman['id_ruangan'],
-                    $dataPeminjaman['waktu_mulai'],
-                    $dataPeminjaman['waktu_selesai'],
-                    $_SESSION['user']['id']
-                );
+            // Jika status baru adalah Disetujui, cek apakah ada peminjaman lain yang bentrok stoknya
+            if ($status_baru === 'Disetujui') {
+                $peminjaman->rejectConflictingPendingLoans($id_peminjaman, $_SESSION['user']['id']);
             }
             header("Location: ../index.php?page=approve-peminjaman&success=updated");
         } else {
