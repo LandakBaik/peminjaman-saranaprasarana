@@ -5,6 +5,10 @@ $database = new \App\Config\Database();
 $db = $database->getConnection();
 $peminjaman = new \App\Models\Peminjaman($db);
 $userId = $_SESSION['user']['id'] ?? 0;
+
+// Update status terlambat sebelum mengambil data
+$peminjaman->updateLateStatus($userId);
+
 $stmt = $peminjaman->readByUser($userId);
 ?>
 <div id="layoutSidenav_content">
@@ -58,6 +62,7 @@ $stmt = $peminjaman->readByUser($userId);
                                             <option value="Pending">Pending</option>
                                             <option value="Disetujui">Disetujui</option>
                                             <option value="Ditolak">Ditolak</option>
+                                            <option value="Terlambat">Terlambat</option>
                                         </select>
                                     </div>
                                     <!-- Jenis -->
@@ -126,6 +131,8 @@ $stmt = $peminjaman->readByUser($userId);
                                         $statusClass = 'bg-secondary-subtle text-secondary';
                                     if (strtolower($displayStatus) == 'dipinjam')
                                         $statusClass = 'bg-info-subtle text-info';
+                                    if (strtolower($displayStatus) == 'terlambat')
+                                        $statusClass = 'bg-danger text-white';
                                     if (strtolower($displayStatus) == 'menunggu pengembalian' || strtolower($displayStatus) == 'pengembalian')
                                         $statusClass = 'bg-warning-subtle text-warning';
                                     ?>
@@ -190,7 +197,7 @@ $stmt = $peminjaman->readByUser($userId);
                                                             <i class="fas fa-trash me-1"></i> Hapus
                                                         </button>
                                                     </form>
-                                                <?php elseif (strtolower($displayStatus) == 'dipinjam'): ?>
+                                                <?php elseif (strtolower($displayStatus) == 'dipinjam' || strtolower($displayStatus) == 'terlambat'): ?>
                                                     <form
                                                         action="controllers/PeminjamanController.php?action=ajukan_pengembalian"
                                                         method="POST" class="d-inline">
@@ -491,6 +498,7 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
             disetujui: 'success',
             approved: 'success',
             dipinjam: 'info',
+            terlambat: 'danger',
             ditolak: 'danger',
             rejected: 'danger'
         };

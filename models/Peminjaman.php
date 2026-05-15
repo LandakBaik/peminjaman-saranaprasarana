@@ -259,7 +259,7 @@ class Peminjaman
     public function updateStatus()
     {
         $query = "UPDATE peminjaman 
-                  SET status=:status, approved_by=:approved_by, keterangan=:keterangan
+                  SET status=:status, approved_by=:approved_by, keterangan=:keterangan, tanggal_diubah = NOW()
                   WHERE id_peminjaman = :id_peminjaman";
 
         $stmt = $this->conn->prepare($query);
@@ -276,7 +276,7 @@ class Peminjaman
     public function updateStatusOnly()
     {
         $query = "UPDATE peminjaman 
-                  SET status=:status 
+                  SET status=:status, tanggal_diubah = NOW()
                   WHERE id_peminjaman = :id_peminjaman";
 
         $stmt = $this->conn->prepare($query);
@@ -284,6 +284,24 @@ class Peminjaman
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":id_peminjaman", $this->id_peminjaman);
 
+        return $stmt->execute();
+    }
+
+    public function updateLateStatus($id_pengguna = null)
+    {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET status = 'Terlambat' 
+                  WHERE (status = 'Dipinjam' OR status = 'Disetujui' OR status = 'Approved') 
+                  AND waktu_selesai < NOW()";
+
+        if ($id_pengguna) {
+            $query .= " AND id_pengguna = :id_pengguna";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        if ($id_pengguna) {
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
+        }
         return $stmt->execute();
     }
 
@@ -352,7 +370,7 @@ class Peminjaman
         $stats['ditolak'] = $stmt->fetchColumn();
 
         // Terlambat
-        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status = 'Dipinjam' AND p.waktu_selesai < NOW()");
+        $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND (p.status = 'Terlambat' OR (p.status IN ('Dipinjam', 'Disetujui', 'Approved') AND p.waktu_selesai < NOW()))");
         if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         $stats['terlambat'] = $stmt->fetchColumn();

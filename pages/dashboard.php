@@ -187,6 +187,8 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
                                                                 $statusClass = 'bg-danger';
                                                             elseif ($row['status'] == 'Dipinjam')
                                                                 $statusClass = 'bg-primary';
+                                                            elseif ($row['status'] == 'Terlambat')
+                                                                $statusClass = 'bg-danger';
                                                             ?>
                                                             <span class="badge <?= $statusClass ?>"><?= $row['status'] ?></span>
                                                         </td>

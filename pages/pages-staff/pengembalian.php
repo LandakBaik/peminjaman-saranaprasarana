@@ -89,6 +89,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
                                     <th>Tanggal Pengajuan</th>
+                                    <th>Status Kembali</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -104,7 +105,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                 ?>
                                 <tr data-status="<?= ucfirst(htmlspecialchars($row['status'])) ?>"
                                     data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
-                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>"
+                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_diubah'] ?? 'now'))) ?>"
                                     data-room="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
                                     data-peminjam="<?= htmlspecialchars($row['peminjam'] ?? '-') ?>">
                                     <td class="text-center"><?= $no++ ?></td>
@@ -127,7 +128,19 @@ $stmt = $peminjaman->readByStaff($userId);
                                         <?= date('d M Y - H:i', strtotime($row['waktu_selesai'])) ?>
                                     </td>
                                     <td class="text-center small">
-                                        <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
+                                        <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_diubah']))) ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php
+                                        $waktu_selesai = strtotime($row['waktu_selesai']);
+                                        $waktu_pengajuan = strtotime($row['tanggal_diubah']);
+                                        
+                                        if ($waktu_pengajuan > $waktu_selesai) {
+                                            echo '<span class="badge bg-danger">Terlambat</span>';
+                                        } else {
+                                            echo '<span class="badge bg-success">Tepat Waktu</span>';
+                                        }
+                                        ?>
                                     </td>
                                     <td class="text-center">
                                         <form action="controllers/PeminjamanController.php?action=verifikasi_pengembalian" method="POST" class="d-inline">
@@ -139,7 +152,7 @@ $stmt = $peminjaman->readByStaff($userId);
                                 <?php } ?>
                                 <?php if (!$ada_data): ?>
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-3">Tidak ada pengajuan pengembalian untuk ruangan Anda.</td>
+                                    <td colspan="9" class="text-center text-muted py-3">Tidak ada pengajuan pengembalian untuk ruangan Anda.</td>
                                 </tr>
                                 <?php endif; ?>
                             </tbody>
