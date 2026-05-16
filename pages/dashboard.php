@@ -5,7 +5,7 @@ $userId = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 
 // Filter logic
 $activeFilter = $_GET['filter'] ?? 'daily';
-$allowedFilters = ['daily', 'weekly', 'monthly','yearly'];
+$allowedFilters = ['daily', 'weekly', 'monthly', 'yearly'];
 if (!in_array($activeFilter, $allowedFilters))
     $activeFilter = 'daily';
 
@@ -53,7 +53,8 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
                         <input type="date" id="dateEnd" class="form-control form-control-sm" style="width: 140px;">
                     </div>
 
-                    <select id="filterType" class="form-select form-select-sm w-auto" onchange="window.location.href='index.php?page=dashboard&filter=' + this.value">
+                    <select id="filterType" class="form-select form-select-sm w-auto"
+                        onchange="window.location.href='index.php?page=dashboard&filter=' + this.value">
                         <option value="daily" <?= $activeFilter === 'daily' ? 'selected' : '' ?>>Harian </option>
                         <option value="weekly" <?= $activeFilter === 'weekly' ? 'selected' : '' ?>>Mingguan </option>
                         <option value="monthly" <?= $activeFilter === 'monthly' ? 'selected' : '' ?>>Bulanan </option>
@@ -65,7 +66,8 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
             <div class="row g-3 my-4 mt-0">
                 <!-- Weather Card -->
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);">
+                    <div class="card border-0 shadow-sm text-white"
+                        style="background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);">
                         <div class="card-body d-flex align-items-center justify-content-between py-3 px-4">
                             <div class="d-flex align-items-center gap-4">
                                 <div id="weatherIcon" class="display-6">
@@ -73,11 +75,13 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
                                 </div>
                                 <div>
                                     <h3 class="mb-0 fw-bold" id="temperatureDisplay">--°C</h3>
-                                    <span id="weatherDescription" class="badge bg-white bg-opacity-25 text-white fw-normal">Memuat cuaca...</span>
+                                    <span id="weatherDescription"
+                                        class="badge bg-white bg-opacity-25 text-white fw-normal">Memuat cuaca...</span>
                                 </div>
                             </div>
                             <div class="text-end d-none d-md-block">
-                                <div class="h5 mb-1 fw-semibold" id="locationName"><i class="fas fa-location-dot me-2"></i>Jember</div>
+                                <div class="h5 mb-1 fw-semibold" id="locationName"><i
+                                        class="fas fa-location-dot me-2"></i>Jember</div>
                                 <div class="small opacity-75" id="currentDateText"><?= date('l, d F Y') ?></div>
                             </div>
                         </div>
@@ -183,45 +187,47 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
                                 </thead>
                                 <tbody>
                                     <?php if ($recent && $recent->rowCount() > 0): ?>
-                                            <?php while ($row = $recent->fetch(PDO::FETCH_ASSOC)): ?>
-                                                    <tr>
-                                                        <td class="fw-semibold">
-                                                            <?php
-                                                            $namaPeminjaman = '';
-                                                            if ($row['jenis_peminjaman'] === 'ruangan') {
-                                                                $namaPeminjaman = "Pinjam Ruangan: " . ($row['nama_ruangan'] ?? '(Tanpa Nama/Item)');
-                                                            } else {
-                                                                $namaPeminjaman = "Pinjam Barang: " . ($row['items'] ?? '(Tanpa Nama)');
-                                                            }
-                                                            echo htmlspecialchars((string) $namaPeminjaman);
-                                                            ?>
-                                                        </td>
-                                                        <td><?= htmlspecialchars($row['keperluan']) ?></td>
-                                                        <td>
-                                                            <?php
-                                                            $statusClass = 'bg-secondary';
-                                                            if ($row['status'] == 'Pending')
-                                                                $statusClass = 'bg-warning text-dark';
-                                                            elseif ($row['status'] == 'Disetujui' || $row['status'] == 'Selesai')
-                                                                $statusClass = 'bg-success';
-                                                            elseif ($row['status'] == 'Ditolak' || $row['status'] == 'Dibatalkan')
-                                                                $statusClass = 'bg-danger';
-                                                            elseif ($row['status'] == 'Dipinjam')
-                                                                $statusClass = 'bg-primary';
-                                                            elseif ($row['status'] == 'Terlambat')
-                                                                $statusClass = 'bg-danger';
-                                                            ?>
-                                                            <span class="badge <?= $statusClass ?>"><?= $row['status'] ?></span>
-                                                        </td>
-                                                        <td class="small">
-                                                            <?= date('d/m/Y', strtotime($row['waktu_mulai'])) ?> - <?= date('d/m/Y', strtotime($row['waktu_selesai'])) ?>
-                                                        </td>
-                                                    </tr>
-                                            <?php endwhile; ?>
-                                    <?php else: ?>
+                                        <?php while ($row = $recent->fetch(PDO::FETCH_ASSOC)): ?>
                                             <tr>
-                                                <td colspan="4" class="text-center text-muted py-4">Belum ada riwayat peminjaman.</td>
+                                                <td class="fw-semibold">
+                                                    <?php
+                                                    $namaPeminjaman = '';
+                                                    if ($row['jenis_peminjaman'] === 'ruangan') {
+                                                        $namaPeminjaman = "Pinjam Ruangan: " . ($row['nama_ruangan'] ?? '(Tanpa Nama/Item)');
+                                                    } else {
+                                                        $namaPeminjaman = "Pinjam Barang: " . ($row['items'] ?? '(Tanpa Nama)');
+                                                    }
+                                                    echo htmlspecialchars((string) $namaPeminjaman);
+                                                    ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($row['keperluan']) ?></td>
+                                                <td>
+                                                    <?php
+                                                    $statusClass = 'bg-secondary';
+                                                    if ($row['status'] == 'Pending')
+                                                        $statusClass = 'bg-warning text-dark';
+                                                    elseif ($row['status'] == 'Disetujui' || $row['status'] == 'Selesai')
+                                                        $statusClass = 'bg-success';
+                                                    elseif ($row['status'] == 'Ditolak' || $row['status'] == 'Dibatalkan')
+                                                        $statusClass = 'bg-danger';
+                                                    elseif ($row['status'] == 'Dipinjam')
+                                                        $statusClass = 'bg-primary';
+                                                    elseif ($row['status'] == 'Terlambat')
+                                                        $statusClass = 'bg-danger';
+                                                    ?>
+                                                    <span class="badge <?= $statusClass ?>"><?= $row['status'] ?></span>
+                                                </td>
+                                                <td class="small">
+                                                    <?= date('d/m/Y', strtotime($row['waktu_mulai'])) ?> -
+                                                    <?= date('d/m/Y', strtotime($row['waktu_selesai'])) ?>
+                                                </td>
                                             </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Belum ada riwayat
+                                                peminjaman.</td>
+                                        </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>

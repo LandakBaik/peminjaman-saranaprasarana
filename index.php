@@ -33,78 +33,22 @@ $page = $_GET['page'] ?? 'dashboard';
         <?php
         include 'sidebar.php';
 
+        // Load Routes
+        require 'routes/web.php';
+
+        // Dispatch current page
         $page = $_GET['page'] ?? 'dashboard';
-
-        switch ($page) {
-            // Universal
-            case 'detail-profil':
-                include 'pages/detail-profil.php';
-                break;
-            case 'detail-profil-edit':
-                include 'pages/detail-profil-edit.php';
-                break;
-            case 'ketentuan':
-                include 'pages/ketentuan.php';
-                break;
-            // Peminjam
-            case 'select-room':
-                only(['user']);
-                include 'pages/pages-peminjam/select-room.php';
-                break;
-            case 'pinjam':
-                only(['user']);
-                include 'pages/pages-peminjam/pinjam.php';
-                break;
-            case 'peminjaman-saya':
-                only(['user', 'admin', 'staff']);
-                include 'pages/pages-peminjam/peminjaman-saya.php';
-                break;
-            case 'riwayat-peminjaman':
-                only(['user', 'admin', 'staff']);
-                include 'pages/pages-peminjam/riwayat-peminjaman.php';
-                break;
-            // Staff
-            case 'approve-peminjaman':
-                only(['staff']);
-                include 'pages/pages-staff/approve.php';
-                break;
-            case 'pengembalian':
-                only(['staff']);
-                include 'pages/pages-staff/pengembalian.php';
-                break;
-            case 'riwayat-peminjaman-staff':
-                only(['staff']);
-                include 'pages/pages-staff/riwayat-peminjaman.php';
-                break;
-            // Admin
-            case 'ruangan-barang':
-                only(['admin']);
-                include 'pages/pages-admin/ruangan-barang.php';
-                break;
-            case 'daftar-akun':
-                only(['admin']);
-                include 'pages/pages-admin/daftar-akun.php';
-                break;
-            case 'akun-staff':
-                only(['admin']);
-                include 'pages/pages-admin/akun-staff.php';
-                break;
-
-            case 'riwayat-peminjaman-admin':
-                only(['admin']);
-                include 'pages/pages-admin/riwayat-peminjaman.php';
-                break;
-            default:
-                include 'pages/dashboard.php';
-        }
+        \App\Utils\Router::dispatch($page);
         ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
     <script src="js/scripts.js"></script>
     <script src="js/temperature.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
     <script src="js/datatables-simple-demo.js"></script>
     <script src="js/peminjaman-filter.js?v=<?= time() ?>"></script>
     <script src="js/barang-filter.js"></script>
