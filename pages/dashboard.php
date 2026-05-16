@@ -63,6 +63,27 @@ $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter
             </div>
 
             <div class="row g-3 my-4 mt-0">
+                <!-- Weather Card -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);">
+                        <div class="card-body d-flex align-items-center justify-content-between py-3 px-4">
+                            <div class="d-flex align-items-center gap-4">
+                                <div id="weatherIcon" class="display-6">
+                                    <i class="fas fa-cloud-sun-rain"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 fw-bold" id="temperatureDisplay">--°C</h3>
+                                    <span id="weatherDescription" class="badge bg-white bg-opacity-25 text-white fw-normal">Memuat cuaca...</span>
+                                </div>
+                            </div>
+                            <div class="text-end d-none d-md-block">
+                                <div class="h5 mb-1 fw-semibold" id="locationName"><i class="fas fa-location-dot me-2"></i>Jember</div>
+                                <div class="small opacity-75" id="currentDateText"><?= date('l, d F Y') ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Total -->
                 <div class="col-xl-3 col-md-6">
                     <div class="card border-1 shadow-sm">

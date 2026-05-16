@@ -50,11 +50,6 @@ class User
     // register
     public function register()
     {
-
-        if (!preg_match("/^[a-zA-Z0-9._%+-]+@polije\.ac\.id$/", $this->email)) {
-            return false;
-        }
-
         // cek email
         $check = "SELECT email FROM " . $this->table_name . " 
               WHERE email = :email LIMIT 1";
