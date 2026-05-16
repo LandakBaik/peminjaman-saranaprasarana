@@ -1,29 +1,5 @@
 <?php
-// require_once '../config/Autoloader.php';
-
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-
-$id_ruangan = $_GET['id_ruangan'] ?? null;
-
-if (!$id_ruangan) {
-    die("Ruangan tidak valid (missing id_ruangan)");
-}
-
-$ruanganModel = new \App\Models\Ruangan($db);
-$ruangan = $ruanganModel->getById($id_ruangan);
-
-if (!$ruangan) {
-    die("Ruangan tidak ditemukan");
-}
-
-$roomName = $ruangan['nama_ruangan'];
-
-$barangModel = new \App\Models\Barang($db);
-$barangList = $barangModel->getByRuangan($id_ruangan);
-
-$peminjamanModel = new \App\Models\Peminjaman($db);
-$bookedDates = $peminjamanModel->getApprovedDatesByRoom($id_ruangan);
+// View variables are provided by PageController
 ?>
 
 <div id="layoutSidenav_content">

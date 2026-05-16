@@ -1,15 +1,5 @@
 <?php
-// require_once '../config/Autoloader.php';
-
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-$peminjaman = new \App\Models\Peminjaman($db);
-$userId = $_SESSION['user']['id'] ?? 0;
-
-// Update status terlambat sebelum mengambil data
-$peminjaman->updateLateStatus($userId);
-
-$stmt = $peminjaman->readByUser($userId);
+// View variables are provided by PageController
 ?>
 <div id="layoutSidenav_content">
     <main>

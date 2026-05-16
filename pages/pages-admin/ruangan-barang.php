@@ -1,10 +1,5 @@
 <?php
-// require_once '../../config/Autoloader.php';
-
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-$ruangan = new \App\Models\Ruangan($db);
-$stmt = $ruangan->readAll();
+// View variables are provided by PageController
 ?>
 <div id="layoutSidenav_content">
     <main>

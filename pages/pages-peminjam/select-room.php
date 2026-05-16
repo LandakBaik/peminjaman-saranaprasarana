@@ -1,20 +1,5 @@
 <?php
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-
-$ruanganModel = new \App\Models\Ruangan($db);
-$stmt = $ruanganModel->readAll();
-
-$labs = [];
-$nonLabs = [];
-
-while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    if (strtolower($r['tipe_ruangan'] ?? '') === 'laboratorium') {
-        $labs[] = $r;
-    } else {
-        $nonLabs[] = $r;
-    }
-}
+// View variables are provided by PageController
 ?>
 
 <div id="layoutSidenav_content" class="bg-light">

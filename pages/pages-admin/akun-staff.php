@@ -1,9 +1,5 @@
 <?php
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-
-$userModel = new \App\Models\User($db);
-$stmt = $userModel->readByRoles(['staff']);
+// View variables are provided by PageController
 ?>
 
 <div id="layoutSidenav_content">

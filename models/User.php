@@ -37,10 +37,10 @@ class User
             if (password_verify($password, $row['password'])) {
 
                 $this->id_pengguna = $row['id_pengguna'];
-                $this->nama        = $row['nama'];
-                $this->email       = $row['email'];
-                $this->role        = $row['role'];
-                $this->status      = $row['status'];
+                $this->nama = $row['nama'];
+                $this->email = $row['email'];
+                $this->role = $row['role'];
+                $this->status = $row['status'];
 
                 return true;
             }
@@ -129,13 +129,13 @@ class User
     {
         $inQuery = implode(',', array_fill(0, count($ids), '?'));
         $query = "SELECT * FROM " . $this->table_name . " WHERE id_pengguna IN ({$inQuery})";
-        
+
         $stmt = $this->conn->prepare($query);
         foreach ($ids as $k => $id) {
             $stmt->bindValue(($k + 1), $id);
         }
         $stmt->execute();
-        
+
         return $stmt;
     }
 

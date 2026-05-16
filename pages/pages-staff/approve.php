@@ -1,16 +1,7 @@
 <?php
-
+// View variables are provided by PageController
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-$peminjaman = new \App\Models\Peminjaman($db);
-$userId = $_SESSION['user']['id'] ?? 0;
-$stmt = $peminjaman->readByStaff($userId);
-
-
-
 ?>
 <div id="layoutSidenav_content">
     <main>

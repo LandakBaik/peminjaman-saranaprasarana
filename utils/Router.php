@@ -5,19 +5,19 @@ namespace App\Utils;
 class Router
 {
     private static $routes = [];
-    private static $defaultRoute = 'pages/dashboard.php';
+    private static $defaultRoute = ['App\Controllers\DashboardController', 'index'];
 
     /**
      * Register a GET route
      * 
      * @param string $path The route name (e.g., 'dashboard')
-     * @param string $file The file to include
+     * @param array|string $action The controller action array [ControllerClass, 'method'] or file path
      * @param array $middleware Array of roles allowed to access
      */
-    public static function get($path, $file, $middleware = [])
+    public static function get($path, $action, $middleware = [])
     {
         self::$routes[$path] = [
-            'file' => $file,
+            'action' => $action,
             'middleware' => $middleware
         ];
     }
@@ -42,25 +42,47 @@ class Router
                 }
             }
 
-            // Include the page file
-            if (file_exists($route['file'])) {
-                include $route['file'];
-            } else {
-                self::notFound();
-            }
+            // Execute action
+            self::executeAction($route['action']);
         } else {
             // Default behavior if route not found
             if ($page === 'dashboard') {
-                include self::$defaultRoute;
+                self::executeAction(self::$defaultRoute);
             } else {
                 self::notFound();
             }
         }
     }
 
-    private static function notFound()
+    private static function executeAction($action)
+    {
+        if (is_array($action)) {
+            $controllerClass = $action[0];
+            $method = $action[1];
+            if (class_exists($controllerClass)) {
+                $controller = new $controllerClass();
+                if (method_exists($controller, $method)) {
+                    $controller->$method();
+                } else {
+                    self::notFound();
+                }
+            } else {
+                self::notFound();
+            }
+        } elseif (is_string($action) && file_exists($action)) {
+            include $action;
+        } else {
+            self::notFound();
+        }
+    }
+
+    public static function notFound()
     {
         http_response_code(404);
-        echo "<div class='container-fluid px-4 mt-4'><h1>404 - Halaman Tidak Ditemukan</h1><p>Maaf, halaman yang Anda cari tidak tersedia.</p></div>";
+        if (file_exists('pages/404.php')) {
+            include 'pages/404.php';
+        } else {
+            echo "<div class='container-fluid px-4 mt-4'><h1>404 - Halaman Tidak Ditemukan</h1><p>Maaf, halaman yang Anda cari tidak tersedia.</p></div>";
+        }
     }
 }

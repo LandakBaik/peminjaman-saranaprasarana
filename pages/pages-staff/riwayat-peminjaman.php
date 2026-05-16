@@ -1,13 +1,5 @@
 <?php
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-
-$peminjaman = new \App\Models\Peminjaman($db);
-
-$userId = $_SESSION['user']['id'] ?? 0;
-
-// TRUE = history
-$stmt = $peminjaman->readByStaff($userId, true);
+// View variables are provided by PageController
 ?>
 
 <div id="layoutSidenav_content">

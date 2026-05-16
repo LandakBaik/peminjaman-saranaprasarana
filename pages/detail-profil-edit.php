@@ -1,23 +1,5 @@
 <?php
-// koneksi database
-$database = new \App\Config\Database();
-$db = $database->getConnection();
-
-// ambil id user dari session
-$userId = $_SESSION['user']['id'] ?? 0;
-
-// ambil data profil dari database
-$query = "SELECT * FROM detail_profil WHERE id_pengguna = :id LIMIT 1";
-$stmt = $db->prepare($query);
-$stmt->bindParam(":id", $userId);
-$stmt->execute();
-
-$profil = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// jika belum ada data
-if (!$profil) {
-    $profil = [];
-}
+// View variables are provided by ProfileController
 ?>
 
 <div id="layoutSidenav_content">

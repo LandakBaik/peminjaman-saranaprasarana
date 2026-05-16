@@ -145,21 +145,21 @@ class Peminjaman
         return $stmt;
     }
 
-   public function create()
-{
-    if ($this->jenis_peminjaman == 'barang') {
-        if (
-            date('Y-m-d', strtotime($this->waktu_mulai)) !=
-            date('Y-m-d', strtotime($this->waktu_selesai))
-        ) {
-            die("Peminjaman barang hanya boleh 1 hari!");
+    public function create()
+    {
+        if ($this->jenis_peminjaman == 'barang') {
+            if (
+                date('Y-m-d', strtotime($this->waktu_mulai)) !=
+                date('Y-m-d', strtotime($this->waktu_selesai))
+            ) {
+                die("Peminjaman barang hanya boleh 1 hari!");
+            }
         }
-    }
 
-    // generate ID manual
-    // $this->id_peminjaman = $this->generateId();
+        // generate ID manual
+        // $this->id_peminjaman = $this->generateId();
 
-    $query = "INSERT INTO peminjaman 
+        $query = "INSERT INTO peminjaman 
         SET id_pengguna=:id_pengguna,
             jenis_peminjaman=:jenis_peminjaman,
             waktu_mulai=:waktu_mulai,
@@ -170,49 +170,49 @@ class Peminjaman
             keterangan=:keterangan,
             status='Pending'";
 
-    $stmt = $this->conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
 
-    $stmt->bindParam(":id_pengguna", $this->id_pengguna);
-    $stmt->bindParam(":jenis_peminjaman", $this->jenis_peminjaman);
-    $stmt->bindParam(":waktu_mulai", $this->waktu_mulai);
-    $stmt->bindParam(":waktu_selesai", $this->waktu_selesai);
-    $stmt->bindParam(":keperluan", $this->keperluan);
-    $stmt->bindParam(":catatan", $this->catatan);
-    $stmt->bindParam(":jaminan", $this->jaminan);
-    $stmt->bindParam(":keterangan", $this->keterangan);
+        $stmt->bindParam(":id_pengguna", $this->id_pengguna);
+        $stmt->bindParam(":jenis_peminjaman", $this->jenis_peminjaman);
+        $stmt->bindParam(":waktu_mulai", $this->waktu_mulai);
+        $stmt->bindParam(":waktu_selesai", $this->waktu_selesai);
+        $stmt->bindParam(":keperluan", $this->keperluan);
+        $stmt->bindParam(":catatan", $this->catatan);
+        $stmt->bindParam(":jaminan", $this->jaminan);
+        $stmt->bindParam(":keterangan", $this->keterangan);
 
-    $stmt->execute();
+        $stmt->execute();
 
-    // Get last insert ID untuk detail
-    $this->id_peminjaman = $this->conn->lastInsertId();
+        // Get last insert ID untuk detail
+        $this->id_peminjaman = $this->conn->lastInsertId();
 
-    // DETAIL
-    if ($this->jenis_peminjaman == 'barang') {
+        // DETAIL
+        if ($this->jenis_peminjaman == 'barang') {
 
-        foreach ($this->items as $id => $kuantitas) {
-            $this->insertDetail($id, $kuantitas);
-        }
+            foreach ($this->items as $id => $kuantitas) {
+                $this->insertDetail($id, $kuantitas);
+            }
 
-    } elseif ($this->jenis_peminjaman == 'ruangan') {
+        } elseif ($this->jenis_peminjaman == 'ruangan') {
 
-        $barangModel  = new \App\Models\Barang($this->conn);
-        // Gunakan range waktu yang dipilih user agar konsisten dengan
-        // sistem validasi stok baru (hanya Disetujui & Dipinjam yang dihitung)
-        $availability = $barangModel->getAvailabilityByRange(
-            $this->id_ruangan,
-            $this->waktu_mulai,
-            $this->waktu_selesai
-        );
+            $barangModel = new \App\Models\Barang($this->conn);
+            // Gunakan range waktu yang dipilih user agar konsisten dengan
+            // sistem validasi stok baru (hanya Disetujui & Dipinjam yang dihitung)
+            $availability = $barangModel->getAvailabilityByRange(
+                $this->id_ruangan,
+                $this->waktu_mulai,
+                $this->waktu_selesai
+            );
 
-        foreach ($availability as $b) {
-            if ($b['stok_tersedia'] > 0) {
-                $this->insertDetail($b['id_barang'], $b['stok_tersedia']);
+            foreach ($availability as $b) {
+                if ($b['stok_tersedia'] > 0) {
+                    $this->insertDetail($b['id_barang'], $b['stok_tersedia']);
+                }
             }
         }
-    }
 
-    return true;
-}
+        return true;
+    }
     private function insertDetail($id_barang, $kuantitas)
     {
         $query = "INSERT INTO detail_peminjaman 
@@ -235,12 +235,12 @@ class Peminjaman
                   SET kuantitas = :kuantitas 
                   WHERE id_peminjaman = :id_peminjaman 
                   AND id_barang = :id_barang";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":kuantitas", $kuantitas);
         $stmt->bindParam(":id_peminjaman", $id_peminjaman);
         $stmt->bindParam(":id_barang", $id_barang);
-        
+
         return $stmt->execute();
     }
     // 🔹 GET BY ID (dengan detail barang)
@@ -258,7 +258,8 @@ class Peminjaman
         $stmt->execute();
         $peminjaman = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (!$peminjaman) return null;
+        if (!$peminjaman)
+            return null;
 
         // Detail barang (id_barang => kuantitas)
         $qDetail = "SELECT id_barang, kuantitas FROM detail_peminjaman WHERE id_peminjaman = :id";
@@ -325,7 +326,7 @@ class Peminjaman
     {
         // Detail peminjaman akan terhapus otomatis jika ada ON DELETE CASCADE di database.
         // Jika tidak, kita hapus manual detailnya dulu.
-        
+
         $queryDetail = "DELETE FROM detail_peminjaman WHERE id_peminjaman = :id_peminjaman";
         $stmtDetail = $this->conn->prepare($queryDetail);
         $stmtDetail->bindParam(":id_peminjaman", $this->id_peminjaman);
@@ -368,25 +369,29 @@ class Peminjaman
 
         // Total
         $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery);
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         $stats['total'] = $stmt->fetchColumn();
 
         // Disetujui
         $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status IN ('Disetujui', 'Dipinjam', 'Selesai')");
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         $stats['disetujui'] = $stmt->fetchColumn();
 
         // Ditolak
         $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND p.status = 'Ditolak'");
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         $stats['ditolak'] = $stmt->fetchColumn();
 
         // Terlambat
         $stmt = $this->conn->prepare($baseQuery . $joinQuery . $whereQuery . " AND (p.status = 'Terlambat' OR (p.status IN ('Dipinjam', 'Disetujui', 'Approved') AND p.waktu_selesai < NOW()))");
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
         $stats['terlambat'] = $stmt->fetchColumn();
 
@@ -429,7 +434,8 @@ class Peminjaman
         $query .= " GROUP BY p.id_peminjaman ORDER BY p.tanggal_dibuat DESC LIMIT :limit";
 
         $stmt = $this->conn->prepare($query);
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
 
@@ -548,14 +554,17 @@ class Peminjaman
                         INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
         }
         $query .= " WHERE DATE(p.tanggal_dibuat) = :date";
-        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
-        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+        if ($role === 'user')
+            $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff')
+            $query .= " AND r.id_pengguna = :id_pengguna";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':date', $date);
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     private function getCountByWeek($role, $id_pengguna, $weeksAgo)
@@ -567,14 +576,17 @@ class Peminjaman
                         INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
         }
         $query .= " WHERE YEARWEEK(p.tanggal_dibuat, 1) = YEARWEEK(CURDATE() - INTERVAL :weeks WEEK, 1)";
-        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
-        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+        if ($role === 'user')
+            $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff')
+            $query .= " AND r.id_pengguna = :id_pengguna";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':weeks', $weeksAgo, \PDO::PARAM_INT);
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     private function getCountByMonth($role, $id_pengguna, $monthYear)
@@ -586,14 +598,17 @@ class Peminjaman
                         INNER JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
         }
         $query .= " WHERE DATE_FORMAT(p.tanggal_dibuat, '%Y-%m') = :month";
-        if ($role === 'user') $query .= " AND p.id_pengguna = :id_pengguna";
-        if ($role === 'staff') $query .= " AND r.id_pengguna = :id_pengguna";
+        if ($role === 'user')
+            $query .= " AND p.id_pengguna = :id_pengguna";
+        if ($role === 'staff')
+            $query .= " AND r.id_pengguna = :id_pengguna";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':month', $monthYear);
-        if ($role !== 'admin') $stmt->bindParam(':id_pengguna', $id_pengguna);
+        if ($role !== 'admin')
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
         $stmt->execute();
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     private function getCountByRange($role, $id_pengguna, $start, $end)
@@ -650,11 +665,11 @@ class Peminjaman
                   WHERE b.id_ruangan = :id_ruangan 
                   AND p.status IN ('Disetujui', 'Dipinjam')
                   AND p.jenis_peminjaman = 'ruangan'";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id_ruangan', $id_ruangan);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
 
@@ -662,19 +677,21 @@ class Peminjaman
     {
         // 1. Ambil data peminjaman yang baru saja disetujui
         $approvedData = $this->getById($id_peminjaman_approved);
-        if (!$approvedData) return;
+        if (!$approvedData)
+            return;
 
         $start_approved = $approvedData['waktu_mulai'];
-        $end_approved   = $approvedData['waktu_selesai'];
+        $end_approved = $approvedData['waktu_selesai'];
         $items_approved = $approvedData['items']; // [id_barang => kuantitas]
 
-        if (empty($items_approved)) return;
+        if (empty($items_approved))
+            return;
 
         // 2. Cari peminjaman lain yang berstatus 'Pending' dan rentang waktunya bertabrakan
         // Serta memiliki setidaknya satu barang yang sama
         $itemIds = array_keys($items_approved);
         $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
-        
+
         $query = "SELECT DISTINCT p.id_peminjaman
                   FROM peminjaman p
                   JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
@@ -683,33 +700,35 @@ class Peminjaman
                   AND p.waktu_mulai < ?
                   AND p.waktu_selesai > ?
                   AND dp.id_barang IN ($placeholders)";
-        
+
         $stmt = $this->conn->prepare($query);
         $params = array_merge([$id_peminjaman_approved, $end_approved, $start_approved], $itemIds);
         $stmt->execute($params);
         $pendingIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
 
-        if (empty($pendingIds)) return;
+        if (empty($pendingIds))
+            return;
 
         $barangModel = new \App\Models\Barang($this->conn);
 
         // 3. Re-validasi stok untuk setiap peminjaman pending yang terdeteksi konflik
         foreach ($pendingIds as $pid) {
             $pData = $this->getById($pid);
-            if (!$pData) continue;
+            if (!$pData)
+                continue;
 
             $id_ruangan_p = $pData['id_ruangan'];
-            $items_p      = $pData['items'];
-            $start_p      = $pData['waktu_mulai'];
-            $end_p        = $pData['waktu_selesai'];
+            $items_p = $pData['items'];
+            $start_p = $pData['waktu_mulai'];
+            $end_p = $pData['waktu_selesai'];
 
             if ($id_ruangan_p) {
                 $availability = $barangModel->getAvailabilityByRange($id_ruangan_p, $start_p, $end_p);
-                
+
                 $shouldReject = false;
                 foreach ($items_p as $id_barang => $qty_requested) {
                     $stok_tersedia = isset($availability[$id_barang]) ? $availability[$id_barang]['stok_tersedia'] : 0;
-                    
+
                     if ($qty_requested > $stok_tersedia) {
                         $shouldReject = true;
                         break;
