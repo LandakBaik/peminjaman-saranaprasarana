@@ -116,6 +116,10 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                                 Aktif
                                             </option>
 
+                                            <option value="nonaktif">
+                                                Nonaktif
+                                            </option>
+
                                         </select>
 
                                     </div>
@@ -183,9 +187,10 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                     if ($row['role'] == 'staff') {
                                         $roleClass = 'bg-secondary-subtle text-secondary';
                                     }
+                                    $statusClass = $row['status'] == 'aktif' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
                                     ?>
 
-                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="aktif">
+                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="<?= htmlspecialchars($row['status']) ?>">
 
                                         <td class="text-center">
                                             <input type="checkbox" class="row-checkbox export-checkbox"
@@ -209,15 +214,15 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
                                         <td class="text-center">
 
                                             <span class="badge <?= $roleClass ?>">
-                                                <?= ucfirst(htmlspecialchars($row['role'])) ?>
+                                                <?= ucfirst(htmlspecialchars($row['role'] ?? '')) ?>
                                             </span>
 
                                         </td>
 
                                         <td class="text-center">
 
-                                            <span class="badge bg-success-subtle text-success">
-                                                Aktif
+                                            <span class="badge <?= $statusClass ?>">
+                                                <?= ucfirst(htmlspecialchars($row['status'] ?? '')) ?>
                                             </span>
 
                                         </td>
@@ -289,31 +294,21 @@ $stmt = $userModel->readByRoles(['user','admin','staff']);
 
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-
-                        <small class="text-muted" id="rowCountUser">
-
-                            0 of 0
-
-                        </small>
+                        <small class="text-muted" id="rowCountUser">Menampilkan 0 data</small>
 
                         <div class="d-flex align-items-center">
-
-                            <small class="me-2">
-                                Rows per page: 10
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPageUser" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
                             </small>
-
-                            <button class="btn btn-light btn-sm me-1">
-                                &lt;
-                            </button>
-
-                            <span>1</span>
-
-                            <button class="btn btn-light btn-sm ms-1">
-                                &gt;
-                            </button>
-
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPageUser">&lt;</button>
+                            <span id="currentPageNumUser" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPageUser">&gt;</button>
                         </div>
-
                     </div>
 
                 </div>

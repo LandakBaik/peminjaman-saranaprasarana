@@ -26,6 +26,14 @@ if (!$profil) {
             <div class="card-body">
                 <h5 class="text-muted mb-4">Detail Profil</h5>
 
+                <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_phone'): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>⚠️ Nomor Telepon Tidak Valid!</strong>
+                        Nomor telepon harus berupa angka dengan panjang antara 11 hingga 13 karakter.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Header Profil -->
                 <div class="d-flex justify-content-between align-items-start flex-wrap">
                     <div class="d-flex align-items-start gap-3">
@@ -88,7 +96,12 @@ if (!$profil) {
                             <input type="text" 
                                    name="nomor_telepon" 
                                    class="form-control"
+                                   placeholder="Contoh: 081234567890"
+                                   minlength="11"
+                                   maxlength="13"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                    value="<?= htmlspecialchars($profil['nomor_telepon'] ?? '') ?>">
+                            <small class="text-muted">Opsional. Jika diisi, minimal 11 dan maksimal 13 angka.</small>
                         </div>
 
                         <!-- Tanggal Lahir -->

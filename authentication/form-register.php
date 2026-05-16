@@ -12,6 +12,10 @@
             echo 'Gunakan email dengan domain student.polije.ac.id!';
         } elseif($_GET['error'] == 'invalid_email') {
             echo 'Format email tidak valid!';
+        } elseif($_GET['error'] == 'password_too_short') {
+            echo 'Password harus minimal 6 karakter!';
+        } elseif($_GET['error'] == 'password_not_alnum') {
+            echo 'Password hanya boleh berisi huruf dan angka!';
         } else {
             echo 'Terjadi kesalahan saat registrasi!';
         }
@@ -32,7 +36,8 @@
 
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <input type="password" class="form-control" name="password" id="password" required>
+        <input type="password" class="form-control" name="password" id="password" minlength="6" pattern="[a-zA-Z0-9]+" required>
+        <div class="invalid-feedback" id="password_feedback">Password harus minimal 6 karakter dan hanya berisi huruf/angka!</div>
     </div>
 
     <div class="mb-3">
@@ -54,13 +59,32 @@
 
 <script>
 document.querySelector('form').addEventListener('submit', function(e) {
+    if (!this.checkValidity()) {
+        return;
+    }
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm_password').value;
+    const alnumRegex = /^[a-zA-Z0-9]+$/;
     
+    let hasError = false;
+
+    if (password.length < 6 || !alnumRegex.test(password)) {
+        e.preventDefault();
+        document.getElementById('password').classList.add('is-invalid');
+        hasError = true;
+    } else {
+        document.getElementById('password').classList.remove('is-invalid');
+    }
+
     if (password !== confirm) {
         e.preventDefault();
         document.getElementById('confirm_password').classList.add('is-invalid');
+        hasError = true;
     } else {
+        document.getElementById('confirm_password').classList.remove('is-invalid');
+    }
+
+    if (!hasError) {
         e.preventDefault();
         const form = this;
         
@@ -71,6 +95,13 @@ document.querySelector('form').addEventListener('submit', function(e) {
         setTimeout(() => {
             form.submit();
         }, 2000);
+    }
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    const alnumRegex = /^[a-zA-Z0-9]+$/;
+    if (this.value.length >= 6 && alnumRegex.test(this.value)) {
+        this.classList.remove('is-invalid');
     }
 });
 

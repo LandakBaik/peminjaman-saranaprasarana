@@ -25,6 +25,14 @@ if (!$data):
         <div class="alert alert-danger text-center small">
             Password tidak cocok!
         </div>
+    <?php elseif (isset($_GET['error']) && $_GET['error'] == 'password_too_short'): ?>
+        <div class="alert alert-danger text-center small">
+            Password harus minimal 6 karakter!
+        </div>
+    <?php elseif (isset($_GET['error']) && $_GET['error'] == 'password_not_alnum'): ?>
+        <div class="alert alert-danger text-center small">
+            Password hanya boleh berisi huruf dan angka!
+        </div>
     <?php endif; ?>
 
     <div class="text-center mb-4">
@@ -37,7 +45,8 @@ if (!$data):
 
         <div class="mb-3">
             <label class="form-label">Password Baru</label>
-            <input type="password" class="form-control" name="password" id="password" required>
+            <input type="password" class="form-control" name="password" id="password" minlength="6" pattern="[a-zA-Z0-9]+" required>
+            <div class="invalid-feedback">Password harus minimal 6 karakter dan hanya berisi huruf/angka!</div>
         </div>
 
         <div class="mb-3">
@@ -62,10 +71,31 @@ if (!$data):
         document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
             const confirm = document.getElementById('confirm_password').value;
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            
+            let hasError = false;
+
+            if (password.length < 6 || !alnumRegex.test(password)) {
+                e.preventDefault();
+                document.getElementById('password').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('password').classList.remove('is-invalid');
+            }
 
             if (password !== confirm) {
                 e.preventDefault();
                 document.getElementById('confirm_password').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('confirm_password').classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            if (this.value.length >= 6 && alnumRegex.test(this.value)) {
+                this.classList.remove('is-invalid');
             }
         });
 

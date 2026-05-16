@@ -27,7 +27,7 @@
 <form action="../controllers/ForgotController.php" method="POST">
     <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" class="form-control" name="email" placeholder="Masukkan email Anda">
+        <input type="email" class="form-control" name="email" placeholder="Masukkan email Anda" required>
     </div>
 
     <button type="submit" class="btn btn-primary w-100 rounded-pill" style="background-color: #0F2854; border-color: #0F2854;">
@@ -42,6 +42,10 @@
 </form>
 <script>
     document.querySelector('form').addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            return;
+        }
+
         e.preventDefault();
         const form = this;
         

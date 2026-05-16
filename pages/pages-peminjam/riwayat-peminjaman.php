@@ -70,7 +70,7 @@ $stmt = $peminjaman->readByUser($userId, true);
                                     </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <label class="form-label fw-semibold">Tanggal Pengajuan</label>
                                         <input type="date" class="form-control" id="filterTanggal">
                                     </div>
                                 </div>
@@ -97,7 +97,7 @@ $stmt = $peminjaman->readByUser($userId, true);
                                     <th>Status</th>
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
-                                    <th>Tanggal</th>
+                                    <th>Tanggal Pengajuan</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -114,7 +114,9 @@ $stmt = $peminjaman->readByUser($userId, true);
                                         $statusClass = 'bg-success-subtle text-success';
                                     ?>
                                     <tr data-status="<?= ucfirst(htmlspecialchars($displayStatus)) ?>"
-                                        data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
+                                    data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
+                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>"
+                                    data-room="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>">
                                         <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td>
@@ -136,17 +138,17 @@ $stmt = $peminjaman->readByUser($userId, true);
                                                 class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($displayStatus)) ?></span>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_mulai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_mulai']))) ?>
                                         </td>
 
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_selesai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_selesai']))) ?>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
                                         </td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary btn-sm btn-detail" data-bs-toggle="modal"
+                                            <button class="btn btn-info btn-sm text-white btn-detail" data-bs-toggle="modal"
                                                 data-bs-target="#detailModal" data-kode="<?= htmlspecialchars($kode) ?>"
                                                 data-ruangan="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
                                                 data-jenis="<?= htmlspecialchars(ucfirst($row['jenis_peminjaman'])) ?>"
@@ -159,7 +161,7 @@ $stmt = $peminjaman->readByUser($userId, true);
                                                 data-status="<?= htmlspecialchars(ucfirst($displayStatus)) ?>"
                                                 data-approval="<?= htmlspecialchars($row['staff_approval'] ?? '-') ?>"
                                                 data-keterangan="<?= htmlspecialchars($row['keterangan'] ?? '') ?>">
-                                                Detail
+                                                <i class="fas fa-eye me-1"></i> Detail
                                             </button>
                                         </td>
                                     </tr>
@@ -175,13 +177,20 @@ $stmt = $peminjaman->readByUser($userId, true);
 
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted" id="rowCount">Menampilkan <?= $no-1 ?> data</small>
+                        <small class="text-muted" id="rowCount">Menampilkan 0 data</small>
 
                         <div class="d-flex align-items-center">
-                            <small class="me-2">Rows per page: 10</small>
-                            <button class="btn btn-light btn-sm me-1">&lt;</button>
-                            <span>1</span>
-                            <button class="btn btn-light btn-sm ms-1">&gt;</button>
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPage" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </small>
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPage">&lt;</button>
+                            <span id="currentPageNum" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPage">&gt;</button>
                         </div>
                     </div>
 
@@ -485,70 +494,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Search and Filter Logic
-    const searchInput = document.getElementById('searchInput');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterJenis = document.getElementById('filterJenis');
-    const filterTanggal = document.getElementById('filterTanggal');
-    const btnApplyFilter = document.getElementById('btnApplyFilter');
-    const btnResetFilter = document.getElementById('btnResetFilter');
-    const tableBody = document.getElementById('peminjamanBody');
-    const rows = tableBody.querySelectorAll('tr[data-status]');
 
-    function filterData() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const statusValue = filterStatus.value;
-        const jenisValue = filterJenis.value;
-        const tanggalValue = filterTanggal.value;
-
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            const status = row.getAttribute('data-status');
-            const type = row.getAttribute('data-type');
-            
-            // Check date in the 8th column (index 7)
-            const dateCell = row.cells[7].innerText;
-            const rowDate = dateCell.split(' ')[0]; // Get only YYYY-MM-DD
-
-            const matchSearch = text.includes(searchTerm);
-            const matchStatus = statusValue === "" || status === statusValue;
-            const matchJenis = jenisValue === "" || type === jenisValue;
-            const matchDate = tanggalValue === "" || rowDate === tanggalValue;
-
-            if (matchSearch && matchStatus && matchJenis && matchDate) {
-                row.style.display = "";
-                visibleCount++;
-            } else {
-                row.style.display = "none";
-            }
-        });
-
-        document.getElementById('rowCount').textContent = `Menampilkan ${visibleCount} data`;
-    }
-
-    searchInput.addEventListener('input', filterData);
-    btnApplyFilter.addEventListener('click', filterData);
-    btnResetFilter.addEventListener('click', function() {
-        searchInput.value = "";
-        filterStatus.value = "";
-        filterJenis.value = "";
-        filterTanggal.value = "";
-        filterData();
-    });
-
-    // Select All Logic
-    const selectAll = document.getElementById('selectAll');
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.row-checkbox');
-            checkboxes.forEach(cb => {
-                if (cb.offsetParent !== null) { // only visible ones
-                    cb.checked = selectAll.checked;
-                }
-            });
-        });
-    }
 });
 </script>

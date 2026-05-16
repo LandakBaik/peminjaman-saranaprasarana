@@ -36,6 +36,16 @@ if ($action == 'login') {
         header("Location: ../authentication/Login.php?page=register&error=1");
         exit();
     }
+    
+    if (strlen($user->password) < 6) {
+        header("Location: ../authentication/Login.php?page=register&error=password_too_short");
+        exit();
+    }
+
+    if (!ctype_alnum($user->password)) {
+        header("Location: ../authentication/Login.php?page=register&error=password_not_alnum");
+        exit();
+    }
     if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
         header("Location: ../authentication/Login.php?page=register&error=invalid_email");
         exit();

@@ -52,11 +52,21 @@ $stmt = $userModel->readByRoles(['staff']);
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <!-- Filter Status -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Role</label>
-                                        <select class="form-select" id="filterRole">
-                                            <option value="">Semua</option>
-                                            <option value="staff">Staff</option>
+                                        <label class="form-label fw-semibold">
+                                            Status
+                                        </label>
+                                        <select class="form-select" id="filterStatusUser">
+                                            <option value="">
+                                                Semua
+                                            </option>
+                                            <option value="aktif">
+                                                Aktif
+                                            </option>
+                                            <option value="nonaktif">
+                                                Nonaktif
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
@@ -93,8 +103,10 @@ $stmt = $userModel->readByRoles(['staff']);
                                     if ($row['role'] == 'staff') {
                                         $roleClass = 'bg-secondary-subtle text-secondary';
                                     }
+
+                                    $statusClass = $row['status'] == 'aktif' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
                                     ?>
-                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="aktif">
+                                    <tr data-role="<?= strtolower($row['role']) ?>" data-status="<?= htmlspecialchars($row['status']) ?>">
                                         <td class="text-center">
                                             <input type="checkbox" class="row-checkbox export-checkbox" value="<?= $row['id_pengguna'] ?>">
                                         </td>
@@ -103,11 +115,17 @@ $stmt = $userModel->readByRoles(['staff']);
                                         <td><?= htmlspecialchars($row['email'] ?? '') ?></td>
                                         <td class="text-center">
                                             <span class="badge <?= $roleClass ?>">
-                                                <?= ucfirst(htmlspecialchars($row['role'])) ?>
+                                                <?= ucfirst(htmlspecialchars($row['role'] ?? '')) ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                            <select class="form-select form-select-sm status-dropdown" 
+                                                onchange="location.href='controllers/UserController.php?action=update_status&id=<?= $row['id_pengguna'] ?>&status=' + this.value"
+                                                style="min-width: 100px; border-radius: 20px; font-size: 0.75rem; 
+                                                <?= $row['status'] == 'aktif' ? 'background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;' : 'background-color: #f8d7da; color: #842029; border-color: #f5c2c7;' ?>">
+                                                <option value="aktif" <?= $row['status'] == 'aktif' ? 'selected' : '' ?>>Aktif</option>
+                                                <option value="nonaktif" <?= $row['status'] == 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
+                                            </select>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-1">
@@ -182,6 +200,13 @@ $stmt = $userModel->readByRoles(['staff']);
                                                                     <label class="form-label fw-semibold">Email</label>
                                                                     <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($row['email']) ?>" required>
                                                                 </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Status Akun</label>
+                                                                    <select class="form-select" name="status">
+                                                                        <option value="aktif" <?= $row['status'] == 'aktif' ? 'selected' : '' ?>>Aktif</option>
+                                                                        <option value="nonaktif" <?= $row['status'] == 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
+                                                                    </select>
+                                                                </div>
                                                                 <input type="hidden" name="role" value="staff">
 
                                                                 <div class="mb-3">
@@ -219,12 +244,20 @@ $stmt = $userModel->readByRoles(['staff']);
 
                     <!-- Footer Table -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted" id="rowCountUser">0 of 0</small>
+                        <small class="text-muted" id="rowCountUser">Menampilkan 0 data</small>
+
                         <div class="d-flex align-items-center">
-                            <small class="me-2">Rows per page: 10</small>
-                            <button class="btn btn-light btn-sm me-1">&lt;</button>
-                            <span>1</span>
-                            <button class="btn btn-light btn-sm ms-1">&gt;</button>
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPageUser" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </small>
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPageUser">&lt;</button>
+                            <span id="currentPageNumUser" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPageUser">&gt;</button>
                         </div>
                     </div>
                 </div>
@@ -315,8 +348,9 @@ $stmt = $userModel->readByRoles(['staff']);
                                     Password
                                 </label>
 
-                                <input type="password" class="form-control" name="password" placeholder="XXXXXX"
-                                    required>
+                                <input type="password" class="form-control" name="password" id="staff_password" placeholder="XXXXXX"
+                                    minlength="6" pattern="[a-zA-Z0-9]+" required>
+                                <div class="invalid-feedback">Password harus minimal 6 karakter dan hanya berisi huruf/angka!</div>
 
                             </div>
 
@@ -460,6 +494,26 @@ $stmt = $userModel->readByRoles(['staff']);
                     }
                 });
             });
+        });
+
+        // Password validation for Add Staff form
+        document.querySelector('#tambahStaffModal form').addEventListener('submit', function(e) {
+            const password = document.getElementById('staff_password').value;
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            
+            if (password.length < 6 || !alnumRegex.test(password)) {
+                e.preventDefault();
+                document.getElementById('staff_password').classList.add('is-invalid');
+            } else {
+                document.getElementById('staff_password').classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('staff_password').addEventListener('input', function() {
+            const alnumRegex = /^[a-zA-Z0-9]+$/;
+            if (this.value.length >= 6 && alnumRegex.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
         });
     </script>
     <footer>

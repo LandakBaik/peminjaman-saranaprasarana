@@ -25,50 +25,49 @@ document.addEventListener('DOMContentLoaded', function () {
     // Checkbox
     // =========================
 
-    selectAll.addEventListener('change', function () {
-
-        getRowCheckboxes().forEach(cb => {
-            cb.checked = selectAll.checked;
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            getRowCheckboxes().forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
         });
+    }
 
-    });
 
-
-    tableBody.addEventListener('change', function (e) {
-
-        if (e.target.classList.contains('row-checkbox')) {
-
-            const all = getRowCheckboxes();
-
-            selectAll.checked =
-                [...all].every(cb => cb.checked);
-
-        }
-
-    });
+    if (tableBody) {
+        tableBody.addEventListener('change', function (e) {
+            if (e.target.classList.contains('row-checkbox')) {
+                const all = getRowCheckboxes();
+                if (selectAll) selectAll.checked = [...all].every(cb => cb.checked);
+            }
+        });
+    }
 
 
     // =========================
     // Search realtime
     // =========================
 
-    searchInput.addEventListener('input', applyAll);
+    if (searchInput) {
+        searchInput.addEventListener('input', applyAll);
+    }
 
 
     // =========================
     // Filter button
     // =========================
 
-    btnApply.addEventListener('click', applyAll);
+    if (btnApply) {
+        btnApply.addEventListener('click', applyAll);
+    }
 
-    btnReset.addEventListener('click', function () {
-
-        filterRuangan.value = '';
-        filterStok.value = '';
-
-        applyAll();
-
-    });
+    if (btnReset) {
+        btnReset.addEventListener('click', function () {
+            if (filterRuangan) filterRuangan.value = '';
+            if (filterStok) filterStok.value = '';
+            applyAll();
+        });
+    }
 
 
     // =========================

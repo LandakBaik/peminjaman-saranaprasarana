@@ -5,6 +5,10 @@ $database = new \App\Config\Database();
 $db = $database->getConnection();
 $peminjaman = new \App\Models\Peminjaman($db);
 $userId = $_SESSION['user']['id'] ?? 0;
+
+// Update status terlambat sebelum mengambil data
+$peminjaman->updateLateStatus($userId);
+
 $stmt = $peminjaman->readByUser($userId);
 ?>
 <div id="layoutSidenav_content">
@@ -58,6 +62,7 @@ $stmt = $peminjaman->readByUser($userId);
                                             <option value="Pending">Pending</option>
                                             <option value="Disetujui">Disetujui</option>
                                             <option value="Ditolak">Ditolak</option>
+                                            <option value="Terlambat">Terlambat</option>
                                         </select>
                                     </div>
                                     <!-- Jenis -->
@@ -71,7 +76,7 @@ $stmt = $peminjaman->readByUser($userId);
                                     </div>
                                     <!-- Tanggal -->
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Tanggal</label>
+                                        <label class="form-label fw-semibold">Tanggal Pengajuan</label>
                                         <input type="date" class="form-control" id="filterTanggal">
                                     </div>
                                 </div>
@@ -98,8 +103,8 @@ $stmt = $peminjaman->readByUser($userId);
                                     <th>Status</th>
                                     <th>Waktu Mulai</th>
                                     <th>Waktu Selesai</th>
-                                    <th>Tanggal</th>
-                                    <th>Aksi</th>
+                                    <th>Tanggal Pengajuan</th>
+                                    <th style="width: 180px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="peminjamanBody">
@@ -126,11 +131,15 @@ $stmt = $peminjaman->readByUser($userId);
                                         $statusClass = 'bg-secondary-subtle text-secondary';
                                     if (strtolower($displayStatus) == 'dipinjam')
                                         $statusClass = 'bg-info-subtle text-info';
+                                    if (strtolower($displayStatus) == 'terlambat')
+                                        $statusClass = 'bg-danger text-white';
                                     if (strtolower($displayStatus) == 'menunggu pengembalian' || strtolower($displayStatus) == 'pengembalian')
                                         $statusClass = 'bg-warning-subtle text-warning';
                                     ?>
                                     <tr data-status="<?= ucfirst(htmlspecialchars($displayStatus)) ?>"
-                                        data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>">
+                                    data-type="<?= ucfirst(htmlspecialchars($row['jenis_peminjaman'])) ?>"
+                                    data-date="<?= htmlspecialchars(date('Y-m-d', strtotime($row['tanggal_dibuat'] ?? 'now'))) ?>"
+                                    data-room="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>">
                                         <td class="text-center"><input type="checkbox" class="row-checkbox"></td>
                                         <td class="text-center"><?= $no++ ?></td>
                                         <td>
@@ -152,18 +161,18 @@ $stmt = $peminjaman->readByUser($userId);
                                                 class="badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($displayStatus)) ?></span>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_mulai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_mulai']))) ?>
                                         </td>
 
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['waktu_selesai']) ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_selesai']))) ?>
                                         </td>
                                         <td class="text-center">
-                                            <?= htmlspecialchars($row['tanggal_dibuat'] ?? '-') ?>
+                                            <?= htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) ?>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-1">
-                                                <button class="btn btn-primary btn-sm btn-detail" data-bs-toggle="modal"
+                                                <button class="btn btn-info btn-sm text-white btn-detail" data-bs-toggle="modal"
                                                     data-bs-target="#detailModal" data-kode="<?= htmlspecialchars($kode) ?>"
                                                     data-ruangan="<?= htmlspecialchars($row['nama_ruangan'] ?? '-') ?>"
                                                     data-jenis="<?= htmlspecialchars(ucfirst($row['jenis_peminjaman'])) ?>"
@@ -176,7 +185,7 @@ $stmt = $peminjaman->readByUser($userId);
                                                     data-status="<?= htmlspecialchars(ucfirst($displayStatus)) ?>"
                                                     data-approval="<?= htmlspecialchars($row['staff_approval'] ?? '-') ?>"
                                                     data-keterangan="<?= htmlspecialchars($row['keterangan'] ?? '') ?>">
-                                                    Detail
+                                                    <i class="fas fa-eye me-1"></i> Detail
                                                 </button>
                                                 <?php if (strtolower($row['status']) == 'pending'): ?>
                                                     <form action="controllers/PeminjamanController.php?action=delete"
@@ -184,17 +193,20 @@ $stmt = $peminjaman->readByUser($userId);
                                                         <input type="hidden" name="id_peminjaman"
                                                             value="<?= $row['id_peminjaman'] ?>">
                                                         <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Apakah anda yakin ingin membatalkan peminjaman ini? Tindakan ini tidak dapat dibatalkan.')">Batalkan</button>
+                                                            onclick="return confirm('Apakah anda yakin ingin menghapus data peminjaman ini?')">
+                                                            <i class="fas fa-trash me-1"></i> Hapus
+                                                        </button>
                                                     </form>
-                                                <?php elseif (strtolower($displayStatus) == 'dipinjam'): ?>
+                                                <?php elseif (strtolower($displayStatus) == 'dipinjam' || strtolower($displayStatus) == 'terlambat'): ?>
                                                     <form
                                                         action="controllers/PeminjamanController.php?action=ajukan_pengembalian"
                                                         method="POST" class="d-inline">
                                                         <input type="hidden" name="id_peminjaman"
                                                             value="<?= $row['id_peminjaman'] ?>">
-                                                        <button type="submit" class="btn btn-info btn-sm"
-                                                            onclick="return confirm('Ajukan pengembalian untuk peminjaman ini?')">Ajukan
-                                                            Pengembalian</button>
+                                                        <button type="submit" class="btn btn-warning btn-sm text-white"
+                                                            onclick="return confirm('Ajukan pengembalian untuk peminjaman ini?')">
+                                                            <i class="fas fa-undo me-1"></i> Ajukan
+                                                        </button>
                                                     </form>
                                                 <?php endif; ?>
                                             </div>
@@ -207,13 +219,20 @@ $stmt = $peminjaman->readByUser($userId);
 
                     <!-- Footer -->
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted" id="rowCount">1–2 of 2</small>
+                        <small class="text-muted" id="rowCount">Menampilkan 0 data</small>
 
                         <div class="d-flex align-items-center">
-                            <small class="me-2">Rows per page: 10</small>
-                            <button class="btn btn-light btn-sm me-1">&lt;</button>
-                            <span>1</span>
-                            <button class="btn btn-light btn-sm ms-1">&gt;</button>
+                            <small class="me-2">Rows per page: 
+                                <select id="rowsPerPage" class="form-select form-select-sm d-inline-block w-auto border-0 bg-transparent py-0" style="cursor: pointer; box-shadow: none;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </small>
+                            <button class="btn btn-light btn-sm me-1" id="btnPrevPage">&lt;</button>
+                            <span id="currentPageNum" class="mx-2">1</span>
+                            <button class="btn btn-light btn-sm ms-1" id="btnNextPage">&gt;</button>
                         </div>
                     </div>
 
@@ -479,6 +498,7 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
             disetujui: 'success',
             approved: 'success',
             dipinjam: 'info',
+            terlambat: 'danger',
             ditolak: 'danger',
             rejected: 'danger'
         };

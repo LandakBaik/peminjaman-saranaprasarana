@@ -20,27 +20,30 @@
                             
                             <h5>2. Waktu Peminjaman</h5>
                             <ul>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
+                                <li>Peminjaman hanya dilakukan saat jam kerja</li>
+                                <li>Peminjaman tidak boleh lebih dari 1 hari</li>
                             </ul>
 
                             <h5>3. Prosedur Peminjaman</h5>
                             <ul>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
+                                <li>Peminjam melakukan pengisian form peminjaman di aplikasi</li>
+                                <li>Menunggu persetujuan dari penanggung jawab ruangan</li>
+                                <li>Jika disetujui, peminjam datang ke ruangan untuk mengambil barang/kunci ruangan yang dipinjam</li>
+                                <li>Jika ditolak, peminjam tidak dapat meminjam</li>
+                                <li>Setelah selesai, peminjam mengikuti prosedur pengembalian barang/ruangan sesuai aturan yang berlaku</li>
                             </ul>
 
                             <h5>4. Kewajiban Peminjam</h5>
                             <ul>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
-                                <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</li>
+                                <li>Mematuhi segala peraturan yang berlaku</li>
+                                <li>Mengembalikan barang/kunci ruangan tepat waktu</li>
+                                <li>Tidak merusak barang/ruangan yang dipinjam</li>
+                                <li>Tidak meminjamkan barang/ruangan kepada orang lain</li>
+                                <li>Tidak memodifikasi barang/ruangan</li>
                             </ul>
 
                             <h5>5. Sanksi</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</p>
+                            <p>Pengguna akan dikenakan sanksi jika melanggar ketentuan sesuai dengan aturan yang berlaku</p>
                             
                             <div class="alert alert-info mt-4">
                                 <strong>Catatan:</strong> Ketentuan ini dapat berubah sewaktu-waktu sesuai dengan kebijakan manajemen.

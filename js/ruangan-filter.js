@@ -1,20 +1,17 @@
 
-
 document.addEventListener('DOMContentLoaded', function () {
 
     // ========== DOM Elements ==========
-    const searchInput   = document.getElementById('searchInput');
-    const tableBody     = document.getElementById('peminjamanBody');
-    const rowCountEl    = document.getElementById('rowCount');
-    const selectAll     = document.getElementById('selectAll');
-    const btnApply      = document.getElementById('btnApplyFilter');
-    const btnReset      = document.getElementById('btnResetFilter');
-    const filterStatus  = document.getElementById('filterStatus');
-    const filterJenis   = document.getElementById('filterJenis');
+    const searchInput   = document.getElementById('searchRuangan');
+    const tableBody     = document.getElementById('ruanganBody');
+    const rowCountEl    = document.getElementById('rowCountRuangan');
+    const selectAll     = document.getElementById('selectAllRuangan');
+    const btnApply      = document.getElementById('btnApplyRuanganFilter');
+    const btnReset      = document.getElementById('btnResetRuanganFilter');
+    const filterTipe    = document.getElementById('filterTipe');
+    const filterKapasitas = document.getElementById('filterKapasitas');
+    const filterAset    = document.getElementById('filterAset');
     const filterTanggal = document.getElementById('filterTanggal');
-    const filterRoom    = document.getElementById('filterRoom');
-    const filterPeminjam = document.getElementById('filterPeminjam');
-    const filterStatusKembali = document.getElementById('filterStatusKembali');
 
     // Helper: ambil semua row checkbox
     const getRowCheckboxes = () => tableBody.querySelectorAll('.row-checkbox');
@@ -25,10 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let rowsPerPage = 10;
     let filteredRows = [];
 
-    const rowsPerPageSelect = document.getElementById('rowsPerPage');
-    const btnPrevPage       = document.getElementById('btnPrevPage');
-    const btnNextPage       = document.getElementById('btnNextPage');
-    const currentPageNum    = document.getElementById('currentPageNum');
+    const rowsPerPageSelect = document.getElementById('rowsPerPageRuangan');
+    const btnPrevPage       = document.getElementById('btnPrevPageRuangan');
+    const btnNextPage       = document.getElementById('btnNextPageRuangan');
+    const currentPageNum    = document.getElementById('currentPageNumRuangan');
 
     // ========== Checkbox ==========
 
@@ -42,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tableBody.addEventListener('change', function (e) {
             if (e.target.classList.contains('row-checkbox')) {
                 const all = getRowCheckboxes();
-                selectAll.checked = [...all].every(cb => cb.checked);
+                if (selectAll) selectAll.checked = [...all].every(cb => cb.checked);
             }
         });
     }
@@ -65,12 +62,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnReset) {
         btnReset.addEventListener('click', function () {
-            if(filterStatus) filterStatus.value  = '';
-            if(filterJenis) filterJenis.value   = '';
+            if(filterTipe) filterTipe.value  = '';
+            if(filterKapasitas) filterKapasitas.value = '';
+            if(filterAset) filterAset.value = '';
             if(filterTanggal) filterTanggal.value = '';
-            if(filterRoom) filterRoom.value = '';
-            if(filterPeminjam) filterPeminjam.value = '';
-            if(filterStatusKembali) filterStatusKembali.value = '';
             applyAll();
         });
     }
@@ -107,34 +102,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyAll() {
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const statusVal  = filterStatus ? filterStatus.value : '';
-        const jenisVal   = filterJenis ? filterJenis.value : '';
+        const tipeVal    = filterTipe ? filterTipe.value.toLowerCase().trim() : '';
+        const kapasitasVal = filterKapasitas ? parseInt(filterKapasitas.value) : 0;
+        const asetVal    = filterAset ? parseInt(filterAset.value) : 0;
         const tanggalVal = filterTanggal ? filterTanggal.value : '';
-        const roomVal    = filterRoom ? filterRoom.value.toLowerCase().trim() : '';
-        const peminjamVal = filterPeminjam ? filterPeminjam.value.toLowerCase().trim() : '';
-        const statusKembaliVal = filterStatusKembali ? filterStatusKembali.value : '';
 
-        const rows = tableBody ? tableBody.querySelectorAll('tr[data-status]') : [];
+        const rows = tableBody ? tableBody.querySelectorAll('tr[data-tipe]') : [];
         filteredRows = [];
 
         rows.forEach(row => {
             const text   = row.textContent.toLowerCase();
-            const status = row.getAttribute('data-status');
-            const type   = row.getAttribute('data-type');
-            const rowDate = row.getAttribute('data-date');
-            const room   = (row.getAttribute('data-room') || '').toLowerCase();
-            const peminjam = (row.getAttribute('data-peminjam') || '').toLowerCase();
-            const statusKembali = row.getAttribute('data-status-kembali');
+            const tipe   = (row.getAttribute('data-tipe') || '').toLowerCase().trim();
+            const kapasitas = parseInt(row.getAttribute('data-kapasitas') || '0');
+            const aset   = parseInt(row.getAttribute('data-aset') || '0');
+            const tanggal = row.getAttribute('data-tanggal') || '';
 
             const matchSearch = !searchTerm || text.includes(searchTerm);
-            const matchStatus = !statusVal  || status === statusVal;
-            const matchType   = !jenisVal   || type === jenisVal;
-            const matchDate   = !tanggalVal || rowDate === tanggalVal;
-            const matchRoom   = !roomVal    || room.includes(roomVal);
-            const matchPeminjam = !peminjamVal || peminjam.includes(peminjamVal);
-            const matchStatusKembali = !statusKembaliVal || statusKembali === statusKembaliVal;
+            const matchTipe   = !tipeVal   || tipe === tipeVal;
+            const matchKapasitas = !kapasitasVal || kapasitas >= kapasitasVal;
+            const matchAset   = !asetVal || aset >= asetVal;
+            const matchTanggal = !tanggalVal || tanggal === tanggalVal;
 
-            if (matchSearch && matchStatus && matchType && matchDate && matchRoom && matchPeminjam && matchStatusKembali) {
+            if (matchSearch && matchTipe && matchKapasitas && matchAset && matchTanggal) {
                 filteredRows.push(row);
             } else {
                 row.style.display = 'none';
@@ -163,6 +152,9 @@ document.addEventListener('DOMContentLoaded', function () {
         filteredRows.forEach((row, index) => {
             if (index >= startIndex && index < endIndex) {
                 row.style.display = '';
+                // Update sequential number (assuming No is in the 2nd cell, index 1)
+                const noCell = row.cells[1];
+                if (noCell) noCell.textContent = index + 1;
             } else {
                 row.style.display = 'none';
             }
