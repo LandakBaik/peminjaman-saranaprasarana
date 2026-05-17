@@ -1,5 +1,5 @@
 <?php
-// View variables are provided by PageController
+
 ?>
 
 <div id="layoutSidenav_content">

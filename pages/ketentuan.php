@@ -16,7 +16,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h5>1. Umum</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</p>
+                            <p>Meminjam berarti menyetujui semua peraturan yang berlaku</p>
                             
                             <h5>2. Waktu Peminjaman</h5>
                             <ul>

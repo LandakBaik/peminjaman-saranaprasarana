@@ -1,9 +1,6 @@
-<?php if (isset($_GET['success']) && isset($_GET['token'])): ?>
+<?php if (isset($_GET['success'])): ?>
     <div class="alert alert-success text-center small">
-        Kode OTP berhasil dikirim!<br>
-        <a href="Login.php?page=reset&token=<?= htmlspecialchars($_GET['token']) ?>">
-            Klik di sini untuk reset password
-        </a>
+        Tautan untuk reset password telah dikirim ke email Anda! <br> Silakan periksa inbox atau folder spam Anda.
     </div>
 <?php endif; ?>
 
@@ -12,6 +9,8 @@
         <?php
         if ($_GET['error'] == 'email_not_found') {
             echo "Email tidak ditemukan!";
+        } elseif ($_GET['error'] == 'mailer_error') {
+            echo "Gagal mengirim email reset password. Silakan coba lagi nanti.";
         } else {
             echo "Terjadi kesalahan!";
         }
@@ -31,7 +30,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary w-100 rounded-pill" style="background-color: #0F2854; border-color: #0F2854;">
-        Kirim Kode OTP
+        Kirim Link Reset
     </button>
 
     <p class="text-center small mt-3">

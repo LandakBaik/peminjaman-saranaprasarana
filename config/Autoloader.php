@@ -2,6 +2,11 @@
 
 date_default_timezone_set('Asia/Jakarta');
 
+// Include Composer Autoloader
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
+
 spl_autoload_register(function ($class) {
     $prefixes = [
         'App\\Config\\' => __DIR__ . '/',
