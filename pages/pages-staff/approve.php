@@ -431,7 +431,7 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
                 <form action="controllers/PeminjamanController.php?action=update_status" method="POST" class="m-0">
                     <input type="hidden" name="id_peminjaman" value="${d.id}">
                     <input type="hidden" name="status" value="Disetujui">
-                    <button type="submit" class="btn btn-primary px-4" onclick="return confirm('Setujui pengajuan ini?')">Setujui Peminjaman</button>
+                    <button type="submit" class="btn btn-primary px-4" onclick="confirmAction(event, 'Setujui pengajuan ini?')">Setujui Peminjaman</button>
                 </form>
             `;
 
@@ -443,10 +443,24 @@ document.querySelectorAll('.btn-detail').forEach(btn => {
                     rejectInput.focus();
                     return;
                 }
-                if (confirm('Tolak pengajuan ini?')) {
-                    document.getElementById('hidden-reject-reason').value = reason;
-                    document.getElementById('form-reject').submit();
-                }
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: 'Tolak pengajuan ini?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Tolak!',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-danger px-4 me-2 shadow-sm',
+                        cancelButton: 'btn btn-secondary px-4 shadow-sm'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('hidden-reject-reason').value = reason;
+                        document.getElementById('form-reject').submit();
+                    }
+                });
             });
         } else {
             actionBox.innerHTML = `<button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>`;

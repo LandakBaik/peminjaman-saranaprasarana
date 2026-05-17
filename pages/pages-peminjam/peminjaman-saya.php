@@ -183,7 +183,7 @@
                                                         <input type="hidden" name="id_peminjaman"
                                                             value="<?= $row['id_peminjaman'] ?>">
                                                         <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Apakah anda yakin ingin menghapus data peminjaman ini?')">
+                                                            onclick="confirmAction(event, 'Apakah anda yakin ingin menghapus data peminjaman ini?')">
                                                             <i class="fas fa-trash me-1"></i> Hapus
                                                         </button>
                                                     </form>
@@ -194,7 +194,7 @@
                                                         <input type="hidden" name="id_peminjaman"
                                                             value="<?= $row['id_peminjaman'] ?>">
                                                         <button type="submit" class="btn btn-warning btn-sm text-white"
-                                                            onclick="return confirm('Ajukan pengembalian untuk peminjaman ini?')">
+                                                            onclick="confirmAction(event, 'Ajukan pengembalian untuk peminjaman ini?')">
                                                             <i class="fas fa-undo me-1"></i> Ajukan
                                                         </button>
                                                     </form>

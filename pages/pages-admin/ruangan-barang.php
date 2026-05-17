@@ -159,7 +159,7 @@
                                             </button>
                                             <a href="controllers/RuanganController.php?action=delete&id_ruangan=<?= $row['id_ruangan'] ?>"
                                                 class="btn btn-danger btn-sm"
-                                                onclick="return confirm('Yakin menghapus ruangan ini?')">
+                                                onclick="confirmAction(event, 'Yakin menghapus ruangan ini?')">
                                                 Hapus
                                             </a>
                                         </td>
@@ -765,7 +765,7 @@
 
                             <a href="controllers/BarangController.php?action=delete&id_barang=${item.id_barang}&source=ruangan"
                                 class="btn btn-light border border-danger text-danger btn-sm"
-                                onclick="return confirm('Yakin ingin menghapus barang ini?')">
+                                onclick="confirmAction(event, 'Yakin ingin menghapus barang ini?')">
 
                                 <i class="fas fa-trash"></i>
 

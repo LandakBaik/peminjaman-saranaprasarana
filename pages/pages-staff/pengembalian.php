@@ -150,7 +150,7 @@ ini_set('display_errors', 1);
                                     <td class="text-center">
                                         <form action="controllers/PeminjamanController.php?action=verifikasi_pengembalian" method="POST" class="d-inline">
                                             <input type="hidden" name="id_peminjaman" value="<?= $row['id_peminjaman'] ?>">
-                                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Verifikasi pengembalian ini?')">Verifikasi Pengembalian</button>
+                                            <button type="submit" class="btn btn-primary btn-sm" onclick="confirmAction(event, 'Verifikasi pengembalian ini?')">Verifikasi Pengembalian</button>
                                         </form>
                                     </td>
                                 </tr>

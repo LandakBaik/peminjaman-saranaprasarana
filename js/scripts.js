@@ -24,3 +24,77 @@ window.addEventListener('DOMContentLoaded', event => {
     }
 
 });
+
+// ==========================================
+// SWEETALERT2 GLOBAL OVERRIDES & HELPERS
+// ==========================================
+
+// Global Override for Native alert()
+window.alert = function(message) {
+    let icon = 'info';
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('❌') || lowerMsg.includes('gagal') || lowerMsg.includes('salah') || lowerMsg.includes('tidak mencukupi') || lowerMsg.includes('tidak boleh')) {
+        icon = 'error';
+    } else if (lowerMsg.includes('⚠️') || lowerMsg.includes('peringatan') || lowerMsg.includes('harus') || lowerMsg.includes('minimal') || lowerMsg.includes('perlu') || lowerMsg.includes('yakin')) {
+        icon = 'warning';
+    } else if (lowerMsg.includes('✅') || lowerMsg.includes('berhasil') || lowerMsg.includes('sukses')) {
+        icon = 'success';
+    }
+    
+    Swal.fire({
+        title: 'Pemberitahuan',
+        text: message.replace(/[⚠️❌✅]/g, '').trim(), // Clean up styling emojis in text
+        icon: icon,
+        confirmButtonText: 'OK',
+        customClass: {
+            confirmButton: 'btn btn-primary px-4 shadow-sm'
+        },
+        buttonsStyling: false
+    });
+};
+
+// Global Helper for Replacement of native confirm()
+function confirmAction(event, message) {
+    event.preventDefault();
+    const target = event.currentTarget || event.target;
+    
+    let actionType = 'navigate';
+    let formElement = null;
+    
+    if (target.tagName.toLowerCase() === 'form') {
+        actionType = 'submit';
+        formElement = target;
+    } else if (target.closest('form') && (target.type === 'submit' || target.tagName.toLowerCase() === 'button')) {
+        actionType = 'submit';
+        formElement = target.closest('form');
+    } else if (target.tagName.toLowerCase() === 'a' || target.closest('a')) {
+        actionType = 'navigate';
+    }
+    
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Lanjutkan!',
+        cancelButtonText: 'Batal',
+        customClass: {
+            confirmButton: 'btn btn-danger px-4 me-2 shadow-sm',
+            cancelButton: 'btn btn-secondary px-4 shadow-sm'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (actionType === 'submit' && formElement) {
+                formElement.submit();
+            } else if (actionType === 'navigate') {
+                const anchor = target.tagName.toLowerCase() === 'a' ? target : target.closest('a');
+                if (anchor && anchor.href) {
+                    window.location.href = anchor.href;
+                }
+            }
+        }
+    });
+}
+
