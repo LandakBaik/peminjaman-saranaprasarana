@@ -4,6 +4,7 @@ use App\Utils\Router;
 
 // Universal Routes
 Router::get('dashboard', [\App\Controllers\DashboardController::class, 'index']);
+Router::get('dashboard-stats-details', [\App\Controllers\DashboardController::class, 'getStatsDetails'], ['user', 'admin', 'staff']);
 Router::get('detail-profil', [\App\Controllers\PageController::class, 'detailProfil']);
 Router::get('detail-profil-edit', [\App\Controllers\PageController::class, 'detailProfilEdit']);
 Router::get('ketentuan', [\App\Controllers\PageController::class, 'ketentuan']);

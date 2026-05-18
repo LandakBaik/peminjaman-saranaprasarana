@@ -12,6 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ================= CREATE =================
     if ($action == 'create') {
+        // CEGAH DOUBLE REQUEST (Session-based backend guard - 15 Seconds Cooldown)
+        if (
+            isset($_SESSION['last_barang_submit']) &&
+            (time() - $_SESSION['last_barang_submit']) < 15
+        ) {
+            header("Location: ../index.php?page=ruangan-barang&error=duplicate_request");
+            exit();
+        }
+        $_SESSION['last_barang_submit'] = time();
 
         $barang->id_barang = $_POST['id_barang'] ?? null;
         $barang->id_ruangan = $_POST['id_ruangan'];

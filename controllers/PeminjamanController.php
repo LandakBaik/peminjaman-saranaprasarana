@@ -42,8 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
    
     if ($action == 'create') {
+        // CEGAH DOUBLE REQUEST (Session-based backend guard - 15 Seconds Cooldown)
+        if (
+            isset($_SESSION['last_peminjaman_submit']) &&
+            (time() - $_SESSION['last_peminjaman_submit']) < 15
+        ) {
+            $roomId = $_POST['ruangan'] ?? '';
+            if (!empty($roomId)) {
+                header("Location: ../index.php?page=pinjam&id_ruangan={$roomId}&error=duplicate_request");
+            } else {
+                header("Location: ../index.php?page=peminjaman-saya&error=duplicate_request");
+            }
+            exit();
+        }
+        $_SESSION['last_peminjaman_submit'] = time();
 
-       
         if (!isset($_SESSION['user'])) {
             die("Harus login!");
         }

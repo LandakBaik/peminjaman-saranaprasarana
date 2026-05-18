@@ -27,7 +27,7 @@ class Peminjaman
         $this->conn = $db;
     }
 
-    // 🔹 READ ALL
+    // READ ALL
     public function readAll($isHistory = false)
     {
         $query = "SELECT p.*,
@@ -58,7 +58,7 @@ class Peminjaman
         return $stmt;
     }
 
-    // 🔹 READ BY USER
+    // ðŸ”¹ READ BY USER
     public function readByUser($id_pengguna, $isHistory = false)
     {
         $query = "SELECT p.*,
@@ -243,7 +243,7 @@ class Peminjaman
 
         return $stmt->execute();
     }
-    // 🔹 GET BY ID (dengan detail barang)
+    // ðŸ”¹ GET BY ID (dengan detail barang)
     public function getById($id_peminjaman)
     {
         // Data peminjaman
@@ -271,7 +271,7 @@ class Peminjaman
         return $peminjaman;
     }
 
-    // 🔹 UPDATE STATUS
+    // ðŸ”¹ UPDATE STATUS
     public function updateStatus()
     {
         $query = "UPDATE peminjaman 
@@ -288,7 +288,7 @@ class Peminjaman
         return $stmt->execute();
     }
 
-    // 🔹 UPDATE STATUS ONLY
+    // ðŸ”¹ UPDATE STATUS ONLY
     public function updateStatusOnly()
     {
         $query = "UPDATE peminjaman 
@@ -321,7 +321,7 @@ class Peminjaman
         return $stmt->execute();
     }
 
-    // 🔹 DELETE
+    // ðŸ”¹ DELETE
     public function delete()
     {
         // Detail peminjaman akan terhapus otomatis jika ada ON DELETE CASCADE di database.
@@ -354,7 +354,7 @@ class Peminjaman
             $filterQuery = " AND YEAR(p.tanggal_dibuat) = YEAR(CURDATE())";
         }
 
-        $baseQuery = "SELECT COUNT(*) FROM peminjaman p ";
+        $baseQuery = "SELECT COUNT(DISTINCT p.id_peminjaman) FROM peminjaman p ";
         $joinQuery = "";
         $whereQuery = " WHERE 1=1 " . $filterQuery;
 
@@ -396,6 +396,64 @@ class Peminjaman
         $stats['terlambat'] = $stmt->fetchColumn();
 
         return $stats;
+    }
+
+    public function getStatsDetailsList($role, $id_pengguna = null, $filter = 'daily', $statusType = 'total')
+    {
+        $filterQuery = "";
+        if ($filter === 'daily') {
+            $filterQuery = "DATE(p.tanggal_dibuat) = CURDATE()";
+        } elseif ($filter === 'weekly') {
+            $filterQuery = "p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)";
+        } elseif ($filter === 'monthly') {
+            $filterQuery = "p.tanggal_dibuat >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)";
+        } elseif ($filter === 'yearly') {
+            $filterQuery = "YEAR(p.tanggal_dibuat) = YEAR(CURDATE())";
+        }
+
+        $query = "SELECT p.id_peminjaman, p.tanggal_dibuat, p.waktu_mulai, p.waktu_selesai, p.keperluan, p.status, p.jenis_peminjaman,
+                         u.nama as peminjam,
+                         GROUP_CONCAT(DISTINCT CONCAT(b.nama_barang, ' (', dp.kuantitas, ')') SEPARATOR ', ') as items,
+                         MAX(r.nama_ruangan) as nama_ruangan
+                  FROM peminjaman p
+                  LEFT JOIN pengguna u ON p.id_pengguna = u.id_pengguna
+                  LEFT JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  LEFT JOIN barang b ON dp.id_barang = b.id_barang
+                  LEFT JOIN ruangan r ON b.id_ruangan = r.id_ruangan ";
+
+        $whereConditions = ["1=1"];
+        if ($filterQuery) {
+            $whereConditions[] = $filterQuery;
+        }
+
+        if ($role === 'user') {
+            $whereConditions[] = "p.id_pengguna = :id_pengguna";
+        } elseif ($role === 'staff') {
+            $query .= " INNER JOIN detail_peminjaman dp2 ON p.id_peminjaman = dp2.id_peminjaman 
+                        INNER JOIN barang b2 ON dp2.id_barang = b2.id_barang 
+                        INNER JOIN ruangan r2 ON b2.id_ruangan = r2.id_ruangan ";
+            $whereConditions[] = "r2.id_pengguna = :id_pengguna";
+        }
+
+        // Filter based on statusType
+        if ($statusType === 'disetujui') {
+            $whereConditions[] = "p.status IN ('Disetujui', 'Dipinjam', 'Selesai')";
+        } elseif ($statusType === 'ditolak') {
+            $whereConditions[] = "p.status = 'Ditolak'";
+        } elseif ($statusType === 'terlambat') {
+            $whereConditions[] = "(p.status = 'Terlambat' OR (p.status IN ('Dipinjam', 'Disetujui', 'Approved') AND p.waktu_selesai < NOW()))";
+        }
+
+        $query .= " WHERE " . implode(" AND ", $whereConditions);
+        $query .= " GROUP BY p.id_peminjaman ORDER BY p.tanggal_dibuat DESC";
+
+        $stmt = $this->conn->prepare($query);
+        if ($role !== 'admin') {
+            $stmt->bindParam(':id_pengguna', $id_pengguna);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function getRecent($role, $id_pengguna = null, $limit = 5, $filter = 'daily')
@@ -447,7 +505,7 @@ class Peminjaman
         $labels = [];
         $values = [];
 
-        // DAILY → per 3 jam
+        // DAILY â†’ per 3 jam
         if ($filter === 'daily') {
 
             $hours = [0, 3, 6, 9, 12, 15, 18, 21];
@@ -483,7 +541,7 @@ class Peminjaman
             }
         }
 
-        // WEEKLY → 7 hari terakhir
+        // WEEKLY â†’ 7 hari terakhir
         elseif ($filter === 'weekly') {
 
             for ($i = 6; $i >= 0; $i--) {
@@ -500,7 +558,7 @@ class Peminjaman
             }
         }
 
-        // MONTHLY → Week 1-4
+        // MONTHLY â†’ Week 1-4
         elseif ($filter === 'monthly') {
 
             for ($i = 3; $i >= 0; $i--) {
@@ -515,7 +573,7 @@ class Peminjaman
             }
         }
 
-        // YEARLY → Jan-Dec
+        // YEARLY â†’ Jan-Dec
         elseif ($filter === 'yearly') {
 
             $year = date('Y');
@@ -547,7 +605,7 @@ class Peminjaman
 
     private function getCountByDate($role, $id_pengguna, $date)
     {
-        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        $query = "SELECT COUNT(DISTINCT p.id_peminjaman) FROM peminjaman p ";
         if ($role === 'staff') {
             $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
                         INNER JOIN barang b ON dp.id_barang = b.id_barang 
@@ -569,7 +627,7 @@ class Peminjaman
 
     private function getCountByWeek($role, $id_pengguna, $weeksAgo)
     {
-        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        $query = "SELECT COUNT(DISTINCT p.id_peminjaman) FROM peminjaman p ";
         if ($role === 'staff') {
             $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
                         INNER JOIN barang b ON dp.id_barang = b.id_barang 
@@ -591,7 +649,7 @@ class Peminjaman
 
     private function getCountByMonth($role, $id_pengguna, $monthYear)
     {
-        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        $query = "SELECT COUNT(DISTINCT p.id_peminjaman) FROM peminjaman p ";
         if ($role === 'staff') {
             $query .= " INNER JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman 
                         INNER JOIN barang b ON dp.id_barang = b.id_barang 
@@ -613,7 +671,7 @@ class Peminjaman
 
     private function getCountByRange($role, $id_pengguna, $start, $end)
     {
-        $query = "SELECT COUNT(*) FROM peminjaman p ";
+        $query = "SELECT COUNT(DISTINCT p.id_peminjaman) FROM peminjaman p ";
 
         if ($role === 'staff') {
 

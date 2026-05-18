@@ -57,6 +57,10 @@ window.alert = function(message) {
 // Global Helper for Replacement of native confirm()
 function confirmAction(event, message) {
     event.preventDefault();
+    
+    // Prevent double confirmation trigger
+    if (window.isActionConfirming) return;
+    
     const target = event.currentTarget || event.target;
     
     let actionType = 'navigate';
@@ -86,6 +90,8 @@ function confirmAction(event, message) {
         buttonsStyling: false
     }).then((result) => {
         if (result.isConfirmed) {
+            window.isActionConfirming = true;
+            Swal.showLoading();
             if (actionType === 'submit' && formElement) {
                 formElement.submit();
             } else if (actionType === 'navigate') {
@@ -97,4 +103,28 @@ function confirmAction(event, message) {
         }
     });
 }
+
+// Global Double Submission Prevention for All Native Forms
+document.addEventListener('submit', function(e) {
+    if (e.defaultPrevented) return;
+    
+    const form = e.target;
+    
+    // If the form is already submitting, cancel the subsequent submit event synchronously!
+    if (form.dataset.submitting === 'true') {
+        e.preventDefault();
+        return;
+    }
+    
+    form.dataset.submitting = 'true';
+    
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) {
+        // Use setTimeout to allow any custom client-side validation to run and browser events to settle
+        setTimeout(() => {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengirim...';
+        }, 0);
+    }
+});
 

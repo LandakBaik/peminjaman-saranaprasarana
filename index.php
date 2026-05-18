@@ -10,6 +10,13 @@ require 'middleware/role.php';
 
 $role = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
 $page = $_GET['page'] ?? 'dashboard';
+
+// Bypass HTML layout for API/AJAX requests
+if ($page === 'dashboard-stats-details') {
+    require 'routes/web.php';
+    \App\Utils\Router::dispatch($page);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -46,7 +53,7 @@ $page = $_GET['page'] ?? 'dashboard';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
-    <script src="js/scripts.js"></script>
+    <script src="js/scripts.js?v=<?= time() ?>"></script>
     <script src="js/temperature.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"

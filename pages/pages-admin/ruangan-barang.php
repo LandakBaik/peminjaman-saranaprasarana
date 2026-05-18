@@ -16,6 +16,14 @@
                 </div>
             <?php endif; ?>
 
+            <?php if (isset($_GET['error']) && $_GET['error'] === 'duplicate_request'): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>⚠️ Permintaan Ganda Dideteksi!</strong>
+                    Permintaan Anda terkirim ganda dalam waktu singkat dan telah dibatalkan secara otomatis demi mencegah duplikasi data.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
             <!-- Action -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="text-muted">
