@@ -321,7 +321,7 @@ class Peminjaman
         return $stmt->execute();
     }
 
-    // ðŸ”¹ DELETE
+    // 🔽 DELETE
     public function delete()
     {
         // Detail peminjaman akan terhapus otomatis jika ada ON DELETE CASCADE di database.
@@ -338,6 +338,40 @@ class Peminjaman
 
         return $stmt->execute();
     }
+
+    public function getByIds($ids)
+    {
+        if (empty($ids)) {
+            return null;
+        }
+        $inQuery = implode(',', array_fill(0, count($ids), '?'));
+
+        $query = "SELECT p.*,
+                         u.nama as peminjam,
+                         s.nama as staff_approval,
+                         MAX(r.nama_ruangan) as nama_ruangan,
+                         GROUP_CONCAT(CONCAT(b.nama_barang, ' (', dp.kuantitas, ')') SEPARATOR ', ') as nama_barang
+                  FROM peminjaman p
+                  LEFT JOIN pengguna u ON p.id_pengguna = u.id_pengguna
+                  LEFT JOIN pengguna s ON p.approved_by = s.id_pengguna
+                  LEFT JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  LEFT JOIN barang b ON dp.id_barang = b.id_barang
+                  LEFT JOIN ruangan r ON b.id_ruangan = r.id_ruangan
+                  WHERE p.id_peminjaman IN ($inQuery)
+                  GROUP BY p.id_peminjaman
+                  ORDER BY p.tanggal_dibuat DESC";
+
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($ids as $k => $id) {
+            $stmt->bindValue(($k + 1), $id);
+        }
+
+        $stmt->execute();
+
+        return $stmt;
+    }
+
 
     public function getStats($role, $id_pengguna = null, $filter = 'daily')
     {

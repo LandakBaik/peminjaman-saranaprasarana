@@ -266,5 +266,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit();
     }
+
+    // EXPORT RIWAYAT (ADMIN)
+    elseif ($action == 'export') {
+        if (!empty($_POST['id_peminjaman']) && is_array($_POST['id_peminjaman'])) {
+            $ids = $_POST['id_peminjaman'];
+            $stmt = $peminjaman->getByIds($ids);
+
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Riwayat_Peminjaman.xls");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            echo "<table border='1'>";
+            echo "<tr>";
+            echo "<th>Kode Peminjaman</th>";
+            echo "<th>Peminjam</th>";
+            echo "<th>Jenis Peminjaman</th>";
+            echo "<th>Nama Ruangan / Barang</th>";
+            echo "<th>Waktu Mulai</th>";
+            echo "<th>Waktu Selesai</th>";
+            echo "<th>Tanggal Pengajuan</th>";
+            echo "<th>Status</th>";
+            echo "<th>Disetujui Oleh</th>";
+            echo "</tr>";
+
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $tgl = date('dmY', strtotime($row['tanggal_dibuat']));
+                $kode = "PJM-" . $tgl . "-" . $row['id_peminjaman'];
+                $item_detail = ($row['jenis_peminjaman'] == 'ruangan') ? ($row['nama_ruangan'] ?? '-') : ($row['nama_barang'] ?? '-');
+
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($kode) . "</td>";
+                echo "<td>" . htmlspecialchars($row['peminjam'] ?? '-') . "</td>";
+                echo "<td>" . htmlspecialchars(ucfirst($row['jenis_peminjaman'] ?? '-')) . "</td>";
+                echo "<td>" . htmlspecialchars($item_detail) . "</td>";
+                echo "<td>" . htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_mulai']))) . "</td>";
+                echo "<td>" . htmlspecialchars(date('d M Y - H:i', strtotime($row['waktu_selesai']))) . "</td>";
+                echo "<td>" . htmlspecialchars(date('d M Y - H:i', strtotime($row['tanggal_dibuat']))) . "</td>";
+                echo "<td>" . htmlspecialchars(ucfirst($row['status'] ?? '-')) . "</td>";
+                echo "<td>" . htmlspecialchars($row['staff_approval'] ?? '-') . "</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            exit();
+        } else {
+            header("Location: ../index.php?page=riwayat-peminjaman&error=no_items_selected");
+            exit();
+        }
+    }
 }
 ?>

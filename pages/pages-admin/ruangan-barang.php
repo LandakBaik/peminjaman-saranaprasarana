@@ -234,7 +234,7 @@
 
                                         <div class="col-md-6">
                                             <label class="form-label">Kapasitas</label>
-                                            <input type="number" class="form-control" name="kapasitas" required>
+                                            <input type="number" min="0" class="form-control" name="kapasitas" required>
                                         </div>
                                     </div>
 
@@ -330,7 +330,7 @@
 
                             <div class="mb-3">
                                 <label>Kapasitas</label>
-                                <input type="number" name="kapasitas" id="edit_kapasitas" class="form-control">
+                                <input type="number" min="0" name="kapasitas" id="edit_kapasitas" class="form-control">
                             </div>
 
                             <div class="mb-3">

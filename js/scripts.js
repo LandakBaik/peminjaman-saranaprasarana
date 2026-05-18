@@ -29,6 +29,11 @@ window.addEventListener('DOMContentLoaded', event => {
 // SWEETALERT2 GLOBAL OVERRIDES & HELPERS
 // ==========================================
 
+// Ensure SweetAlert2 container is always on top of modals (which have z-index: 9999)
+const swalStyle = document.createElement('style');
+swalStyle.textContent = '.swal2-container { z-index: 100000 !important; }';
+document.head.appendChild(swalStyle);
+
 // Global Override for Native alert()
 window.alert = function(message) {
     let icon = 'info';
