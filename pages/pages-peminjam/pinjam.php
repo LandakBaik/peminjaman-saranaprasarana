@@ -582,16 +582,10 @@
         }
 
         // =========================
-        // VALIDASI SUBMIT & CEK DOUBLE SUBMISSION
+        // VALIDASI SUBMIT
         // =========================
         form.addEventListener('submit', function(e) {
             if (e.defaultPrevented) return;
-
-            // Synchronous submit state locking
-            if (form.dataset.submitting === 'true') {
-                e.preventDefault();
-                return;
-            }
 
             if (jenisPeminjaman.value === 'barang') {
 
@@ -617,18 +611,6 @@
                     alert('❌ Salah satu barang yang dipilih melebihi stok tersedia pada rentang waktu tersebut.');
                     return;
                 }
-            }
-
-            form.dataset.submitting = 'true';
-
-            // Cegah double submission akibat double click pada server hosting yang lambat
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                // Gunakan setTimeout agar form tetap ter-submit secara native sebelum tombol di-disable
-                setTimeout(() => {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengirim...';
-                }, 0);
             }
         });
 

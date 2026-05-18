@@ -122,8 +122,13 @@ document.addEventListener('submit', function(e) {
     if (submitBtn) {
         // Use setTimeout to allow any custom client-side validation to run and browser events to settle
         setTimeout(() => {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengirim...';
+            submitBtn.style.pointerEvents = 'none';
+            submitBtn.classList.add('disabled');
+            if (submitBtn.tagName.toLowerCase() === 'button') {
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengirim...';
+            } else {
+                submitBtn.value = 'Mengirim...';
+            }
         }, 0);
     }
 });
