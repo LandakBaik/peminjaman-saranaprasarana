@@ -11,6 +11,7 @@ class PageController
 
     public function __construct()
     {
+        // Koneksi database
         $database = new Database();
         $this->db = $database->getConnection();
     }
@@ -19,9 +20,17 @@ class PageController
     {
         $userId = $_SESSION['user']['id'] ?? 0;
 
-        $query = "SELECT * FROM detail_profil WHERE id_pengguna = :id LIMIT 1";
+        // Ambil data profil
+        $query = "
+            SELECT * FROM detail_profil 
+            WHERE id_pengguna = :id 
+            LIMIT 1
+        ";
+
         $stmt = $this->db->prepare($query);
+
         $stmt->bindParam(":id", $userId);
+
         $stmt->execute();
 
         $profil = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -37,9 +46,17 @@ class PageController
     {
         $userId = $_SESSION['user']['id'] ?? 0;
 
-        $query = "SELECT * FROM detail_profil WHERE id_pengguna = :id LIMIT 1";
+        // Ambil data profil
+        $query = "
+            SELECT * FROM detail_profil 
+            WHERE id_pengguna = :id 
+            LIMIT 1
+        ";
+
         $stmt = $this->db->prepare($query);
+
         $stmt->bindParam(":id", $userId);
+
         $stmt->execute();
 
         $profil = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -59,14 +76,20 @@ class PageController
     public function selectRoom()
     {
         $ruanganModel = new \App\Models\Ruangan($this->db);
+
         $stmt = $ruanganModel->readAll();
 
         $labs = [];
         $nonLabs = [];
 
+        // Pisahkan laboratorium dan non laboratorium
         while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (strtolower($r['tipe_ruangan'] ?? '') === 'laboratorium') {
+
+            if (
+                strtolower($r['tipe_ruangan'] ?? '') === 'laboratorium'
+            ) {
                 $labs[] = $r;
+
             } else {
                 $nonLabs[] = $r;
             }
@@ -79,11 +102,13 @@ class PageController
     {
         $id_ruangan = $_GET['id_ruangan'] ?? null;
 
+        // Validasi ruangan
         if (!$id_ruangan) {
             die("Ruangan tidak valid (missing id_ruangan)");
         }
 
         $ruanganModel = new \App\Models\Ruangan($this->db);
+
         $ruangan = $ruanganModel->getById($id_ruangan);
 
         if (!$ruangan) {
@@ -92,11 +117,16 @@ class PageController
 
         $roomName = $ruangan['nama_ruangan'];
 
+        // Data barang ruangan
         $barangModel = new \App\Models\Barang($this->db);
+
         $barangList = $barangModel->getByRuangan($id_ruangan);
 
+        // Tanggal booking
         $peminjamanModel = new \App\Models\Peminjaman($this->db);
-        $bookedDates = $peminjamanModel->getApprovedDatesByRoom($id_ruangan);
+
+        $bookedDates = $peminjamanModel
+            ->getApprovedDatesByRoom($id_ruangan);
 
         include 'pages/pages-peminjam/pinjam.php';
     }
@@ -104,9 +134,10 @@ class PageController
     public function peminjamanSaya()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $userId = $_SESSION['user']['id'] ?? 0;
 
-        // Update status terlambat sebelum mengambil data
+        // Update status terlambat
         $peminjaman->updateLateStatus($userId);
 
         $stmt = $peminjaman->readByUser($userId);
@@ -117,9 +148,10 @@ class PageController
     public function riwayatPeminjaman()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $userId = $_SESSION['user']['id'] ?? 0;
 
-        // Ambil riwayat
+        // Ambil riwayat peminjaman
         $stmt = $peminjaman->readByUser($userId, true);
 
         include 'pages/pages-peminjam/riwayat-peminjaman.php';
@@ -128,7 +160,9 @@ class PageController
     public function approvePeminjaman()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $userId = $_SESSION['user']['id'] ?? 0;
+
         $stmt = $peminjaman->readByStaff($userId);
 
         include 'pages/pages-staff/approve.php';
@@ -137,7 +171,9 @@ class PageController
     public function pengembalian()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $userId = $_SESSION['user']['id'] ?? 0;
+
         $stmt = $peminjaman->readByStaff($userId);
 
         include 'pages/pages-staff/pengembalian.php';
@@ -146,7 +182,9 @@ class PageController
     public function riwayatPeminjamanStaff()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $userId = $_SESSION['user']['id'] ?? 0;
+
         $stmt = $peminjaman->readByStaff($userId, true);
 
         include 'pages/pages-staff/riwayat-peminjaman.php';
@@ -155,6 +193,7 @@ class PageController
     public function ruanganBarang()
     {
         $ruangan = new \App\Models\Ruangan($this->db);
+
         $stmt = $ruangan->readAll();
 
         include 'pages/pages-admin/ruangan-barang.php';
@@ -163,7 +202,12 @@ class PageController
     public function daftarAkun()
     {
         $userModel = new \App\Models\User($this->db);
-        $stmt = $userModel->readByRoles(['user', 'admin', 'staff']);
+
+        $stmt = $userModel->readByRoles([
+            'user',
+            'admin',
+            'staff'
+        ]);
 
         include 'pages/pages-admin/daftar-akun.php';
     }
@@ -171,6 +215,7 @@ class PageController
     public function akunStaff()
     {
         $userModel = new \App\Models\User($this->db);
+
         $stmt = $userModel->readByRoles(['staff']);
 
         include 'pages/pages-admin/akun-staff.php';
@@ -179,6 +224,7 @@ class PageController
     public function riwayatPeminjamanAdmin()
     {
         $peminjaman = new \App\Models\Peminjaman($this->db);
+
         $stmt = $peminjaman->readAll(true);
 
         include 'pages/pages-admin/riwayat-peminjaman.php';

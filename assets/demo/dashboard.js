@@ -1,17 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize charts
+
   App.lineChart.init();
 
+  // Update dashboard
   function updateDashboard() {
+
     if (!window.dashboardStats) return;
 
-    // Update Line Chart (Trend)
+    // Update line chart
     if (window.dashboardStats.trend) {
+
       const { labels, values } = window.dashboardStats.trend;
+
       App.lineChart.update(labels, values);
     }
 
-    // Update KPI and Doughnut Chart
+    // Data KPI
     const kpiData = [
       window.dashboardStats.total || 0,
       window.dashboardStats.disetujui || 0,
@@ -21,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     App.kpi.update(kpiData);
 
-    // Doughnut chart only shows the breakdown (excluding total)
+    // Update doughnut chart
     App.doughnutChart.render([
       window.dashboardStats.disetujui || 0,
       window.dashboardStats.ditolak || 0,
@@ -29,17 +33,17 @@ document.addEventListener("DOMContentLoaded", function () {
     ]);
   }
 
-  // Initial update
+  // Render awal
   updateDashboard();
 
-  // Handle filter changes (handled by page reload in dashboard.php, 
-  // but we keep the listener if needed for future SPA-like behavior)
+  // Listener filter
   const filter = document.getElementById("filterType");
+
   if (filter) {
     filter.addEventListener("change", function () {
-      // In current implementation, dashboard.php reloads the page on change
-      // so this might not be strictly necessary, but good for completeness
-      // updateDashboard(); 
+
+      // updateDashboard();
+
     });
   }
-});
+});

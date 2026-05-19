@@ -3,8 +3,11 @@ window.App = window.App || {};
 window.App.lineChart = {
   chart: null,
 
+  // Inisialisasi chart
   init: function () {
+
     const canvas = document.getElementById("myAreaChart");
+
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -30,11 +33,14 @@ window.App.lineChart = {
     });
   },
 
+  // Update data chart
   update: function (labels, values) {
+
     if (!this.chart) return;
 
     this.chart.data.labels = labels;
     this.chart.data.datasets[0].data = values;
+
     this.chart.update();
   },
 };

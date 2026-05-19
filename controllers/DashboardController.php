@@ -9,60 +9,108 @@ class DashboardController
 {
     public function index()
     {
-        // Ensure session and role are available
-        $currentRole = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
-        $userId = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+        // Ambil role dan user
+        $currentRole = isset($_SESSION['user']['role'])
+            ? strtolower($_SESSION['user']['role'])
+            : '';
 
-        // Filter logic
+        $userId = isset($_SESSION['user']['id'])
+            ? $_SESSION['user']['id']
+            : null;
+
+        // Filter dashboard
         $activeFilter = $_GET['filter'] ?? 'daily';
-        $allowedFilters = ['daily', 'weekly', 'monthly', 'yearly'];
+
+        $allowedFilters = [
+            'daily',
+            'weekly',
+            'monthly',
+            'yearly'
+        ];
+
         if (!in_array($activeFilter, $allowedFilters)) {
             $activeFilter = 'daily';
         }
 
+        // Koneksi database
         $database = new Database();
         $db = $database->getConnection();
+
         $peminjamanModel = new Peminjaman($db);
 
-        // Fetch Stats based on role
-        $stats = $peminjamanModel->getStats($currentRole, $userId, $activeFilter);
+        // Data statistik
+        $stats = $peminjamanModel->getStats(
+            $currentRole,
+            $userId,
+            $activeFilter
+        );
 
-        // Fetch Recent Peminjaman based on role
-        $recent = $peminjamanModel->getRecent($currentRole, $userId, 5, $activeFilter);
+        // Data peminjaman terbaru
+        $recent = $peminjamanModel->getRecent(
+            $currentRole,
+            $userId,
+            5,
+            $activeFilter
+        );
 
-        // Fetch Trend Data for Line Chart
-        $trendData = $peminjamanModel->getTrendData($currentRole, $userId, $activeFilter);
+        // Data trend chart
+        $trendData = $peminjamanModel->getTrendData(
+            $currentRole,
+            $userId,
+            $activeFilter
+        );
 
-        // Load the view
+        // Load halaman dashboard
         include 'pages/dashboard.php';
     }
 
     public function getStatsDetails()
     {
-        // Set header to JSON
+        // Response JSON
         header('Content-Type: application/json');
 
-        // Ensure session and role are available
-        $currentRole = isset($_SESSION['user']['role']) ? strtolower($_SESSION['user']['role']) : '';
-        $userId = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+        // Ambil role dan user
+        $currentRole = isset($_SESSION['user']['role'])
+            ? strtolower($_SESSION['user']['role'])
+            : '';
 
-        // Filter logic
+        $userId = isset($_SESSION['user']['id'])
+            ? $_SESSION['user']['id']
+            : null;
+
+        // Filter dashboard
         $activeFilter = $_GET['filter'] ?? 'daily';
-        $allowedFilters = ['daily', 'weekly', 'monthly', 'yearly'];
+
+        $allowedFilters = [
+            'daily',
+            'weekly',
+            'monthly',
+            'yearly'
+        ];
+
         if (!in_array($activeFilter, $allowedFilters)) {
             $activeFilter = 'daily';
         }
 
+        // Status detail
         $statusType = $_GET['status'] ?? 'total';
 
+        // Koneksi database
         $database = new Database();
         $db = $database->getConnection();
+
         $peminjamanModel = new Peminjaman($db);
 
-        // Fetch the detailed list
-        $list = $peminjamanModel->getStatsDetailsList($currentRole, $userId, $activeFilter, $statusType);
+        // Ambil detail statistik
+        $list = $peminjamanModel->getStatsDetailsList(
+            $currentRole,
+            $userId,
+            $activeFilter,
+            $statusType
+        );
 
         echo json_encode($list);
+
         exit();
     }
 }

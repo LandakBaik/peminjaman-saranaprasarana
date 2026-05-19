@@ -1,7 +1,10 @@
 window.App = window.App || {};
 
 window.App.kpi = {
+
+  // Update data KPI
   update: function (data) {
+
     const [total, disetujui, ditolak, terlambat] = data;
 
     const elTotal = document.getElementById("totalPinjam");

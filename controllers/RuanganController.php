@@ -1,97 +1,147 @@
 <?php
 session_start();
+
 require_once '../config/Autoloader.php';
 
+// Koneksi database
 $database = new \App\Config\Database();
 $db = $database->getConnection();
+
 $ruangan = new \App\Models\Ruangan($db);
 
 $action = $_GET['action'] ?? '';
 
-// ================= FUNCTION UPLOAD =================
+
+// Upload foto
 function uploadFoto($file)
 {
     $targetDir = "../uploads/";
 
+    // Buat folder upload
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0777, true);
     }
 
     $allowedExt = ['jpg', 'jpeg', 'png'];
-    $allowedMime = ['image/jpeg', 'image/png'];
-    $maxSize = 2 * 1024 * 1024; // 2MB
 
-    $fileExt = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    $allowedMime = [
+        'image/jpeg',
+        'image/png'
+    ];
 
-    // cek ekstensi
+    $maxSize = 2 * 1024 * 1024;
+
+    $fileExt = strtolower(
+        pathinfo($file["name"], PATHINFO_EXTENSION)
+    );
+
+    // Validasi ekstensi
     if (!in_array($fileExt, $allowedExt)) {
         return false;
     }
 
-    // cek ukuran
+    // Validasi ukuran file
     if ($file["size"] > $maxSize) {
         return false;
     }
 
-    // cek MIME asli
+    // Validasi MIME type
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime = finfo_file($finfo, $file["tmp_name"]);
+
+    $mime = finfo_file(
+        $finfo,
+        $file["tmp_name"]
+    );
+
     finfo_close($finfo);
 
     if (!in_array($mime, $allowedMime)) {
         return false;
     }
 
-    // generate nama file aman
-    $fileName = time() . '_' . bin2hex(random_bytes(5)) . '.' . $fileExt;
+    // Generate nama file
+    $fileName =
+        time() . '_' .
+        bin2hex(random_bytes(5)) .
+        '.' . $fileExt;
+
     $targetFile = $targetDir . $fileName;
 
-    if (move_uploaded_file($file["tmp_name"], $targetFile)) {
+    if (
+        move_uploaded_file(
+            $file["tmp_name"],
+            $targetFile
+        )
+    ) {
         return "uploads/" . $fileName;
     }
 
     return false;
 }
 
-// ================= REQUEST =================
+
+// Request POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-
-
-    // ================= CREATE =================
+    // Create ruangan
     if ($action == 'create') {
-        // CEGAH DOUBLE REQUEST (Session-based backend guard - 15 Seconds Cooldown)
+
+        // Cegah double request
         if (
             isset($_SESSION['last_ruangan_submit']) &&
             (time() - $_SESSION['last_ruangan_submit']) < 15
         ) {
+
             header("Location: ../index.php?page=ruangan-barang&error=duplicate_request");
+
             exit();
         }
+
         $_SESSION['last_ruangan_submit'] = time();
 
-        $allowedTipe = ['laboratorium', 'non-laboratorium'];
+        // Validasi tipe ruangan
+        $allowedTipe = [
+            'laboratorium',
+            'non-laboratorium'
+        ];
+
         $tipe = $_POST['tipe_ruangan'] ?? '';
+
         if (empty($tipe)) {
             $tipe = $_POST['tipe_lama'] ?? '';
         }
+
         if (!in_array($tipe, $allowedTipe)) {
+
             header("Location: ../index.php?page=ruangan-barang&error=invalid_tipe");
+
             exit();
         }
 
-        $ruangan->nama_ruangan = $_POST['nama_ruangan'];
-        $ruangan->kapasitas = $_POST['kapasitas'];
-        $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
-        $ruangan->id_pengguna = $_SESSION['user']["id"] ?? null;
+        // Data ruangan
+        $ruangan->nama_ruangan =
+            $_POST['nama_ruangan'];
 
-        // FOTO OPSIONAL
+        $ruangan->kapasitas =
+            $_POST['kapasitas'];
+
+        $ruangan->tipe_ruangan =
+            $_POST['tipe_ruangan'];
+
+        $ruangan->id_pengguna =
+            $_SESSION['user']["id"] ?? null;
+
+        // Upload foto opsional
         if (!empty($_FILES['foto_ruangan']['name'])) {
 
-            $upload = uploadFoto($_FILES['foto_ruangan']);
+            $upload = uploadFoto(
+                $_FILES['foto_ruangan']
+            );
 
             if (!$upload) {
+
                 header("Location: ../index.php?page=ruangan-barang&error=upload_failed");
+
                 exit();
             }
 
@@ -99,41 +149,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
-            // jika kosong
             $ruangan->foto_ruangan = null;
         }
 
+        // Simpan ruangan
         if ($ruangan->create()) {
+
             header("Location: ../index.php?page=ruangan-barang&success=added");
+
         } else {
+
             header("Location: ../index.php?page=ruangan-barang&error=add_failed");
         }
 
         exit();
     }
 
-    // ================= UPDATE =================
+    // Update ruangan
     elseif ($action == 'update') {
-        $allowedTipe = ['laboratorium', 'non-laboratorium'];
+
+        // Validasi tipe ruangan
+        $allowedTipe = [
+            'laboratorium',
+            'non-laboratorium'
+        ];
+
         $tipe = $_POST['tipe_ruangan'] ?? '';
+
         if (empty($tipe)) {
             $tipe = $_POST['tipe_lama'] ?? '';
         }
+
         if (!in_array($tipe, $allowedTipe)) {
+
             header("Location: ../index.php?page=ruangan-barang&error=invalid_tipe");
+
             exit();
         }
 
-        $ruangan->id_ruangan = $_POST['id_ruangan'];
-        $ruangan->nama_ruangan = $_POST['nama_ruangan'];
-        $ruangan->kapasitas = $_POST['kapasitas'];
-        $ruangan->tipe_ruangan = $_POST['tipe_ruangan'];
-        $ruangan->id_pengguna = $_SESSION['user']['id'] ?? null;
+        // Data ruangan
+        $ruangan->id_ruangan =
+            $_POST['id_ruangan'];
 
-        // jika upload foto baru
+        $ruangan->nama_ruangan =
+            $_POST['nama_ruangan'];
+
+        $ruangan->kapasitas =
+            $_POST['kapasitas'];
+
+        $ruangan->tipe_ruangan =
+            $_POST['tipe_ruangan'];
+
+        $ruangan->id_pengguna =
+            $_SESSION['user']['id'] ?? null;
+
+        // Upload foto baru
         if (!empty($_FILES['foto_ruangan']['name'])) {
 
-            // hapus foto lama jika ada
+            // Hapus foto lama
             if (
                 !empty($_POST['foto_lama']) &&
                 file_exists("../" . $_POST['foto_lama'])
@@ -141,10 +214,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unlink("../" . $_POST['foto_lama']);
             }
 
-            $upload = uploadFoto($_FILES['foto_ruangan']);
+            $upload = uploadFoto(
+                $_FILES['foto_ruangan']
+            );
 
             if (!$upload) {
+
                 header("Location: ../index.php?page=ruangan-barang&error=upload_failed");
+
                 exit();
             }
 
@@ -152,31 +229,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
-            // pakai foto lama
-            $ruangan->foto_ruangan = $_POST['foto_lama'] ?? null;
+            // Gunakan foto lama
+            $ruangan->foto_ruangan =
+                $_POST['foto_lama'] ?? null;
         }
 
+        // Update data
         if ($ruangan->update()) {
+
             header("Location: ../index.php?page=ruangan-barang&success=updated");
+
         } else {
+
             header("Location: ../index.php?page=ruangan-barang&error=update_failed");
         }
 
         exit();
     }
 
-    // ================= EXPORT =================
+    // Export ruangan
     elseif ($action == 'export') {
-        if (!empty($_POST['id_ruangan']) && is_array($_POST['id_ruangan'])) {
+
+        if (
+            !empty($_POST['id_ruangan']) &&
+            is_array($_POST['id_ruangan'])
+        ) {
+
             $ids = $_POST['id_ruangan'];
+
             $stmt = $ruangan->getByIds($ids);
 
+            // Header export excel
             header("Content-Type: application/vnd.ms-excel");
+
             header("Content-Disposition: attachment; filename=Data_Ruangan.xls");
+
             header("Pragma: no-cache");
+
             header("Expires: 0");
 
             echo "<table border='1'>";
+
             echo "<tr>";
             echo "<th>Nama Ruangan</th>";
             echo "<th>Kapasitas</th>";
@@ -184,30 +277,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "</tr>";
 
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+
                 echo "<tr>";
+
                 echo "<td>" . htmlspecialchars($row['nama_ruangan']) . "</td>";
+
                 echo "<td>" . htmlspecialchars($row['kapasitas']) . "</td>";
-                echo "<td>" . htmlspecialchars(ucfirst($row['tipe_ruangan'])) . "</td>";
+
+                echo "<td>" . htmlspecialchars(
+                    ucfirst($row['tipe_ruangan'])
+                ) . "</td>";
+
                 echo "</tr>";
             }
+
             echo "</table>";
+
             exit();
+
         } else {
+
             header("Location: ../index.php?page=ruangan-barang&error=no_items_selected");
+
             exit();
         }
     }
 }
 
-// ================= DELETE =================
+// Delete ruangan
 elseif ($action == 'delete') {
 
-    $ruangan->id_ruangan = $_GET['id_ruangan'];
+    $ruangan->id_ruangan =
+        $_GET['id_ruangan'];
 
-    // ambil data dulu
-    $data = $ruangan->getById($ruangan->id_ruangan);
+    // Ambil data ruangan
+    $data = $ruangan->getById(
+        $ruangan->id_ruangan
+    );
 
-    // hapus file jika ada
+    // Hapus foto lama
     if (
         $data &&
         !empty($data['foto_ruangan']) &&
@@ -217,22 +325,33 @@ elseif ($action == 'delete') {
     }
 
     if ($ruangan->delete()) {
+
         header("Location: ../index.php?page=ruangan-barang&success=deleted");
+
     } else {
+
         header("Location: ../index.php?page=ruangan-barang&error=delete_failed");
     }
 
     exit();
 }
-// ================= GET BY TIPE (AJAX) =================
+
+// Ambil ruangan berdasarkan tipe
 elseif ($action == 'get_by_tipe') {
+
     $tipe = $_GET['tipe'] ?? '';
+
     $stmt = $ruangan->getByTipe($tipe);
+
     $data = [];
+
     while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
         $data[] = $row;
     }
+
     header('Content-Type: application/json');
+
     echo json_encode($data);
+
     exit();
 }

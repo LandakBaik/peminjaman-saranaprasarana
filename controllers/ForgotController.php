@@ -5,14 +5,19 @@ require_once '../config/Autoloader.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Koneksi database
 $database = new \App\Config\Database();
 $db = $database->getConnection();
+
 $user = new \App\Models\User($db);
 
 $email = trim($_POST['email'] ?? '');
 
+// Validasi email kosong
 if (empty($email)) {
+
     header("Location: ../authentication/Login.php?page=forgot&error=empty_email");
+
     exit();
 }
 
@@ -20,30 +25,35 @@ $mailerConfig = require '../config/mailer.php';
 
 try {
 
-    // cari user
-    $query = "SELECT * FROM pengguna 
-              WHERE email = :email 
-              LIMIT 1";
+    // Cari user
+    $query = "
+        SELECT * FROM pengguna 
+        WHERE email = :email 
+        LIMIT 1
+    ";
 
     $stmt = $db->prepare($query);
+
     $stmt->bindParam(':email', $email);
+
     $stmt->execute();
 
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // tetap sukses walaupun email tidak ada
+    // Tetap tampil sukses
     if ($userData) {
 
-        // hapus token lama
+        // Hapus token lama
         $delete = $db->prepare("
             DELETE FROM password_resets
-            WHERE email=:email
+            WHERE email = :email
         ");
 
         $delete->bindParam(':email', $email);
+
         $delete->execute();
 
-        // generate token
+        // Generate token reset
         $token = bin2hex(random_bytes(32));
 
         $user->createResetToken(
@@ -51,10 +61,10 @@ try {
             $token
         );
 
-        // generate reset link
+        // Generate reset link
         $protocol =
-            (!empty($_SERVER['HTTPS'])
-                && $_SERVER['HTTPS'] !== 'off')
+            (!empty($_SERVER['HTTPS']) &&
+                $_SERVER['HTTPS'] !== 'off')
             ? "https"
             : "http";
 
@@ -68,10 +78,10 @@ try {
 
         $resetLink =
             $baseUrl .
-            "/authentication/Login.php?page=reset&token="
-            . urlencode($token);
+            "/authentication/Login.php?page=reset&token=" .
+            urlencode($token);
 
-        // MAIL
+        // Konfigurasi mail
         $mail = new PHPMailer(true);
 
         $mail->isSMTP();
@@ -81,7 +91,6 @@ try {
 
         $mail->SMTPAuth = true;
 
-        // paksa LOGIN
         $mail->AuthType = 'LOGIN';
 
         $mail->Username =
@@ -98,13 +107,13 @@ try {
 
         $mail->Timeout = 15;
 
-        // sender
+        // Sender email
         $mail->setFrom(
             $mailerConfig['from_email'],
             $mailerConfig['from_name']
         );
 
-        // recipient
+        // Penerima email
         $mail->addAddress(
             $email,
             $userData['nama']
@@ -115,6 +124,7 @@ try {
         $mail->Subject =
             'Reset Password - Sistem Peminjaman';
 
+        // Isi email
         $mail->Body = "
 
         <div style='font-family:Arial'>
@@ -160,9 +170,7 @@ try {
             <br><br>
 
             <a href='{$resetLink}'>
-
             {$resetLink}
-
             </a>
 
             </p>
@@ -181,6 +189,7 @@ try {
 
         ";
 
+        // Kirim email
         $mail->send();
     }
 

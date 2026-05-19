@@ -1,13 +1,16 @@
 <?php
 
+// Set timezone
 date_default_timezone_set('Asia/Jakarta');
 
-// Include Composer Autoloader
+// Load Composer autoload
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
 }
 
+// Autoload class project
 spl_autoload_register(function ($class) {
+
     $prefixes = [
         'App\\Config\\' => __DIR__ . '/',
         'App\\Models\\' => __DIR__ . '/../models/',
@@ -16,22 +19,29 @@ spl_autoload_register(function ($class) {
     ];
 
     foreach ($prefixes as $prefix => $base_dir) {
+
         $len = strlen($prefix);
+
         if (strncmp($prefix, $class, $len) !== 0) {
             continue;
         }
 
         $relative_class = substr($class, $len);
-        $file = $base_dir . str_replace('\\', DIRECTORY_SEPARATOR, $relative_class) . '.php';
 
+        $file = $base_dir .
+            str_replace('\\', DIRECTORY_SEPARATOR, $relative_class) .
+            '.php';
+
+        // Load file class
         if (file_exists($file)) {
             require $file;
         }
+
         return;
     }
 });
 
-// Compatibility aliases for legacy global class names
+// Alias class lama
 $classAliases = [
     'Database' => App\Config\Database::class,
     'Barang' => App\Models\Barang::class,
@@ -41,7 +51,13 @@ $classAliases = [
 ];
 
 foreach ($classAliases as $alias => $target) {
-    if (!class_exists($alias, false) && !interface_exists($alias, false) && !trait_exists($alias, false)) {
+
+    // Buat alias jika belum ada
+    if (
+        !class_exists($alias, false) &&
+        !interface_exists($alias, false) &&
+        !trait_exists($alias, false)
+    ) {
         class_alias($target, $alias);
     }
 }

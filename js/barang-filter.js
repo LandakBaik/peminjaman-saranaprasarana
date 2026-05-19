@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // =========================
-    // DOM
-    // =========================
-
+    // DOM utama
     const searchInput = document.getElementById('searchBarang');
     const tableBody   = document.getElementById('barangBody');
 
@@ -21,12 +18,11 @@ document.addEventListener('DOMContentLoaded', function () {
         tableBody.querySelectorAll('.row-checkbox');
 
 
-    // =========================
-    // Checkbox
-    // =========================
-
+    // Select semua checkbox
     if (selectAll) {
+
         selectAll.addEventListener('change', function () {
+
             getRowCheckboxes().forEach(cb => {
                 cb.checked = selectAll.checked;
             });
@@ -34,46 +30,50 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    // Sinkron checkbox
     if (tableBody) {
+
         tableBody.addEventListener('change', function (e) {
+
             if (e.target.classList.contains('row-checkbox')) {
+
                 const all = getRowCheckboxes();
-                if (selectAll) selectAll.checked = [...all].every(cb => cb.checked);
+
+                if (selectAll) {
+                    selectAll.checked =
+                        [...all].every(cb => cb.checked);
+                }
             }
         });
     }
 
 
-    // =========================
     // Search realtime
-    // =========================
-
     if (searchInput) {
         searchInput.addEventListener('input', applyAll);
     }
 
 
-    // =========================
-    // Filter button
-    // =========================
-
+    // Tombol filter
     if (btnApply) {
         btnApply.addEventListener('click', applyAll);
     }
 
+    // Reset filter
     if (btnReset) {
+
         btnReset.addEventListener('click', function () {
+
             if (filterRuangan) filterRuangan.value = '';
+
             if (filterStok) filterStok.value = '';
+
             applyAll();
         });
     }
 
 
-    // =========================
-    // Core Filter
-    // =========================
-
+    // Filter tabel
     function applyAll() {
 
         const searchTerm = searchInput.value
@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .trim();
 
         const ruanganVal = filterRuangan.value;
-        const stokVal    = filterStok.value;
+
+        const stokVal = filterStok.value;
 
         const rows = tableBody.querySelectorAll('tr');
 
@@ -92,14 +93,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const text = row.textContent
                 .toLowerCase();
 
-            const ruangan = row.getAttribute('data-ruangan');
+            const ruangan =
+                row.getAttribute('data-ruangan');
 
-            const stok = row.getAttribute('data-tersedia');
+            const stok =
+                row.getAttribute('data-tersedia');
 
-            // =========================
-            // Matching
-            // =========================
-
+            // Pencocokan filter
             const matchSearch =
                 !searchTerm ||
                 text.includes(searchTerm);
@@ -112,10 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 !stokVal ||
                 stok === stokVal;
 
-            // =========================
-            // Final check
-            // =========================
-
+            // Tampilkan hasil
             if (
                 matchSearch &&
                 matchRuangan &&
@@ -123,32 +120,25 @@ document.addEventListener('DOMContentLoaded', function () {
             ) {
 
                 row.style.display = '';
+
                 visible++;
 
             } else {
 
                 row.style.display = 'none';
-
             }
 
         });
 
-        // =========================
-        // Update row count
-        // =========================
-
+        // Update jumlah data
         const total = rows.length;
 
         rowCount.textContent =
             `${visible} of ${total}`;
-
     }
 
 
-    // =========================
-    // Init
-    // =========================
-
+    // Render awal
     applyAll();
 
 });
