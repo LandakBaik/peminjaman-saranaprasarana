@@ -13,6 +13,25 @@ $barangModel = new \App\Models\Barang($db);
 // Ambil action
 $action = $_GET['action'] ?? '';
 
+// Cek list peminjaman pada tanggal tertentu (AJAX)
+if (
+    $_SERVER['REQUEST_METHOD'] === 'GET' &&
+    $action === 'get_loans_by_date'
+) {
+    header('Content-Type: application/json');
+    $id_ruangan = $_GET['id_ruangan'] ?? null;
+    $date = $_GET['date'] ?? null;
+
+    if (!$id_ruangan || !$date) {
+        echo json_encode(['error' => 'Parameter tidak lengkap']);
+        exit();
+    }
+
+    $loans = $peminjaman->getLoansByDateAndRoom($date, $id_ruangan);
+    echo json_encode(['success' => true, 'data' => $loans]);
+    exit();
+}
+
 // Cek stok barang (AJAX)
 if (
     $_SERVER['REQUEST_METHOD'] === 'GET' &&

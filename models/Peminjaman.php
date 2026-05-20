@@ -765,6 +765,28 @@ class Peminjaman
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    public function getLoansByDateAndRoom($date, $id_ruangan)
+    {
+        $query = "SELECT p.id_peminjaman, p.jenis_peminjaman, p.waktu_mulai, p.waktu_selesai, p.status, 
+                         GROUP_CONCAT(CONCAT(b.nama_barang, ' (', dp.kuantitas, ')') SEPARATOR ', ') as detail_barang
+                  FROM peminjaman p
+                  JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
+                  JOIN barang b ON dp.id_barang = b.id_barang
+                  WHERE b.id_ruangan = :id_ruangan 
+                  AND DATE(p.waktu_mulai) <= :date 
+                  AND DATE(p.waktu_selesai) >= :date
+                  AND p.status IN ('Disetujui', 'Dipinjam')
+                  GROUP BY p.id_peminjaman
+                  ORDER BY p.waktu_mulai ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_ruangan', $id_ruangan);
+        $stmt->bindParam(':date', $date);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function rejectConflictingPendingLoans($id_peminjaman_approved, $approved_by)
     {
         // 1. Ambil data peminjaman yang baru saja disetujui

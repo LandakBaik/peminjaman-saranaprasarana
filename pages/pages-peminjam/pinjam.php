@@ -72,6 +72,31 @@
 
                         </div>
 
+                        <!-- ================= LIST PEMINJAMAN ================= -->
+                        <div id="loanListContainer" class="mb-4 p-3 bg-light border border-primary-subtle rounded" style="display: none;">
+                            <div class="d-flex align-items-center mb-2 pb-2 border-bottom border-secondary-subtle">
+                                <h6 class="fw-bold text-dark mb-0">
+                                    <i class="fas fa-list-ul text-primary me-2"></i> Jadwal pada <span id="selectedDateText" class="text-primary"></span>
+                                </h6>
+                            </div>
+                            <div class="table-responsive bg-white rounded border" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-sm table-striped table-hover text-center align-middle mb-0" style="font-size: 0.9rem;">
+                                    <thead class="table-primary" style="position: sticky; top: 0; z-index: 1;">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Tipe</th>
+                                            <th>Waktu Peminjaman</th>
+                                            <th>Detail Barang</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="loanListBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted mb-4">
+
                         <form id="formPeminjaman"
                             action="controllers/PeminjamanController.php?action=create"
                             method="POST"
@@ -330,6 +355,18 @@
 
                     </div>
 
+                </div>
+
+                <!-- ================= MODAL DETAIL BARANG ================= -->
+                <div id="detailBarangModal" class="modal" style="z-index: 9999; background-color: rgba(0,0,0,0.5);">
+                    <div class="modal-content shadow" style="max-width: 400px; margin: 10% auto; padding: 20px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-primary mb-0"><i class="fas fa-box-open me-2"></i>Detail Barang</h5>
+                            <span id="closeDetailModal" style="cursor: pointer; font-size: 1.5rem; line-height: 1; font-weight: bold;">&times;</span>
+                        </div>
+                        <div id="detailBarangContent" class="text-start p-3 bg-light border rounded" style="font-size: 0.95rem; white-space: pre-wrap;">
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -617,6 +654,65 @@
         // =========================
         // LOGIKA KALENDER
         // =========================
+        function fetchLoansByDate(dateStr) {
+            const url = `controllers/PeminjamanController.php?action=get_loans_by_date&id_ruangan=${encodeURIComponent(idRuangan)}&date=${encodeURIComponent(dateStr)}`;
+            
+            // Format date for display
+            const dateObj = new Date(dateStr);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('selectedDateText').textContent = dateObj.toLocaleDateString('id-ID', options);
+            
+            const tbody = document.getElementById('loanListBody');
+            const container = document.getElementById('loanListContainer');
+            
+            tbody.innerHTML = '<tr><td colspan="4">Memuat data...</td></tr>';
+            container.style.display = 'block';
+            
+            fetch(url)
+                .then(r => r.json())
+                .then(json => {
+                    if (!json.success || !json.data || json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Tidak ada peminjaman pada tanggal ini.</td></tr>';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = '';
+                    json.data.forEach((loan, index) => {
+                        const tr = document.createElement('tr');
+                        
+                        const getTimes = (datetime) => {
+                            const t = new Date(datetime);
+                            return String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+                        };
+                        const timeStr = `${getTimes(loan.waktu_mulai)} - ${getTimes(loan.waktu_selesai)}`;
+                        const typeStr = loan.jenis_peminjaman.charAt(0).toUpperCase() + loan.jenis_peminjaman.slice(1);
+                        
+                        let detailHtml = '-';
+                        if (loan.detail_barang) {
+                            // Escape quotes just in case
+                            const escapedDetail = loan.detail_barang.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                            detailHtml = `
+                                <button type="button" class="btn btn-sm btn-outline-info rounded-pill py-0 px-2" onclick="showDetailModal('${escapedDetail}')">
+                                    <i class="fas fa-eye"></i> Detail
+                                </button>
+                            `;
+                        }
+                        
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${typeStr}</td>
+                            <td>${timeStr}</td>
+                            <td>${detailHtml}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.warn('Error fetching loans by date:', err);
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-danger">Gagal memuat data.</td></tr>';
+                });
+        }
+
         const monthSelect = document.getElementById('monthSelect');
         const yearSelect = document.getElementById('yearSelect');
         const calendarDates = document.getElementById('calendarDates');
@@ -723,6 +819,8 @@
                             inputSelesai.dispatchEvent(new Event('change', { bubbles: true }));
                         }
 
+                        fetchLoansByDate(dateStr);
+
                         if (modal) modal.style.display = 'flex';
                     });
                 }
@@ -789,11 +887,35 @@
             });
         }
 
+        const detailBarangModal = document.getElementById('detailBarangModal');
+        const closeDetailModal = document.getElementById('closeDetailModal');
+        
+        if (closeDetailModal) {
+            closeDetailModal.addEventListener('click', () => {
+                if (detailBarangModal) detailBarangModal.style.display = 'none';
+            });
+        }
+
         window.addEventListener('click', (e) => {
             if (modal && e.target === modal) {
                 modal.style.display = 'none';
             }
+            if (detailBarangModal && e.target === detailBarangModal) {
+                detailBarangModal.style.display = 'none';
+            }
         });
+
+        // Helper untuk memunculkan modal detail barang (dipanggil di onClick)
+        window.showDetailModal = function(detailText) {
+            const content = document.getElementById('detailBarangContent');
+            if (content) {
+                // Buat agar list barang tampil ke bawah jika ada koma
+                content.innerHTML = detailText.split(', ').join('<br>');
+            }
+            if (detailBarangModal) {
+                detailBarangModal.style.display = 'block';
+            }
+        };
 
         // Jalankan kalender pertama kali
         renderCalendar(currentMonth, currentYear);
