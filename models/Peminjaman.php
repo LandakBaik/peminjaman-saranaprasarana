@@ -58,7 +58,7 @@ class Peminjaman
         return $stmt;
     }
 
-    // ðŸ”¹ READ BY USER
+    // READ BY USER
     public function readByUser($id_pengguna, $isHistory = false)
     {
         $query = "SELECT p.*,
