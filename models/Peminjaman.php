@@ -750,19 +750,24 @@ class Peminjaman
 
     public function getApprovedDatesByRoom($id_ruangan)
     {
-        $query = "SELECT DISTINCT DATE(p.waktu_mulai) as tanggal 
+        $query = "SELECT DATE(p.waktu_mulai) as tanggal, COUNT(DISTINCT p.id_peminjaman) as total
                   FROM peminjaman p
                   JOIN detail_peminjaman dp ON p.id_peminjaman = dp.id_peminjaman
                   JOIN barang b ON dp.id_barang = b.id_barang
                   WHERE b.id_ruangan = :id_ruangan 
                   AND p.status IN ('Disetujui', 'Dipinjam')
-                  AND p.jenis_peminjaman = 'ruangan'";
+                  GROUP BY DATE(p.waktu_mulai)";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id_ruangan', $id_ruangan);
         $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $result = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $result[$row['tanggal']] = (int)$row['total'];
+        }
+
+        return $result;
     }
 
     public function getLoansByDateAndRoom($date, $id_ruangan)

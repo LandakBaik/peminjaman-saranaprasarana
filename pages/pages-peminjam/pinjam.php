@@ -388,7 +388,7 @@
         const inputMulai      = document.getElementById('waktu_mulai');
         const inputSelesai    = document.getElementById('waktu_selesai');
         const idRuangan       = '<?= $id_ruangan ?>';
-        const bookedDates     = <?= json_encode($bookedDates) ?>;
+        const bookedDates     = <?= json_encode((object)$bookedDates) ?>;
 
         // Stok awal dari server (sebelum ada input waktu)
         const stokAwal = {};
@@ -800,8 +800,13 @@
                 const dd = String(date).padStart(2, '0');
                 const dateStr = `${yyyy}-${mm}-${dd}`;
 
-                if (bookedDates.includes(dateStr)) {
-                    day.classList.add('bg-danger', 'text-white');
+                if (bookedDates[dateStr] !== undefined) {
+                    const count = bookedDates[dateStr];
+                    if (count <= 2) {
+                        day.classList.add('bg-warning', 'text-dark');
+                    } else {
+                        day.classList.add('bg-danger', 'text-white');
+                    }
                 }
 
                 if (!isPastOrToday) {
